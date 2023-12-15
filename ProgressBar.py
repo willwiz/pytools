@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
 __all__ = ["progress_bar"]
 
-
 from typing import Final
 
 
+_FULL_BAR: Final[str] = 50 * "*"
+
+
 class progress_bar:
-    __slots__ = ["n", "msg", "t", "i"]
+    __slots__ = ("n", "msg", "t", "i")
+
     n: Final[int]
     msg: Final[str]
     t: Final[float]
-    i: int = 0
+    i: int
 
     def _print_bar(self):
         if self.i == self.n:
-            bar = 50 * "*"
-            print(f"\r{self.msg} |{bar}| {100.0:.1f}%%", end="\r")
-            print()
+            print(f"\r{self.msg} |{_FULL_BAR}| 100.0%%", end="\r\n")
         else:
             percent = self.i * self.t
-            filledLength = percent // 2
+            filledLength = int(percent // 2)
             bar = filledLength * "*" + (50 - filledLength) * "-"
             print(f"\r{self.msg} |{bar}| {percent:.1f}%%", end="\r")
 
@@ -27,6 +28,7 @@ class progress_bar:
         self.n = max
         self.t = 100.0 / max
         self.msg = message
+        self.i = 0
         self._print_bar()
 
     def next(self):
