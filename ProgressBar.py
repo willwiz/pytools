@@ -1,39 +1,46 @@
 #!/usr/bin/env python3
-__all__ = ["progress_bar"]
+__all__ = ["ProgressBar"]
 
-from typing import Final
-
-
-_FULL_BAR: Final[str] = 50 * "*"
+from typing import Final, Literal
 
 
-class progress_bar:
-    __slots__ = ("n", "msg", "t", "i")
+class ProgressBar:
+    __slots__ = ["_n", "i", "_l", "_p", "_s",
+                 "_b", "_bmt", "_pmt", "_endl"]
 
-    n: Final[int]
-    msg: Final[str]
-    t: Final[float]
+    _n: Final[int]
     i: int
+    _l: Final[int]
+    _p: Final[str]
+    _s: Final[str]
+    _b: Final[str]
+    _endl: Final[Literal["\n", "\r", ""]]
+    _bmt: Final[str]
+    _pmt: Final[str]
 
-    def _print_bar(self):
-        if self.i == self.n:
-            print(f"\r{self.msg} |{_FULL_BAR}| 100.0%%", end="\r\n")
-        else:
-            percent = self.i * self.t
-            filledLength = int(percent // 2)
-            bar = filledLength * "*" + (50 - filledLength) * "-"
-            print(f"\r{self.msg} |{bar}| {percent:.1f}%%", end="\r")
+    def __init__(self, max: int, prefix: str = "", suffix: str = "", length: int = 40, decimal: int = 1, pixel: str = "*", end: Literal["\n", "\r", ""] = ""):
+        self.i, self._n = 0, max
+        self._p, self._s = prefix, suffix
+        self._l = length * len(pixel)
+        self._b = pixel
+        self._bmt = f"-<{self._l}"
+        self._pmt = f">{5+decimal}.{decimal}%"
+        self._endl = end
 
-    def __init__(self, message: str, max=100):
-        self.n = max
-        self.t = 100.0 / max
-        self.msg = message
+    def reset(self) -> None:
         self.i = 0
-        self._print_bar()
 
     def next(self):
         self.i = self.i + 1
-        self._print_bar()
+        self._print_bar(self.i)
 
     def finish(self):
-        self._print_bar()
+        self._print_bar(self._n)
+
+    def _print_bar(self, i: int):
+        p = 1.0 if (self._n == 0) else (i / self._n)
+        f = self._b * int(self._l * p)
+        bar = f"\r{self._p}|{f:{self._bmt}}|{p:{self._pmt}}{self._s}"
+        print(bar, end=self._endl)
+        if i == self._n:
+            print()
