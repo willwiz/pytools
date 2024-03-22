@@ -1,4 +1,4 @@
-__all__ = ["touch", "Logger", "LogLevel", "create_logger"]
+__all__ = ["touch", "Logger", "LogLevel", "create_logger", "bcolors"]
 import enum
 import logging
 from logging import Logger
@@ -15,6 +15,7 @@ class LogLevel(enum.Enum):
     WARN = logging.WARN
     ERROR = logging.ERROR
     FATAL = logging.FATAL
+    def __lt__(self, other) -> bool: ...
 
 
 def create_logger(
@@ -27,3 +28,15 @@ def create_logger(
     Method to return a custom logger with the given name and level
     """
     ...
+
+
+class bcolors:
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+    ENDC = "\033[0m"

@@ -18,10 +18,10 @@ class LogLevel(enum.Enum):
     ERROR = logging.ERROR
     FATAL = logging.FATAL
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:
         if self.__class__ is other.__class__:
             return self.value < other.value
-        return NotImplemented
+        raise NotImplementedError()
 
 
 def has_FileHandler(handlers: list[logging.Handler]):
