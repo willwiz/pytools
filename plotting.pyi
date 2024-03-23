@@ -48,8 +48,8 @@ class PlotStyle:
     ) -> None: ...
 
 
-def new_fig(fig: Figure | None, style: PlotStyle,
-            fig_size: tuple[float, float] = (4, 3)) -> Figure: ...
+def new_fig(fig_size: tuple[float, float] = (4, 3), style: PlotStyle | None = None, fig: Figure | None = None
+            ) -> Figure: ...
 
 
 def add_axis(fig: Figure, style: PlotStyle, nrows: int = 1, ncols: int = 1, index: int = 1,
