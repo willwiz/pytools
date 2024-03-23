@@ -74,9 +74,9 @@ class PlotStyle:
         }
 
 
-def new_fig(fig_size: tuple[float, float] = (4, 3), style: PlotStyle | None = None, fig: Figure | None = None):
+def new_fig(fig_size: tuple[float, float] = (4, 3), dpi: int = 180, style: PlotStyle | None = None, fig: Figure | None = None):
     style = style if style else PlotStyle()
-    fig = fig if fig else plt.figure(dpi=180)
+    fig = fig if fig else plt.figure(dpi=dpi)
     fig.clear()
     fig.set_size_inches(*fig_size)
     fig.subplots_adjust(**style.margins)
