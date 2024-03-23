@@ -21,11 +21,20 @@ class FigStyleSettings(TypedDict):
     markeredgewidth: float
 
 
+class MarginSettings(TypedDict):
+    left: float | None
+    right: float | None
+    top: float | None
+    bottom: float | None
+    wspace: float | None
+    hspace: float | None
+
+
 class PlotStyle:
     __slots__ = ["style", "cyclers", "margins", "axes", "transparent"]
     style: FigStyleSettings
     cyclers: Cycler[str, str]
-    margins: dict[str, float | None]
+    margins: MarginSettings
     axes: AxesTickSettings
     transparent: bool
 
