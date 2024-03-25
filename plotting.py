@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from cycler import Cycler, cycler
 from matplotlib.figure import Figure
 from numpy import ndarray as Arr, float64, dtype
+
 __all__ = ["PlotStyle", "new_fig", "add_axis", "get_axis_lim"]
 
 f64 = dtype[float64]
@@ -65,16 +66,22 @@ class PlotStyle:
         )
         self.transparent = transparent
         self.margins = {
-            "left": left_margin, "right": right_margin, "top": top_margin,
-            "bottom": bottom_margin, "wspace": w_space, "hspace": h_space
+            "left": left_margin,
+            "right": right_margin,
+            "top": top_margin,
+            "bottom": bottom_margin,
+            "wspace": w_space,
+            "hspace": h_space,
         }
-        self.axes = {
-            "axis": "both",
-            "labelsize": font_size
-        }
+        self.axes = {"axis": "both", "labelsize": font_size}
 
 
-def new_fig(fig_size: tuple[float, float] = (4, 3), dpi: int = 180, style: PlotStyle | None = None, fig: Figure | None = None):
+def new_fig(
+    fig_size: tuple[float, float] = (4, 3),
+    dpi: int = 180,
+    style: PlotStyle | None = None,
+    fig: Figure | None = None,
+):
     style = style if style else PlotStyle()
     fig = fig if fig else plt.figure(dpi=dpi)
     fig.clear()
@@ -83,7 +90,16 @@ def new_fig(fig_size: tuple[float, float] = (4, 3), dpi: int = 180, style: PlotS
     return fig
 
 
-def add_axis(fig: Figure, style: PlotStyle, nrows: int = 1, ncols: int = 1, index: int = 1, projection: Literal["3d"] | None = None, xlim: tuple[float, float] | None = None, ylim: tuple[float, float] | None = None):
+def add_axis(
+    fig: Figure,
+    style: PlotStyle,
+    nrows: int = 1,
+    ncols: int = 1,
+    index: int = 1,
+    projection: Literal["3d"] | None = None,
+    xlim: tuple[float, float] | None = None,
+    ylim: tuple[float, float] | None = None,
+):
     axs = fig.add_subplot(nrows, ncols, index, projection=projection)
     axs.tick_params(**style.axes)
     axs.set_prop_cycle(style.cyclers)

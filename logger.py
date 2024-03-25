@@ -1,3 +1,4 @@
+__all__ = ["touch", "Logger", "LogLevel", "create_logger", "bcolors"]
 import sys
 import enum
 import logging
@@ -64,8 +65,7 @@ def create_logger(
         logger.setLevel(level.value)
         # Creating and adding the file handler
         if not has_FileHandler(logger.handlers):
-            file_handler = logging.FileHandler(
-                logger_name, mode="a", encoding="utf-8")
+            file_handler = logging.FileHandler(logger_name, mode="a", encoding="utf-8")
             file_handler.setFormatter(log_format)
             logger.addHandler(file_handler)
     # Creating and adding the console handler

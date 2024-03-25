@@ -7,18 +7,15 @@ from numpy import ndarray as Arr, float64, dtype
 
 f64 = dtype[float64]
 
-
 class AxesTickSettings(TypedDict):
     axis: Literal["both", "x", "y"]
     labelsize: int
-
 
 class FigStyleSettings(TypedDict):
     markersize: int
     markevery: int
     fillstyle: str
     markeredgewidth: float
-
 
 class PlotStyle:
     __slots__ = ["style", "cyclers", "margins", "axes", "transparent"]
@@ -47,14 +44,20 @@ class PlotStyle:
         transparent: bool = False,
     ) -> None: ...
 
-
-def new_fig(fig_size: tuple[float, float] = (4, 3), dpi: int = 180,
-            style: PlotStyle | None = None, fig: Figure | None = None): ...
-
-
-def add_axis(fig: Figure, style: PlotStyle, nrows: int = 1, ncols: int = 1, index: int = 1,
-             projection: Literal["3d"] | None = None, xlim: tuple[float, float] | None = None, ylim: tuple[float, float] | None = None) -> Axes: ...
-
-
-def get_axis_lim(data: Arr[Any, f64],
-                 padding: float = 0.02) -> tuple[float, float]: ...
+def new_fig(
+    fig_size: tuple[float, float] = (4, 3),
+    dpi: int = 180,
+    style: PlotStyle | None = None,
+    fig: Figure | None = None,
+): ...
+def add_axis(
+    fig: Figure,
+    style: PlotStyle,
+    nrows: int = 1,
+    ncols: int = 1,
+    index: int = 1,
+    projection: Literal["3d"] | None = None,
+    xlim: tuple[float, float] | None = None,
+    ylim: tuple[float, float] | None = None,
+) -> Axes: ...
+def get_axis_lim(data: Arr[Any, f64], padding: float = 0.02) -> tuple[float, float]: ...

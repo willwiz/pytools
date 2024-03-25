@@ -4,9 +4,7 @@ import logging
 from logging import Logger
 from typing import Literal
 
-
 def touch(file: str) -> None: ...
-
 
 class LogLevel(enum.Enum):
     NULL = 0
@@ -16,7 +14,6 @@ class LogLevel(enum.Enum):
     ERROR = logging.ERROR
     FATAL = logging.FATAL
     def __lt__(self, other) -> bool: ...
-
 
 def create_logger(
     logger_name: str = "null",
@@ -28,7 +25,6 @@ def create_logger(
     Method to return a custom logger with the given name and level
     """
     ...
-
 
 class bcolors:
     HEADER = "\033[95m"
