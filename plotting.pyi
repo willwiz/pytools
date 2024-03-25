@@ -1,27 +1,18 @@
 __all__ = ["PlotStyle", "new_fig", "add_axis", "get_axis_lim"]
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from cycler import Cycler
 from numpy import ndarray as Arr, float64, dtype
+from .plotting import AxesTickSettings, FigStyleSettings, MarginSettings
 
 f64 = dtype[float64]
-
-class AxesTickSettings(TypedDict):
-    axis: Literal["both", "x", "y"]
-    labelsize: int
-
-class FigStyleSettings(TypedDict):
-    markersize: int
-    markevery: int
-    fillstyle: str
-    markeredgewidth: float
 
 class PlotStyle:
     __slots__ = ["style", "cyclers", "margins", "axes", "transparent"]
     style: FigStyleSettings
     cyclers: Cycler[str, str]
-    margins: dict[str, float | None]
+    margins: MarginSettings
     axes: AxesTickSettings
     transparent: bool
 
