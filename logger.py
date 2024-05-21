@@ -50,7 +50,7 @@ def create_logger(
     """
     # format="%(asctime)s::%(levelname)-8s >> %(module)s-%(lineno)d[%(funcName)s]: %(message)s"
     # datefmt="%y-%m-%d %H:%M:%S"
-    format = "%(asctime)s::[%(levelname)-.1s]::%(module)s-%(lineno)d>> %(message)s"
+    format = "%(asctime)s[%(levelname)-.1s]%(module)s-%(lineno)d>> %(message)s"
     datefmt = "%y-%m-%d %H:%M"
     log_format = logging.Formatter(fmt=format, datefmt=datefmt)
     if (level is LogLevel.NULL) or logger_name == "null":
@@ -65,8 +65,7 @@ def create_logger(
         logger.setLevel(level.value)
         # Creating and adding the file handler
         if not has_FileHandler(logger.handlers):
-            file_handler = logging.FileHandler(
-                logger_name, mode="a", encoding="utf-8")
+            file_handler = logging.FileHandler(logger_name, mode="a", encoding="utf-8")
             file_handler.setFormatter(log_format)
             logger.addHandler(file_handler)
     # Creating and adding the console handler
