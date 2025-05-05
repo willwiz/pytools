@@ -1,26 +1,15 @@
 .vscode
 
-**/__pycache__
 **~$*
+**/__pycache__
+**/__init__.pyc
 **.mp4
 **.png
 **.tif
 **.pyd
 **.so
-**/__init__.pyc
 
 **/build/*
 **.egg-info/
 **.venv
-uvenv
-
-test
-
-results.*
-
-script_*.py
-script_figures
-
-All reps.xlsx
-
-*.log
+**.log

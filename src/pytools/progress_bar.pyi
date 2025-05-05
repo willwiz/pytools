@@ -1,6 +1,5 @@
 __all__ = ["ProgressBar"]
-
-from typing import Literal as L
+from typing import Literal
 
 class ProgressBar:
     def __init__(
@@ -8,11 +7,12 @@ class ProgressBar:
         max: int,
         prefix: str = "",
         suffix: str = "",
-        length: int = 40,
+        length: int = 50,
         decimal: int = 1,
         pixel: str = "*",
-        end: L["\n", "\r", ""] = "",
+        end: Literal["\n", "\r", ""] = "",
     ) -> None: ...
     def reset(self) -> None: ...
     def next(self) -> None: ...
     def finish(self) -> None: ...
+    def _print_bar(self, i: int) -> None: ...

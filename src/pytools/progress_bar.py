@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-__all__ = ["ProgressBar"]
-
 from typing import Final, Literal
 
 
@@ -22,7 +19,7 @@ class ProgressBar:
         max: int,
         prefix: str = "",
         suffix: str = "",
-        length: int = 40,
+        length: int = 50,
         decimal: int = 1,
         pixel: str = "*",
         end: Literal["\n", "\r", ""] = "",
