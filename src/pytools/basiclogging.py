@@ -1,4 +1,4 @@
-__all__ = ["LOG_LEVEL", "LogLevel", "BLogger", "NullLogger", "ILogger"]
+__all__ = ["LOG_LEVEL", "LogLevel", "BLogger", "XLogger", "NullLogger", "ILogger"]
 import re
 import abc
 import enum
@@ -111,31 +111,33 @@ class BLogger(ILogger):
             print(m)
 
     def disp(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.INFO.value:
-            print(*msg)
+        if len(msg) < 1:
+            return
+        for m in msg:
+            print(m)
 
     def debug(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.DEBUG.value:
+        if self._level >= LogLevel.DEBUG:
             self.print(*msg, level=LogLevel.DEBUG)
 
     def info(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.INFO.value:
+        if self._level >= LogLevel.INFO:
             self.print(*msg, level=LogLevel.INFO)
 
     def brief(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.BRIEF.value:
+        if self._level >= LogLevel.BRIEF:
             self.print(*msg, level=LogLevel.BRIEF)
 
     def warn(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.WARN.value:
+        if self._level >= LogLevel.WARN:
             self.print(*msg, level=LogLevel.WARN)
 
     def error(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.ERROR.value:
+        if self._level >= LogLevel.ERROR:
             self.print(*msg, level=LogLevel.ERROR)
 
     def fatal(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.FATAL.value:
+        if self._level >= LogLevel.FATAL:
             self.print(*msg, level=LogLevel.FATAL)
 
     def exception(self, e: Exception):
@@ -191,11 +193,11 @@ class XLogger(ILogger):
                 print(m, file=self._file)
 
     def debug(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.DEBUG.value:
+        if self._level >= LogLevel.DEBUG:
             self.print(*msg, level=LogLevel.DEBUG)
 
     def info(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.INFO.value:
+        if self._level >= LogLevel.INFO:
             self.print(*msg, level=LogLevel.INFO)
 
     def disp(self, *msg: Any) -> None:
@@ -208,19 +210,19 @@ class XLogger(ILogger):
                 print(m, file=self._file)
 
     def brief(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.BRIEF.value:
+        if self._level >= LogLevel.BRIEF:
             self.print(*msg, level=LogLevel.BRIEF)
 
     def warn(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.WARN.value:
+        if self._level >= LogLevel.WARN:
             self.print(*msg, level=LogLevel.WARN)
 
     def error(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.ERROR.value:
+        if self._level >= LogLevel.ERROR:
             self.print(*msg, level=LogLevel.ERROR)
 
     def fatal(self, *msg: Any) -> None:
-        if self._level.value >= LogLevel.FATAL.value:
+        if self._level >= LogLevel.FATAL:
             self.print(*msg, level=LogLevel.FATAL)
 
     def exception(self, e: Exception):

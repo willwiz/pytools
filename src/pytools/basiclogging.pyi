@@ -69,7 +69,10 @@ class BLogger(ILogger):
 class XLogger(ILogger):
     def __init__(
         self,
-        level: LOG_LEVEL,
+        level: (
+            LogLevel
+            | Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
+        ),
         file: str | None = None,
     ) -> None: ...
     @property
