@@ -68,7 +68,7 @@ class ILogger(abc.ABC):
     @abc.abstractmethod
     def print(self, *msg: Any, level: LogLevel = LogLevel.BRIEF) -> None: ...
     @abc.abstractmethod
-    def disp(self, *msg: Any) -> None: ...
+    def disp(self, *msg: Any, end: Literal["\n", "\r"] = "\n") -> None: ...
     @abc.abstractmethod
     def debug(self, *msg: Any) -> None: ...
     @abc.abstractmethod
@@ -110,11 +110,11 @@ class BLogger(ILogger):
         for m in msg:
             print(m)
 
-    def disp(self, *msg: Any) -> None:
+    def disp(self, *msg: Any, end: Literal["\n", "\r"] = "\n") -> None:
         if len(msg) < 1:
             return
         for m in msg:
-            print(m)
+            print(m, end=end)
 
     def debug(self, *msg: Any) -> None:
         if self._level >= LogLevel.DEBUG:
@@ -183,12 +183,12 @@ class XLogger(ILogger):
             return
         frame = getframeinfo(stack()[2][0])
         file = os.path.join(*frame.filename.split(os.sep)[-3:])
-        print(
-            f"[{now()}|{LB[level]}{level.name}{RB[level]}]({file}:{frame.lineno}|{frame.function})>>>"
-        )
+        debug_str = f"\n[{now()}|{LB[level]}{level.name}{RB[level]}]({file}:{frame.lineno}|{frame.function})>>>"
+        print(debug_str)
         for m in msg:
             print(m)
         if self._file is not None:
+            print(filter_ansi(debug_str), file=self._file)
             for m in msg:
                 print(m, file=self._file)
 
@@ -200,11 +200,11 @@ class XLogger(ILogger):
         if self._level >= LogLevel.INFO:
             self.print(*msg, level=LogLevel.INFO)
 
-    def disp(self, *msg: Any) -> None:
+    def disp(self, *msg: Any, end: Literal["\n", "\r"] = "\n") -> None:
         if len(msg) < 1:
             return
         for m in msg:
-            print(m)
+            print(m, end=end)
         if self._file is not None:
             for m in msg:
                 print(m, file=self._file)
@@ -253,7 +253,7 @@ class NullLogger(ILogger):
     def info(self, *msg: Any) -> None:
         pass
 
-    def disp(self, *msg: Any) -> None:
+    def disp(self, *msg: Any, end: Literal["\n"] | Literal["\r"] = "\n") -> None:
         pass
 
     def brief(self, *msg: Any) -> None:
