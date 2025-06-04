@@ -1,16 +1,22 @@
-__all__ = ["LOG_LEVEL", "LogLevel", "BLogger", "XLogger", "NullLogger", "ILogger"]
-import re
+from __future__ import annotations
+
+__all__ = ["LOG_LEVEL", "BLogger", "ILogger", "LogLevel", "NullLogger", "XLogger"]
 import abc
 import enum
 import os
-from typing import Any, Literal, Mapping, TextIO
-from datetime import datetime
+import re
 import traceback
-from inspect import getframeinfo, stack
+from datetime import datetime
+from inspect import Traceback, getframeinfo, stack
+from pathlib import Path
+from typing import TYPE_CHECKING, Literal, TextIO
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 
 def now() -> str:
-    return datetime.now().strftime("%H:%M:%S")
+    return datetime.now().strftime("%H:%M:%S")  # noqa: DTZ005
 
 
 LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
@@ -25,8 +31,11 @@ class LogLevel(enum.IntEnum):
     INFO = 5
     DEBUG = 6
 
+    def __str__(self) -> str:
+        return self.name
 
-class bcolors(enum.StrEnum):
+
+class BColors(enum.StrEnum):
     HEADER = "\033[95m"
     OKBLUE = "\033[94m"
     OKCYAN = "\033[96m"
@@ -40,22 +49,22 @@ class bcolors(enum.StrEnum):
 
 LB: Mapping[LogLevel, str] = {
     LogLevel.NULL: "",
-    LogLevel.FATAL: bcolors.FAIL,
-    LogLevel.ERROR: bcolors.FAIL,
-    LogLevel.WARN: bcolors.WARN,
-    LogLevel.BRIEF: bcolors.OKCYAN,
-    LogLevel.INFO: bcolors.OKGREEN,
-    LogLevel.DEBUG: bcolors.OKBLUE,
+    LogLevel.FATAL: BColors.FAIL,
+    LogLevel.ERROR: BColors.FAIL,
+    LogLevel.WARN: BColors.WARN,
+    LogLevel.BRIEF: BColors.OKCYAN,
+    LogLevel.INFO: BColors.OKGREEN,
+    LogLevel.DEBUG: BColors.OKBLUE,
 }
 
 RB: Mapping[LogLevel, str] = {
     LogLevel.NULL: "",
-    LogLevel.FATAL: bcolors.ENDC,
-    LogLevel.ERROR: bcolors.ENDC,
-    LogLevel.WARN: bcolors.ENDC,
-    LogLevel.BRIEF: bcolors.ENDC,
-    LogLevel.INFO: bcolors.ENDC,
-    LogLevel.DEBUG: bcolors.ENDC,
+    LogLevel.FATAL: BColors.ENDC,
+    LogLevel.ERROR: BColors.ENDC,
+    LogLevel.WARN: BColors.ENDC,
+    LogLevel.BRIEF: BColors.ENDC,
+    LogLevel.INFO: BColors.ENDC,
+    LogLevel.DEBUG: BColors.ENDC,
 }
 
 
@@ -66,23 +75,32 @@ class ILogger(abc.ABC):
     @abc.abstractmethod
     def flush(self) -> None: ...
     @abc.abstractmethod
-    def print(self, *msg: Any, level: LogLevel = LogLevel.BRIEF) -> None: ...
+    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None: ...
     @abc.abstractmethod
-    def disp(self, *msg: Any, end: Literal["\n", "\r"] = "\n") -> None: ...
+    def disp(self, *msg: object, end: Literal["\n", "\r"] = "\n") -> None: ...
     @abc.abstractmethod
-    def debug(self, *msg: Any) -> None: ...
+    def debug(self, *msg: object) -> None: ...
     @abc.abstractmethod
-    def info(self, *msg: Any) -> None: ...
+    def info(self, *msg: object) -> None: ...
     @abc.abstractmethod
-    def brief(self, *msg: Any) -> None: ...
+    def brief(self, *msg: object) -> None: ...
     @abc.abstractmethod
-    def warn(self, *msg: Any) -> None: ...
+    def warn(self, *msg: object) -> None: ...
     @abc.abstractmethod
-    def error(self, *msg: Any) -> None: ...
+    def error(self, *msg: object) -> None: ...
     @abc.abstractmethod
-    def fatal(self, *msg: Any) -> None: ...
+    def fatal(self, *msg: object) -> None: ...
     @abc.abstractmethod
     def exception(self, e: Exception) -> Exception: ...
+
+
+def _debug_str(frame: Traceback) -> str:
+    file = Path(*Path(frame.filename).parts[-3:])
+    return f"({file}:{frame.lineno}|{frame.function})>>>"
+
+
+def _cstr(level: LogLevel) -> str:
+    return f"{LB[level]}{level}{RB[level]}"
 
 
 class BLogger(ILogger):
@@ -99,133 +117,133 @@ class BLogger(ILogger):
     def flush(self) -> None:
         pass
 
-    def print(self, *msg: Any, level: LogLevel = LogLevel.BRIEF):
+    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         if len(msg) < 1:
             return
         frame = getframeinfo(stack()[2][0])
-        file = os.path.join(*frame.filename.split(os.sep)[-3:])
-        print(
-            f"\n[{now()}|{LB[level]}{level.name}{RB[level]}]({file}:{frame.lineno}|{frame.function})>>>"
-        )
-        for m in msg:
-            print(m)
+        print(f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}", *msg, sep="\n")
 
-    def disp(self, *msg: Any, end: Literal["\n", "\r"] = "\n") -> None:
+    def disp(self, *msg: object, end: Literal["\n", "\r"] = "\n") -> None:
         if len(msg) < 1:
             return
-        for m in msg:
-            print(m, end=end)
+        print(*msg, sep=end, end=end)
 
-    def debug(self, *msg: Any) -> None:
+    def debug(self, *msg: object) -> None:
         if self._level >= LogLevel.DEBUG:
             self.print(*msg, level=LogLevel.DEBUG)
 
-    def info(self, *msg: Any) -> None:
+    def info(self, *msg: object) -> None:
         if self._level >= LogLevel.INFO:
             self.print(*msg, level=LogLevel.INFO)
 
-    def brief(self, *msg: Any) -> None:
+    def brief(self, *msg: object) -> None:
         if self._level >= LogLevel.BRIEF:
             self.print(*msg, level=LogLevel.BRIEF)
 
-    def warn(self, *msg: Any) -> None:
+    def warn(self, *msg: object) -> None:
         if self._level >= LogLevel.WARN:
             self.print(*msg, level=LogLevel.WARN)
 
-    def error(self, *msg: Any) -> None:
+    def error(self, *msg: object) -> None:
         if self._level >= LogLevel.ERROR:
             self.print(*msg, level=LogLevel.ERROR)
 
-    def fatal(self, *msg: Any) -> None:
+    def fatal(self, *msg: object) -> None:
         if self._level >= LogLevel.FATAL:
             self.print(*msg, level=LogLevel.FATAL)
 
-    def exception(self, e: Exception):
+    def exception(self, e: Exception) -> Exception:
         print(traceback.format_exc())
         return e
 
 
 class XLogger(ILogger):
-    __slots__ = ["_level", "_file"]
+    __slots__ = ["_f", "_level"]
     _level: LogLevel
-    _file: TextIO | None
+    _f: TextIO | None
+    _h: bool
 
     def __init__(
         self,
         level: LOG_LEVEL | LogLevel,
-        file: str | None = None,
+        file: str | Path | None = None,
+        *,
+        debug_str: bool = False,
     ) -> None:
         self._level = level if isinstance(level, LogLevel) else LogLevel[level]
+        self._h = debug_str
         if file is None:
-            self._file = None
+            self._f = None
             return
-        self._file = open(file, "w")
-        self._file.write(
-            f"Log file: {file}\n"
-            f"Log file created at {now()}\n"
-            f"Log level: {self._level.name}\n\n"
+        self._f = open(file, "w")  # noqa: SIM115, PTH123
+        self._f.write(
+            f"Log file: {file}\nLog file created at {now()}\nLog level: {self._level.name}\n\n",
         )
-        self._file.flush()
-        os.fsync(self._file.fileno())
+        self._f.flush()
+        os.fsync(self._f.fileno())
+
+    def __del__(self) -> None:
+        if self._f is None:
+            return
+        self._f.write(f"\nLog file closed at {now()}\n")
+        self._f.close()
 
     @property
     def level(self) -> LogLevel:
         return self._level
 
     def flush(self) -> None:
-        if self._file is None:
+        if self._f is None:
             return
-        self._file.flush()
-        os.fsync(self._file.fileno())
+        self._f.flush()
+        os.fsync(self._f.fileno())
 
-    def print(self, *msg: Any, level: LogLevel = LogLevel.BRIEF) -> None:
+    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         if len(msg) < 1:
             return
         frame = getframeinfo(stack()[2][0])
-        file = os.path.join(*frame.filename.split(os.sep)[-3:])
-        debug_str = f"\n[{now()}|{LB[level]}{level.name}{RB[level]}]({file}:{frame.lineno}|{frame.function})>>>"
-        print(debug_str)
-        for m in msg:
-            print(m)
-        if self._file is not None:
-            print(filter_ansi(debug_str), file=self._file)
-            for m in msg:
-                print(m, file=self._file)
+        debug_str = _debug_str(frame)
+        message = "\n".join([str(m) for m in msg])
+        print(f"\n[{now()}|{_cstr(level)}]{debug_str}", message, sep="\n")
+        if self._f is None:
+            return
+        message = f"\n[{now()}|{_cstr(level)}]{debug_str}" + message if self._h else message
+        self._f.write(message + "\n")
 
-    def debug(self, *msg: Any) -> None:
+    def disp(self, *msg: object, end: Literal["\n", "\r"] = "\n") -> None:
+        if len(msg) < 1:
+            return
+        message = "\n".join([str(m) for m in msg])
+        print(message, end=end)
+        if self._f is None:
+            return
+        self._f.write(message + "\n")
+
+    def debug(self, *msg: object) -> None:
         if self._level >= LogLevel.DEBUG:
             self.print(*msg, level=LogLevel.DEBUG)
 
-    def info(self, *msg: Any) -> None:
+    def info(self, *msg: object) -> None:
         if self._level >= LogLevel.INFO:
             self.print(*msg, level=LogLevel.INFO)
 
-    def disp(self, *msg: Any, end: Literal["\n", "\r"] = "\n") -> None:
-        if len(msg) < 1:
-            return
-        for m in msg:
-            print(m, end=end)
-        if self._file is not None:
-            for m in msg:
-                print(m, file=self._file)
-
-    def brief(self, *msg: Any) -> None:
+    def brief(self, *msg: object) -> None:
         if self._level >= LogLevel.BRIEF:
             self.print(*msg, level=LogLevel.BRIEF)
 
-    def warn(self, *msg: Any) -> None:
+    def warn(self, *msg: object) -> None:
         if self._level >= LogLevel.WARN:
             self.print(*msg, level=LogLevel.WARN)
 
-    def error(self, *msg: Any) -> None:
+    def error(self, *msg: object) -> None:
         if self._level >= LogLevel.ERROR:
             self.print(*msg, level=LogLevel.ERROR)
 
-    def fatal(self, *msg: Any) -> None:
+    def fatal(self, *msg: object) -> None:
         if self._level >= LogLevel.FATAL:
             self.print(*msg, level=LogLevel.FATAL)
 
-    def exception(self, e: Exception):
+    def exception(self, e: Exception) -> Exception:
         print(traceback.format_exc())
         return e
 
@@ -244,28 +262,28 @@ class NullLogger(ILogger):
     def flush(self) -> None:
         pass
 
-    def print(self, *msg: Any, level: LogLevel = LogLevel.BRIEF) -> None:
+    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         pass
 
-    def debug(self, *msg: Any) -> None:
+    def disp(self, *msg: object, end: Literal["\n", "\r"] = "\n") -> None:
         pass
 
-    def info(self, *msg: Any) -> None:
+    def debug(self, *msg: object) -> None:
         pass
 
-    def disp(self, *msg: Any, end: Literal["\n"] | Literal["\r"] = "\n") -> None:
+    def info(self, *msg: object) -> None:
         pass
 
-    def brief(self, *msg: Any) -> None:
+    def brief(self, *msg: object) -> None:
         pass
 
-    def warn(self, *msg: Any) -> None:
+    def warn(self, *msg: object) -> None:
         pass
 
-    def error(self, *msg: Any) -> None:
+    def error(self, *msg: object) -> None:
         pass
 
-    def fatal(self, *msg: Any) -> None:
+    def fatal(self, *msg: object) -> None:
         pass
 
     def exception(self, e: Exception) -> Exception:
@@ -320,7 +338,7 @@ ANSI_ESCAPE_8BITB = re.compile(
 def filter_ansi[T: (str, bytes)](text: T) -> T:
     if isinstance(text, str):
         return ANSI_ESCAPE_8BIT.sub("", text)
-    elif isinstance(text, bytes):
+    if isinstance(text, bytes):
         return ANSI_ESCAPE_8BITB.sub(b"", text)
-    else:
-        raise TypeError("text must be str or bytes")
+    err_msg = f"text must be str or bytes, got {type(text).__name__}"
+    raise TypeError(err_msg)

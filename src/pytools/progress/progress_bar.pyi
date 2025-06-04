@@ -4,7 +4,7 @@ from typing import Literal
 class ProgressBar:
     def __init__(
         self,
-        max: int,
+        bound: int,
         prefix: str = "",
         suffix: str = "",
         length: int = 50,
