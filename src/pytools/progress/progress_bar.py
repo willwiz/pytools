@@ -1,3 +1,4 @@
+import sys
 from typing import Final, Literal, TypedDict, Unpack
 
 
@@ -11,52 +12,80 @@ class PBarKwargs(TypedDict, total=False):
 
 
 class ProgressBar:
-    __slots__ = ["_b", "_bmt", "_endl", "_l", "_n", "_p", "_pmt", "_s", "i"]
+    __slots__ = [
+        "_bdiv",
+        "_bmt",
+        "_endl",
+        "_l",
+        "_n",
+        "_pdiv",
+        "_pfx",
+        "_pmt",
+        "_sfx",
+        "_x",
+        "b",
+        "bar",
+        "i",
+        "p",
+    ]
 
+    _x: Final[str]
     _n: Final[int]
-    i: int
     _l: Final[int]
-    _p: Final[str]
-    _s: Final[str]
-    _b: Final[str]
+    _pfx: Final[str]
+    _sfx: Final[str]
     _endl: Final[Literal["\n", "\r", ""]]
     _bmt: Final[str]
     _pmt: Final[str]
+    _bdiv: Final[float]
+    _pdiv: Final[float]
+    b: int
+    i: int
+    p: int
+    bar: str
 
     def __init__(
         self,
-        bound: int,
+        n: int,
         prefix: str = "",
         suffix: str = "",
         **kwargs: Unpack[PBarKwargs],
-        # length: int = 50,
-        # decimal: int = 1,
-        # pixel: str = "*",
-        # end: Literal["\n", "\r", ""] = "",
     ) -> None:
-        self.i, self._n = 0, bound
-        self._p, self._s = prefix, suffix
-        self._b = kwargs.get("pixel", "*")
-        self._l = kwargs.get("length", 50) * len(self._b)
-        self._bmt = f"-<{self._l}"
+        self.i, self.b, self._n = 0, 0, n
+        self._pfx, self._sfx = prefix, suffix
+        self._x = kwargs.get("pixel", "*")
         decimal = kwargs.get("decimal", 1)
+        length = kwargs.get("length", 50)
+        self._l = length * len(self._x)
+        self._pdiv = 100.0 / decimal / n
+        self._bdiv = length / n
+        self._bmt = f"-<{self._l}"
         self._pmt = f">{5 + decimal}.{decimal}%"
         self._endl = kwargs.get("end", "\r")
+        self.bar = f"{self._pfx}|{' ':{self._bmt}}|"
 
     def reset(self) -> None:
         self.i = 0
 
     def next(self) -> None:
         self.i = self.i + 1
-        self._print_bar(self.i)
+        self._print_bar()
 
     def finish(self) -> None:
-        self._print_bar(self._n)
+        self._print_bar()
 
-    def _print_bar(self, i: int) -> None:
-        p = 1.0 if (self._n == 0) else (i / self._n)
-        f = self._b * int(self._l * p)
-        bar = f"\r{self._p}|{f:{self._bmt}}|{p:{self._pmt}}{self._s}"
-        print(bar, end=self._endl)
-        if i == self._n:
-            print()
+    def _print_bar(self) -> None:
+        p = int(self._pdiv * self.i)
+        if self.p == p:
+            return
+        self.p = p
+        b = int(self._bdiv * self.i)
+        if self.b != b:
+            self.b = b
+            self.bar = f"{self._pfx}|{self._x * b:{self._bmt}}|"
+        sys.stdout.write(self._endl)
+        sys.stdout.write(self.bar)
+        sys.stdout.write(f"{p:{self._pmt}}{self._sfx}")
+        if self.i == self._n:
+            sys.stdout.write("\n")
+        sys.stdout.flush()

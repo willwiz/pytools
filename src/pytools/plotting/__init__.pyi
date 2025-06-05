@@ -1,3 +1,4 @@
+# pyright: reportOverlappingOverload=false
 __all__ = [
     "PlotKwargs",
     "close_figure",
@@ -10,9 +11,8 @@ __all__ = [
     "update_figure_setting",
 ]
 
-from typing import Any, Literal, Unpack, overload
+from typing import Literal, Unpack, overload
 
-import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
@@ -29,31 +29,49 @@ from .typing import PlotKwargs
 def close_figure(fig: Figure | None = None) -> None: ...
 @overload
 def create_figure(
-    ncols: None,
-    nrows: None,
     **kwargs: Unpack[PlotKwargs],
 ) -> Figure: ...
 @overload
 def create_figure(
-    ncols: Literal[1] = 1,
-    nrows: Literal[1] = 1,
+    ncols: Literal[1],
+    **kwargs: Unpack[PlotKwargs],
+) -> tuple[Figure, Axes]: ...
+@overload
+def create_figure(
+    nrows: Literal[1],
+    **kwargs: Unpack[PlotKwargs],
+) -> tuple[Figure, Axes]: ...
+@overload
+def create_figure(
+    ncols: Literal[1],
+    nrows: Literal[1],
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes]: ...
 @overload
 def create_figure(
     ncols: int,
-    nrows: None,
     **kwargs: Unpack[PlotKwargs],
-) -> tuple[Figure, np.ndarray[tuple[int, int], Any]]: ...
+) -> tuple[Figure, tuple[Axes, ...]]: ...
 @overload
 def create_figure(
-    ncols: None,
+    ncols: int,
+    nrows: Literal[1],
+    **kwargs: Unpack[PlotKwargs],
+) -> tuple[Figure, tuple[Axes, ...]]: ...
+@overload
+def create_figure(
     nrows: int,
     **kwargs: Unpack[PlotKwargs],
-) -> tuple[Figure, np.ndarray[tuple[int, int], Any]]: ...
+) -> tuple[Figure, tuple[Axes, ...]]: ...
+@overload
+def create_figure(
+    ncols: Literal[1],
+    nrows: int,
+    **kwargs: Unpack[PlotKwargs],
+) -> tuple[Figure, tuple[Axes, ...]]: ...
 @overload
 def create_figure(
     ncols: int,
     nrows: int,
     **kwargs: Unpack[PlotKwargs],
-) -> tuple[Figure, np.ndarray[tuple[int, int], Any]]: ...
+) -> tuple[Figure, tuple[tuple[Axes, ...], ...]]: ...
