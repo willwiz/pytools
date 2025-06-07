@@ -18,11 +18,16 @@ if TYPE_CHECKING:
     from .typing import (
         CyclerKwargs,
         FigureKwargs,
+        FontKwargs,
         LegendKwargs,
         PaddingKwargs,
         PlotKwargs,
         StyleKwargs,
     )
+
+
+def font_kwargs(**kwargs: Unpack[PlotKwargs]) -> FontKwargs:
+    return {"fontsize": kwargs.get("fontsize", 14)}
 
 
 def legend_kwargs(**kwargs: Unpack[PlotKwargs]) -> LegendKwargs:
@@ -80,10 +85,16 @@ def figure_kwargs(**kwargs: Unpack[PlotKwargs]) -> FigureKwargs:
 def padding_kwargs(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> PaddingKwargs:
     if "layout" in kwargs:
         return {}
-    left = kwargs.get("padleft", 0.15)
+    width, height = fig.get_size_inches()
+    ratio = width / height
+    left = kwargs.get("padleft", 0.1)
+    if "xlabel" in kwargs:
+        left = 1.5 * left
     bottom = kwargs.get("padbottom", 0.1)
-    right = 1.0 - kwargs.get("padright", 0.1)
-    top = 1.0 - kwargs.get("padtop", 0.1)
+    if "ylabel" in kwargs:
+        bottom = bottom + 0.5 * left
+    right = 1.0 - kwargs.get("padright", 0.02) / ratio
+    top = 1.0 - kwargs.get("padtop", 0.02)
     if not fig.axes:
         return {"left": left, "right": right, "top": top, "bottom": bottom}
     grid = fig.axes[0].get_gridspec()
@@ -107,14 +118,18 @@ def update_figure_setting(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> None:
     if not fig.axes:
         return
     cyclers: dict[str, Any] = {**cycler_kwargs(**kwargs)}
+    fig.subplots_adjust(**padding_kwargs(fig, **kwargs))
     for ax in fig.axes:
-        ax.set_prop_cycle(**cyclers)
+        if cyclers:
+            ax.set_prop_cycle(**cyclers)
+        if "fontsize" in kwargs:
+            ax.tick_params(axis="both", which="major", labelsize=kwargs["fontsize"] - 2)
         if "curve_labels" in kwargs:
             ax.legend(**legend_kwargs(**kwargs))
         if "xlabel" in kwargs:
-            ax.set_xlabel(kwargs["xlabel"])
+            ax.set_xlabel(kwargs["xlabel"], **font_kwargs(**kwargs))
         if "ylabel" in kwargs:
-            ax.set_ylabel(kwargs["ylabel"])
+            ax.set_ylabel(kwargs["ylabel"], **font_kwargs(**kwargs))
         if "xlim" in kwargs:
             ax.set_xlim(kwargs["xlim"])
         if "ylim" in kwargs:

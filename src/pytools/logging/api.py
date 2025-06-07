@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-__all__ = ["LOG_LEVEL", "BLogger", "ILogger", "LogLevel", "NullLogger", "XLogger"]
-import abc
+__all__ = ["LOG_LEVEL", "NULL_LOGGER", "BLogger", "ILogger", "LogLevel", "XLogger"]
 import enum
 import os
 import re
@@ -10,6 +9,8 @@ from datetime import datetime
 from inspect import Traceback, getframeinfo, stack
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, TextIO
+
+from .trait import ILogger, LogLevel
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -20,19 +21,6 @@ def now() -> str:
 
 
 LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
-
-
-class LogLevel(enum.IntEnum):
-    NULL = 0
-    FATAL = 1
-    ERROR = 2
-    WARN = 3
-    BRIEF = 4
-    INFO = 5
-    DEBUG = 6
-
-    def __str__(self) -> str:
-        return self.name
 
 
 class BColors(enum.StrEnum):
@@ -66,32 +54,6 @@ RB: Mapping[LogLevel, str] = {
     LogLevel.INFO: BColors.ENDC,
     LogLevel.DEBUG: BColors.ENDC,
 }
-
-
-class ILogger(abc.ABC):
-    @property
-    @abc.abstractmethod
-    def level(self) -> LogLevel: ...
-    @abc.abstractmethod
-    def flush(self) -> None: ...
-    @abc.abstractmethod
-    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None: ...
-    @abc.abstractmethod
-    def disp(self, *msg: object, end: Literal["\n", "\r"] = "\n") -> None: ...
-    @abc.abstractmethod
-    def debug(self, *msg: object) -> None: ...
-    @abc.abstractmethod
-    def info(self, *msg: object) -> None: ...
-    @abc.abstractmethod
-    def brief(self, *msg: object) -> None: ...
-    @abc.abstractmethod
-    def warn(self, *msg: object) -> None: ...
-    @abc.abstractmethod
-    def error(self, *msg: object) -> None: ...
-    @abc.abstractmethod
-    def fatal(self, *msg: object) -> None: ...
-    @abc.abstractmethod
-    def exception(self, e: Exception) -> Exception: ...
 
 
 def _debug_str(frame: Traceback) -> str:
@@ -248,7 +210,7 @@ class XLogger(ILogger):
         return e
 
 
-class NullLogger(ILogger):
+class _NullLogger(ILogger):
     __slots__ = ["_level"]
     _level: LogLevel
 
@@ -290,6 +252,7 @@ class NullLogger(ILogger):
         return e
 
 
+NULL_LOGGER = _NullLogger()
 # 7-bit and 8-bit C1 ANSI sequences
 ANSI_ESCAPE_8BIT = re.compile(
     r"""

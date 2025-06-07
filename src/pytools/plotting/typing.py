@@ -4,6 +4,7 @@ __all__ = [
     "LEGEND_KEYS",
     "CyclerKwargs",
     "FigureKwargs",
+    "FontKwargs",
     "LegendKwargs",
     "PaddingKwargs",
     "PlotKwargs",
@@ -35,14 +36,14 @@ class PlotKwargs(TypedDict, total=False):
     markersize: int | float
     markerskip: int | list[int] | float | list[float]
     markeredgewidth: float
-    legendlabelcols: int
     fillstyle: str
     loc: Literal["outside lower center", "upper right", "lower left", "best"]
     handlelength: float
     frameon: bool
-    fontsize: int
+    fontsize: float
     labelspacing: float
     columnspacing: float
+    legendlabelcols: int
     padleft: float
     padright: float
     padtop: float
@@ -54,7 +55,7 @@ class LegendKwargs(TypedDict, total=False):
     loc: Literal["outside lower center", "upper right", "lower left", "best"]
     handlelength: float
     frameon: bool
-    fontsize: int
+    fontsize: float
     labelspacing: float
     columnspacing: float
     legendlabelcols: int
@@ -89,3 +90,7 @@ class PaddingKwargs(TypedDict, total=False):
     bottom: float
     hspace: float
     wspace: float
+
+
+class FontKwargs(TypedDict, total=False):
+    fontsize: float
