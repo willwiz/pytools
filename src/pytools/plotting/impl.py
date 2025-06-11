@@ -100,12 +100,12 @@ def padding_kwargs(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> PaddingKwargs:
     grid = fig.axes[0].get_gridspec()
     if grid is None:
         return {"left": left, "right": right, "top": top, "bottom": bottom}
+    hspace = top + bottom
+    wspace = left + right
     left = left / grid.ncols
     right = right / grid.ncols
     top = top / grid.nrows
     bottom = bottom / grid.nrows
-    hspace = left + right
-    wspace = top + bottom
     right = 1.0 - right
     top = 1.0 - top
     return {
