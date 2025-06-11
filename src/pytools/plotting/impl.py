@@ -93,8 +93,8 @@ def padding_kwargs(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> PaddingKwargs:
     bottom = kwargs.get("padbottom", 0.1)
     if "ylabel" in kwargs:
         bottom = bottom + 0.5 * left
-    right = 1.0 - kwargs.get("padright", 0.02) / ratio
-    top = 1.0 - kwargs.get("padtop", 0.02)
+    right = kwargs.get("padright", 0.02) / ratio
+    top = kwargs.get("padtop", 0.02)
     if not fig.axes:
         return {"left": left, "right": right, "top": top, "bottom": bottom}
     grid = fig.axes[0].get_gridspec()
@@ -104,13 +104,17 @@ def padding_kwargs(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> PaddingKwargs:
     right = right / grid.ncols
     top = top / grid.nrows
     bottom = bottom / grid.nrows
+    hspace = left + right
+    wspace = top + bottom
+    right = 1.0 - right
+    top = 1.0 - top
     return {
         "left": left,
         "right": right,
         "top": top,
         "bottom": bottom,
-        "hspace": left + right,
-        "wspace": top + bottom,
+        "hspace": hspace,
+        "wspace": wspace,
     }
 
 

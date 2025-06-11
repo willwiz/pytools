@@ -11,7 +11,7 @@ __all__ = [
     "update_figure_setting",
 ]
 
-from typing import Literal, Unpack, overload
+from typing import Unpack, overload
 
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -33,39 +33,11 @@ def create_figure(
 ) -> Figure: ...
 @overload
 def create_figure(
-    ncols: Literal[1],
-    **kwargs: Unpack[PlotKwargs],
-) -> tuple[Figure, Axes]: ...
-@overload
-def create_figure(
-    nrows: Literal[1],
-    **kwargs: Unpack[PlotKwargs],
-) -> tuple[Figure, Axes]: ...
-@overload
-def create_figure(
-    ncols: Literal[1],
-    nrows: Literal[1],
-    **kwargs: Unpack[PlotKwargs],
-) -> tuple[Figure, Axes]: ...
-@overload
-def create_figure(
     ncols: int,
     **kwargs: Unpack[PlotKwargs],
-) -> tuple[Figure, tuple[Axes, ...]]: ...
+) -> tuple[Figure, Axes]: ...
 @overload
 def create_figure(
-    ncols: int,
-    nrows: Literal[1],
-    **kwargs: Unpack[PlotKwargs],
-) -> tuple[Figure, tuple[Axes, ...]]: ...
-@overload
-def create_figure(
-    nrows: int,
-    **kwargs: Unpack[PlotKwargs],
-) -> tuple[Figure, tuple[Axes, ...]]: ...
-@overload
-def create_figure(
-    ncols: Literal[1],
     nrows: int,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, tuple[Axes, ...]]: ...

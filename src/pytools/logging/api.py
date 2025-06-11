@@ -85,7 +85,7 @@ class BLogger(ILogger):
         frame = getframeinfo(stack()[2][0])
         print(f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}", *msg, sep="\n")
 
-    def disp(self, *msg: object, end: Literal["\n", "\r"] = "\n") -> None:
+    def disp(self, *msg: object, end: Literal["\n", "\r", "\x1b[1K\r", ""] = "\n") -> None:
         if len(msg) < 1:
             return
         print(*msg, sep=end, end=end)
@@ -172,7 +172,7 @@ class XLogger(ILogger):
         message = f"\n[{now()}|{_cstr(level)}]{debug_str}" + message if self._h else message
         self._f.write(message + "\n")
 
-    def disp(self, *msg: object, end: Literal["\n", "\r"] = "\n") -> None:
+    def disp(self, *msg: object, end: Literal["\n", "\r", "\x1b[1K\r", ""] = "\n") -> None:
         if len(msg) < 1:
             return
         message = "\n".join([str(m) for m in msg])
@@ -227,7 +227,7 @@ class _NullLogger(ILogger):
     def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         pass
 
-    def disp(self, *msg: object, end: Literal["\n", "\r"] = "\n") -> None:
+    def disp(self, *msg: object, end: Literal["\n", "\r", "\x1b[1K\r", ""] = "\n") -> None:
         pass
 
     def debug(self, *msg: object) -> None:
