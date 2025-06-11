@@ -87,7 +87,7 @@ def padding_kwargs(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> PaddingKwargs:
         return {}
     width, height = fig.get_size_inches()
     ratio = width / height
-    left = kwargs.get("padleft", 0.1)
+    left = kwargs.get("padleft", 0.15)
     if "xlabel" in kwargs:
         left = 1.5 * left
     bottom = kwargs.get("padbottom", 0.1)
