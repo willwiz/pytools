@@ -2,6 +2,7 @@ from __future__ import annotations
 
 __all__ = [
     "LEGEND_KEYS",
+    "BarPlotKwargs",
     "CyclerKwargs",
     "FigureKwargs",
     "FontKwargs",
@@ -32,9 +33,12 @@ class PlotKwargs(TypedDict, total=False):
     alpha: Sequence[float]
     linestyle: Sequence[str]
     linewidth: Sequence[float]
+    edgecolor: Sequence[str]
+    facecolor: Sequence[str]
+    mec: Sequence[str]
     marker: Sequence[str]
     markersize: int | float
-    markerskip: int | list[int] | float | list[float]
+    markevery: int | Sequence[int] | float | Sequence[float]
     markeredgewidth: float
     fillstyle: str
     loc: Literal["outside lower center", "upper right", "lower left", "best"]
@@ -49,6 +53,13 @@ class PlotKwargs(TypedDict, total=False):
     padtop: float
     padbottom: float
     transparency: bool
+    width: float
+
+
+class BarPlotKwargs(PlotKwargs, TypedDict, total=False):
+    fill: bool
+    hatch: Sequence[str]
+    edgecolor: Sequence[str]
 
 
 class LegendKwargs(TypedDict, total=False):
@@ -70,11 +81,16 @@ class CyclerKwargs(TypedDict, total=False):
     marker: Sequence[str]
 
 
+class BarCyclerKwargs(CyclerKwargs, TypedDict, total=False):
+    hatch: Sequence[str]
+
+
 class StyleKwargs(TypedDict, total=False):
     markevery: int | Sequence[int] | float | Sequence[float]
     markersize: int | float
     fillstyle: str
     markeredgewidth: float
+    width: float
 
 
 class FigureKwargs(TypedDict, total=False):

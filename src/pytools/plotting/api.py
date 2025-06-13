@@ -26,15 +26,27 @@ def create_figure(
     ncols: int | None = None,
     nrows: int | None = None,
     **kwargs: Unpack[PlotKwargs],
-) -> Figure | tuple[Figure, Axes] | tuple[Figure, np.ndarray[tuple[int, int], Any]]:
+) -> (
+    tuple[Figure, Axes]
+    | tuple[Figure, np.ndarray[tuple[int], Any]]
+    | tuple[Figure, np.ndarray[tuple[int, int], Any]]
+):
     opts = figure_kwargs(**kwargs)
-    if ncols is None and nrows is None:
-        return plt.figure(**opts)
     dims: dict[Literal["ncols", "nrows"], int] = {
         "ncols": ncols if ncols is not None else 1,
         "nrows": nrows if nrows is not None else 1,
     }
-    fig, ax = plt.subplots(**dims, **opts)
+    fig, ax = plt.subplots(**dims, squeeze=False, **opts)
+    match ncols, nrows:
+        case None, None:
+            return fig, ax[0, 0]
+        case None, _:
+            return fig, ax[:, 0]  # type: ignore[return-value]
+        case _, None:
+            return fig, ax[0, :]  # type: ignore[return-value]
+        case _, _:
+            return fig, ax
+    # matplotlib leave ax as unknown, nothing to do here
     return fig, ax
 
 

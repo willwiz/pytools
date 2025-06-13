@@ -1,7 +1,11 @@
 # pyright: reportUnknownMemberType=false, reportUnknownVariableType=false
 from __future__ import annotations
 
+from itertools import cycle
+
 __all__ = [
+    "bar_cycler_kwargs",
+    "bar_cycler_kwargs",
     "cycler_kwargs",
     "figure_kwargs",
     "legend_kwargs",
@@ -13,9 +17,13 @@ __all__ = [
 from typing import TYPE_CHECKING, Any, Unpack
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.figure import Figure
 
     from .typing import (
+        BarCyclerKwargs,
+        BarPlotKwargs,
         CyclerKwargs,
         FigureKwargs,
         FontKwargs,
@@ -69,6 +77,8 @@ def style_kwargs(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs:
         style["fillstyle"] = kwargs["fillstyle"]
     if "markeredgewidth" in kwargs:
         style["markeredgewidth"] = kwargs["markeredgewidth"]
+    if "width" in kwargs:
+        style["width"] = kwargs["width"]
     return style
 
 
@@ -88,10 +98,10 @@ def padding_kwargs(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> PaddingKwargs:
     width, height = fig.get_size_inches()
     ratio = width / height
     left = kwargs.get("padleft", 0.15)
-    if "xlabel" in kwargs:
+    if "ylabel" in kwargs:
         left = 1.5 * left
     bottom = kwargs.get("padbottom", 0.1)
-    if "ylabel" in kwargs:
+    if "xlabel" in kwargs:
         bottom = bottom + 0.5 * left
     right = kwargs.get("padright", 0.02) / ratio
     top = kwargs.get("padtop", 0.02)
@@ -138,3 +148,16 @@ def update_figure_setting(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> None:
             ax.set_xlim(kwargs["xlim"])
         if "ylim" in kwargs:
             ax.set_ylim(kwargs["ylim"])
+
+
+def bar_cycler_kwargs(n: int, **kwargs: Unpack[BarPlotKwargs]) -> Sequence[BarCyclerKwargs]:
+    hatches: Sequence[BarCyclerKwargs] = [{**style_kwargs(**kwargs)} for _ in range(n)]
+    if "hatch" in kwargs:
+        cycler = cycle(kwargs["hatch"])
+        for v in hatches:
+            v["hatch"] = next(cycler)
+    # if "edgecolor" in kwargs:
+    #     cycler = cycle(kwargs["edgecolor"])
+    #     for v in hatches:
+    #         v["edgecolor"] = next(cycler)
+    return hatches
