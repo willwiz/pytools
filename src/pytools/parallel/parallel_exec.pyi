@@ -1,11 +1,9 @@
 __all__ = ["PEXEC_ARGS", "parallel_exec"]
-from collections.abc import Collection, Mapping, Sequence
+from collections.abc import Callable, Collection, Mapping, Sequence
 from concurrent import futures
-from typing import Any, Callable
+from typing import Any
 
-import typing_extensions
-
-PEXEC_ARGS: typing_extensions.TypeAlias = Collection[tuple[Sequence[Any], Mapping[str, Any]]]
+type PEXEC_ARGS = Collection[tuple[Sequence[Any], Mapping[str, Any]]]
 
 def parallel_exec(
     exe: futures.ProcessPoolExecutor,

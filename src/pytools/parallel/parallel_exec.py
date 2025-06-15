@@ -1,7 +1,7 @@
 __all__ = ["PEXEC_ARGS", "parallel_exec"]
-from collections.abc import Collection
+from collections.abc import Callable, Collection
 from concurrent import futures
-from typing import Any, Callable
+from typing import Any
 
 from pytools.progress import ProgressBar
 

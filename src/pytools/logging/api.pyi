@@ -9,11 +9,9 @@ __all__ = [
 from pathlib import Path
 from typing import Literal
 
-import typing_extensions
-
 from .trait import ILogger, LogLevel
 
-LOG_LEVEL: typing_extensions.TypeAlias = Literal[
+type LOG_LEVEL = Literal[
     "NULL",
     "FATAL",
     "ERROR",
