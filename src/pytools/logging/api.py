@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__all__ = ["LOG_LEVEL", "BLogger", "ILogger", "LogLevel", "XLogger"]
+__all__ = ["LOG_LEVEL", "NULL_LOGGER", "BLogger", "ILogger", "LogLevel", "TXLogger", "XLogger"]
 import enum
 import os
 import re
@@ -357,7 +357,7 @@ class _NullLogger(ILogger):
         return e
 
 
-null_logger = _NullLogger()
+NULL_LOGGER = _NullLogger()
 # 7-bit and 8-bit C1 ANSI sequences
 ANSI_ESCAPE_8BIT = re.compile(
     r"""
