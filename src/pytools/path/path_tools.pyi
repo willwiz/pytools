@@ -1,5 +1,5 @@
 __all__ = ["clear_dir", "path"]
-from pytools.logging import ILogger
+from pytools.logging.trait import ILogger
 
 def path(*v: str | None) -> str: ...
 def clear_dir(folder: str, *suffix: str, log: ILogger = ...) -> None: ...

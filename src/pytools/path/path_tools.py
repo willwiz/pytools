@@ -3,7 +3,8 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 
-from pytools.logging.trait import NULL_LOGGER, ILogger
+from pytools.logging.api import NULL_LOGGER
+from pytools.logging.trait import ILogger
 
 warnings.warn("deprecated", DeprecationWarning, stacklevel=2)
 
@@ -13,11 +14,9 @@ def path(*v: str | None) -> str:
     return str(Path(*[s for s in v if s]))
 
 
-def clear_dir(folder: Path | str, *suffix: str, log: ILogger | None = None) -> None:
+def clear_dir(folder: Path | str, *suffix: str, log: ILogger = NULL_LOGGER) -> None:
     """Remove all files in directory with suffixes."""
     folder = Path(folder)
-    if log is None:
-        log = NULL_LOGGER
     if not folder.is_dir():
         log.warn(f"Dir {folder} was not found.")
         folder.mkdir(parents=True, exist_ok=True)

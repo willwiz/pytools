@@ -315,6 +315,49 @@ class TXLogger(ILogger):
         return e
 
 
+class _NullLogger(ILogger):
+    __slots__ = ["_level"]
+    _level: LogLevel
+
+    def __init__(self) -> None:
+        self._level = LogLevel.NULL
+
+    @property
+    def level(self) -> LogLevel:
+        return self._level
+
+    def flush(self) -> None:
+        pass
+
+    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
+        pass
+
+    def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
+        pass
+
+    def debug(self, *msg: object) -> None:
+        pass
+
+    def info(self, *msg: object) -> None:
+        pass
+
+    def brief(self, *msg: object) -> None:
+        pass
+
+    def warn(self, *msg: object) -> None:
+        pass
+
+    def error(self, *msg: object) -> None:
+        pass
+
+    def fatal(self, *msg: object) -> None:
+        pass
+
+    def exception(self, e: Exception) -> Exception:
+        return e
+
+
+null_logger = _NullLogger()
 # 7-bit and 8-bit C1 ANSI sequences
 ANSI_ESCAPE_8BIT = re.compile(
     r"""

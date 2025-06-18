@@ -12,6 +12,8 @@ from .trait import ILogger, LogLevel
 
 type LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
 
+null_logger: ILogger
+
 class BLogger(ILogger):
     def __init__(
         self,
