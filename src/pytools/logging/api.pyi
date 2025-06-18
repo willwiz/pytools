@@ -1,6 +1,5 @@
 __all__ = [
     "LOG_LEVEL",
-    "NULL_LOGGER",
     "BLogger",
     "ILogger",
     "LogLevel",
@@ -11,22 +10,12 @@ from typing import Literal
 
 from .trait import ILogger, LogLevel
 
-type LOG_LEVEL = Literal[
-    "NULL",
-    "FATAL",
-    "ERROR",
-    "WARN",
-    "BRIEF",
-    "INFO",
-    "DEBUG",
-]
-
-NULL_LOGGER: ILogger
+type LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
 
 class BLogger(ILogger):
     def __init__(
         self,
-        level: (LogLevel | Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]),
+        level: (LogLevel | LOG_LEVEL),
     ) -> None: ...
     @property
     def level(self) -> LogLevel: ...
@@ -44,7 +33,7 @@ class BLogger(ILogger):
 class XLogger(ILogger):
     def __init__(
         self,
-        level: (LogLevel | Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]),
+        level: (LogLevel | LOG_LEVEL),
         file: str | Path | None = None,
     ) -> None: ...
     @property
@@ -63,7 +52,7 @@ class XLogger(ILogger):
 class TXLogger(ILogger):
     def __init__(
         self,
-        level: (LogLevel | Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]),
+        level: (LogLevel | LOG_LEVEL),
         file: str | Path | None = None,
     ) -> None: ...
     @property

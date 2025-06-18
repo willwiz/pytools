@@ -3,7 +3,7 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 
-from pytools.logging import NULL_LOGGER, ILogger
+from pytools.logging.trait import NULL_LOGGER, ILogger
 
 warnings.warn("deprecated", DeprecationWarning, stacklevel=2)
 
