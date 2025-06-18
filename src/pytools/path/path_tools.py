@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import warnings
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from pytools.logging.api import NULL_LOGGER
-from pytools.logging.trait import ILogger
+
+if TYPE_CHECKING:
+    from pytools.logging.trait import ILogger
 
 warnings.warn("deprecated", DeprecationWarning, stacklevel=2)
 

@@ -1,6 +1,15 @@
 from __future__ import annotations
 
-__all__ = ["LOG_LEVEL", "NULL_LOGGER", "BLogger", "ILogger", "LogLevel", "TXLogger", "XLogger"]
+__all__ = [
+    "LOG_LEVEL",
+    "NULL_LOGGER",
+    "BLogger",
+    "ILogger",
+    "LogLevel",
+    "TLogger",
+    "TXLogger",
+    "XLogger",
+]
 import enum
 import os
 import re
@@ -8,6 +17,7 @@ import traceback
 from concurrent.futures import Executor, ThreadPoolExecutor
 from datetime import datetime
 from inspect import Traceback, getframeinfo, stack
+from multiprocessing import Lock
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, TextIO
 
@@ -15,6 +25,7 @@ from .trait import ILogger, LogLevel
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+    from multiprocessing.synchronize import Lock as LockBase
 
 
 def now() -> str:
@@ -211,14 +222,100 @@ class XLogger(ILogger):
         return e
 
 
+class TLogger(ILogger):
+    __slots__ = ["_level", "_lock", "_thread"]
+    _lock: LockBase
+    _level: LogLevel
+    _thread: Executor
+
+    def __init__(self, level: LOG_LEVEL | LogLevel) -> None:
+        self._level = level if isinstance(level, LogLevel) else LogLevel[level]
+        self._lock = Lock()
+        self._thread = ThreadPoolExecutor(max_workers=1)
+
+    def __del__(self) -> None:
+        self._thread.shutdown(wait=True)
+
+    @property
+    def level(self) -> LogLevel:
+        return self._level
+
+    def flush(self) -> None:
+        pass
+
+    def _async_print(
+        self,
+        lock: LockBase,
+        *msg: object,
+        level: LogLevel = LogLevel.BRIEF,
+    ) -> None:
+        with lock:
+            if len(msg) < 1:
+                return
+            frame = getframeinfo(stack()[2][0])
+            print(f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}", *msg, sep="\n")
+
+    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
+        if len(msg) < 1:
+            return
+        self._thread.submit(self._async_print, self._lock, *msg, level=level)
+
+    def _async_disp(
+        self,
+        lock: LockBase,
+        *msg: object,
+        end: Literal["\n", "\r", ""] = "\n",
+    ) -> None:
+        if len(msg) < 1:
+            return
+        message = "\n".join([str(m) for m in msg])
+        print(message, end=end)
+        with lock:
+            print(*msg, sep=end, end=end)
+
+    def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
+        if len(msg) < 1:
+            return
+        self._thread.submit(self._async_disp, self._lock, *msg, end=end)
+
+    def debug(self, *msg: object) -> None:
+        if self._level >= LogLevel.DEBUG:
+            self.print(*msg, level=LogLevel.DEBUG)
+
+    def info(self, *msg: object) -> None:
+        if self._level >= LogLevel.INFO:
+            self.print(*msg, level=LogLevel.INFO)
+
+    def brief(self, *msg: object) -> None:
+        if self._level >= LogLevel.BRIEF:
+            self.print(*msg, level=LogLevel.BRIEF)
+
+    def warn(self, *msg: object) -> None:
+        if self._level >= LogLevel.WARN:
+            self.print(*msg, level=LogLevel.WARN)
+
+    def error(self, *msg: object) -> None:
+        if self._level >= LogLevel.ERROR:
+            self.print(*msg, level=LogLevel.ERROR)
+
+    def fatal(self, *msg: object) -> None:
+        if self._level >= LogLevel.FATAL:
+            self.print(*msg, level=LogLevel.FATAL)
+
+    def exception(self, e: Exception) -> Exception:
+        print(traceback.format_exc())
+        return e
+
+
 class TXLogger(ILogger):
     """Threaded logger that writes to a file."""
 
-    __slots__ = ["_f", "_level", "_thread"]
+    __slots__ = ["_f", "_h", "_level", "_lock", "_thread"]
     _level: LogLevel
     _thread: Executor
     _f: TextIO | None
     _h: bool
+    _lock: LockBase
 
     def __init__(
         self,
@@ -233,6 +330,7 @@ class TXLogger(ILogger):
             self._f = None
             return
         self._thread = ThreadPoolExecutor(max_workers=1)
+        self._lock = Lock()
         self._f = open(file, "w")  # noqa: SIM115, PTH123
         self._f.write(
             f"Log file: {file}\nLog file created at {now()}\nLog level: {self._level.name}\n\n",
@@ -257,29 +355,37 @@ class TXLogger(ILogger):
         self._f.flush()
         os.fsync(self._f.fileno())
 
-    def _print_async(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
-        frame = getframeinfo(stack()[2][0])
-        header = f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}"
-        message = "\n".join([str(m) for m in msg])
-        print(header, message)
-        if self._f is None:
-            return
-        message = f"{header}\n{message}" if self._h else message
-        self._f.write(filter_ansi(message) + "\n")
+    def _print_async(
+        self,
+        lock: LockBase,
+        *msg: object,
+        level: LogLevel = LogLevel.BRIEF,
+    ) -> None:
+        with lock:
+            frame = getframeinfo(stack()[2][0])
+            header = f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}"
+            message = "\n".join([str(m) for m in msg])
+            print(header, message)
+            if self._f is None:
+                return
+            message = f"{header}\n{message}" if self._h else message
+            self._f.write(filter_ansi(message) + "\n")
 
     def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         if len(msg) < 1:
             return
-        self._thread.submit(self._print_async, *msg, level=level)
+        with self._lock:
+            self._thread.submit(self._print_async, self._lock, *msg, level=level)
 
     def _disp_async(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
         if len(msg) < 1:
             return
-        message = "\n".join([str(m) for m in msg])
-        print(message, end=end)
-        if self._f is None:
-            return
-        self._f.write(filter_ansi(message) + "\n")
+        with self._lock:
+            message = "\n".join([str(m) for m in msg])
+            print(message, end=end)
+            if self._f is None:
+                return
+            self._f.write(filter_ansi(message))
 
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
         if len(msg) < 1:
