@@ -381,7 +381,7 @@ class TXLogger(ILogger):
             sys.stdout.write(message + end)
             if self._f is None:
                 return
-            self._f.write(filter_ansi(message))
+            self._f.write(filter_ansi(message + end))
 
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
         if len(msg) < 1:
