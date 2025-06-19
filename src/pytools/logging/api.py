@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import sys
+
 __all__ = [
     "LOG_LEVEL",
     "NULL_LOGGER",
@@ -127,7 +129,7 @@ class BLogger(ILogger):
             self.print(*msg, level=LogLevel.FATAL)
 
     def exception(self, e: Exception) -> Exception:
-        print(traceback.format_exc())
+        self.disp(traceback.format_exc())
         return e
 
 
@@ -218,7 +220,7 @@ class XLogger(ILogger):
             self.print(*msg, level=LogLevel.FATAL)
 
     def exception(self, e: Exception) -> Exception:
-        print(traceback.format_exc())
+        self.disp(traceback.format_exc())
         return e
 
 
@@ -251,8 +253,6 @@ class TLogger(ILogger):
         level: LogLevel = LogLevel.BRIEF,
     ) -> None:
         with lock:
-            if len(msg) < 1:
-                return
             print(f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}", *msg, sep="\n")
 
     def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
@@ -267,12 +267,9 @@ class TLogger(ILogger):
         *msg: object,
         end: Literal["\n", "\r", ""] = "\n",
     ) -> None:
-        if len(msg) < 1:
-            return
-        message = "\n".join([str(m) for m in msg])
-        print(message, end=end)
         with lock:
-            print(*msg, sep=end, end=end)
+            message = end.join([str(m) for m in msg])
+            sys.stdout.write(message + end)
 
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
         if len(msg) < 1:
@@ -304,7 +301,7 @@ class TLogger(ILogger):
             self.print(*msg, level=LogLevel.FATAL)
 
     def exception(self, e: Exception) -> Exception:
-        print(traceback.format_exc())
+        self.disp(traceback.format_exc())
         return e
 
 
@@ -364,9 +361,9 @@ class TXLogger(ILogger):
         level: LogLevel = LogLevel.BRIEF,
     ) -> None:
         with lock:
-            header = f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}"
+            header = f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}\n"
             message = "\n".join([str(m) for m in msg])
-            print(header, message)
+            sys.stdout.write(f"{header}\n{message}" + "\n")
             if self._f is None:
                 return
             message = f"{header}\n{message}" if self._h else message
@@ -376,16 +373,12 @@ class TXLogger(ILogger):
         if len(msg) < 1:
             return
         frame = getframeinfo(stack()[2][0])
-
-        with self._lock:
-            self._thread.submit(self._print_async, frame, self._lock, *msg, level=level)
+        self._thread.submit(self._print_async, frame, self._lock, *msg, level=level)
 
     def _disp_async(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
-        if len(msg) < 1:
-            return
         with self._lock:
             message = "\n".join([str(m) for m in msg])
-            print(message, end=end)
+            sys.stdout.write(message + end)
             if self._f is None:
                 return
             self._f.write(filter_ansi(message))
@@ -420,7 +413,7 @@ class TXLogger(ILogger):
             self.print(*msg, level=LogLevel.FATAL)
 
     def exception(self, e: Exception) -> Exception:
-        print(traceback.format_exc())
+        self.disp(traceback.format_exc())
         return e
 
 
