@@ -245,6 +245,7 @@ class TLogger(ILogger):
 
     def _async_print(
         self,
+        frame: Traceback,
         lock: LockBase,
         *msg: object,
         level: LogLevel = LogLevel.BRIEF,
@@ -252,13 +253,13 @@ class TLogger(ILogger):
         with lock:
             if len(msg) < 1:
                 return
-            frame = getframeinfo(stack()[2][0])
             print(f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}", *msg, sep="\n")
 
     def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         if len(msg) < 1:
             return
-        self._thread.submit(self._async_print, self._lock, *msg, level=level)
+        frame = getframeinfo(stack()[2][0])
+        self._thread.submit(self._async_print, frame, self._lock, *msg, level=level)
 
     def _async_disp(
         self,
@@ -357,12 +358,12 @@ class TXLogger(ILogger):
 
     def _print_async(
         self,
+        frame: Traceback,
         lock: LockBase,
         *msg: object,
         level: LogLevel = LogLevel.BRIEF,
     ) -> None:
         with lock:
-            frame = getframeinfo(stack()[2][0])
             header = f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}"
             message = "\n".join([str(m) for m in msg])
             print(header, message)
@@ -374,8 +375,10 @@ class TXLogger(ILogger):
     def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         if len(msg) < 1:
             return
+        frame = getframeinfo(stack()[2][0])
+
         with self._lock:
-            self._thread.submit(self._print_async, self._lock, *msg, level=level)
+            self._thread.submit(self._print_async, frame, self._lock, *msg, level=level)
 
     def _disp_async(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
         if len(msg) < 1:
