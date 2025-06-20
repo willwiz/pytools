@@ -366,7 +366,7 @@ class TXLogger(ILogger):
             sys.stdout.write(f"{header}\n{message}" + "\n")
             if self._f is None:
                 return
-            message = f"{header}\n{message}" if self._h else message
+            message = f"{header}{message}" if self._h else message
             self._f.write(filter_ansi(message) + "\n")
 
     def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
@@ -381,7 +381,7 @@ class TXLogger(ILogger):
             sys.stdout.write(message + end)
             if self._f is None:
                 return
-            self._f.write(filter_ansi(message + end))
+            self._f.write(filter_ansi(message) + "\n")
 
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
         if len(msg) < 1:
