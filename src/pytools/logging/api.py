@@ -361,12 +361,12 @@ class TXLogger(ILogger):
         level: LogLevel = LogLevel.BRIEF,
     ) -> None:
         with lock:
-            header = f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}\n"
+            header = f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}"
             message = "\n".join([str(m) for m in msg])
             sys.stdout.write(f"{header}\n{message}" + "\n")
             if self._f is None:
                 return
-            message = f"{header}{message}" if self._h else message
+            message = f"{header}\n{message}" if self._h else message
             self._f.write(filter_ansi(message).replace("\r", "") + "\n")
 
     def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
