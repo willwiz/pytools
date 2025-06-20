@@ -12,7 +12,6 @@ __all__ = [
     "TXLogger",
     "XLogger",
 ]
-import enum
 import os
 import re
 import traceback
@@ -23,7 +22,7 @@ from multiprocessing import Lock
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, TextIO
 
-from .trait import ILogger, LogLevel
+from .trait import BColors, ILogger, LogLevel
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -35,18 +34,6 @@ def now() -> str:
 
 
 type LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
-
-
-class BColors(enum.StrEnum):
-    HEADER = "\033[95m"
-    OKBLUE = "\033[94m"
-    OKCYAN = "\033[96m"
-    OKGREEN = "\033[92m"
-    WARN = "\033[93m"
-    FAIL = "\033[91m"
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
 
 
 LB: Mapping[LogLevel, str] = {
