@@ -184,7 +184,7 @@ class XLogger(ILogger):
         if self._f is None:
             return
         message = f"{header}\n{message}" if self._h else message
-        self._f.write(filter_ansi(message) + "\n")
+        self._f.write(filter_ansi(message).replace("\r", "") + "\n")
 
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
         if len(msg) < 1:
@@ -193,7 +193,7 @@ class XLogger(ILogger):
         print(message, end=end)
         if self._f is None:
             return
-        self._f.write(filter_ansi(message) + "\n")
+        self._f.write(filter_ansi(message).replace("\r", "") + "\n")
 
     def debug(self, *msg: object) -> None:
         if self._level >= LogLevel.DEBUG:
@@ -367,7 +367,7 @@ class TXLogger(ILogger):
             if self._f is None:
                 return
             message = f"{header}{message}" if self._h else message
-            self._f.write(filter_ansi(message) + "\n")
+            self._f.write(filter_ansi(message).replace("\r", "") + "\n")
 
     def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         if len(msg) < 1:
@@ -381,7 +381,7 @@ class TXLogger(ILogger):
             sys.stdout.write(message + end)
             if self._f is None:
                 return
-            self._f.write(filter_ansi(message) + "\n")
+            self._f.write(filter_ansi(message).replace("\r", "") + "\n")
 
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
         if len(msg) < 1:
