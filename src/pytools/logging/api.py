@@ -22,7 +22,7 @@ from multiprocessing import Lock
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, TextIO
 
-from .trait import BColors, ILogger, LogLevel
+from .trait import LOG_LEVEL, BColors, ILogger, LogLevel
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -31,9 +31,6 @@ if TYPE_CHECKING:
 
 def now() -> str:
     return datetime.now().strftime("%H:%M:%S")  # noqa: DTZ005
-
-
-type LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
 
 
 LB: Mapping[LogLevel, str] = {

@@ -1,5 +1,4 @@
 __all__ = [
-    "LOG_LEVEL",
     "NULL_LOGGER",
     "BLogger",
     "ILogger",
@@ -11,9 +10,7 @@ __all__ = [
 from pathlib import Path
 from typing import Literal
 
-from .trait import ILogger, LogLevel
-
-type LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
+from .trait import LOG_LEVEL, ILogger, LogLevel
 
 NULL_LOGGER: ILogger
 

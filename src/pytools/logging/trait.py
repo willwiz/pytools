@@ -5,6 +5,8 @@ import abc
 import enum
 from typing import Literal
 
+type LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
+
 
 class BColors(enum.StrEnum):
     HEADER = "\033[95m"
