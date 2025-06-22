@@ -15,6 +15,7 @@ class ProgressBar:
     __slots__ = [
         "_bdiv",
         "_bmt",
+        "_dec",
         "_endl",
         "_l",
         "_n",
@@ -39,9 +40,10 @@ class ProgressBar:
     _pmt: Final[str]
     _bdiv: Final[float]
     _pdiv: Final[float]
+    _dec: Final[float]
     b: int
     i: int
-    p: int
+    p: float
     bar: str
 
     def __init__(
@@ -57,12 +59,13 @@ class ProgressBar:
         decimal = kwargs.get("decimal", 1)
         length = kwargs.get("length", 50)
         self._l = length * len(self._x)
-        self._pdiv = 100.0 / decimal / n
+        self._pdiv = 1.0 / n
         self._bdiv = length / n
         self._bmt = f"-<{self._l}"
         self._pmt = f">{5 + decimal}.{decimal}%"
         self._endl = kwargs.get("end", "\r")
         self.bar = f"{self._pfx}|{' ':{self._bmt}}|"
+        self._dec = 0.01 * 0.1**decimal
 
     def reset(self) -> None:
         self.i = 0
@@ -75,8 +78,8 @@ class ProgressBar:
         self._print_bar()
 
     def _print_bar(self) -> None:
-        p = int(self._pdiv * self.i)
-        if self.p == p:
+        p = self._pdiv * self.i
+        if (p - self.p) < self._dec:
             return
         self.p = p
         b = int(self._bdiv * self.i)
