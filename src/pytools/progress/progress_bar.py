@@ -51,7 +51,7 @@ class ProgressBar:
         suffix: str = "",
         **kwargs: Unpack[PBarKwargs],
     ) -> None:
-        self.i, self.b, self._n = 0, 0, n
+        self.i, self.b, self.p, self._n = 0, 0, 0, n
         self._pfx, self._sfx = prefix, suffix
         self._x = kwargs.get("pixel", "*")
         decimal = kwargs.get("decimal", 1)
