@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any, Literal, Unpack
 
 from matplotlib import pyplot as plt
 
-from .impl import cycler_kwargs, figure_kwargs, font_kwargs, legend_kwargs, padding_kwargs
+from ._impl_default import cycler_kwargs, figure_kwargs, font_kwargs, legend_kwargs, padding_kwargs
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
 
-    from .typing import BarCyclerKwargs, BarPlotKwargs, PlotKwargs, StyleKwargs
+    from .trait import BarCyclerKwargs, BarPlotKwargs, PlotKwargs, StyleKwargs
 
 
 def create_figure(

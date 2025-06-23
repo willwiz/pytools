@@ -13,7 +13,7 @@ from typing import Unpack, overload
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from .typing import BarCyclerKwargs, BarPlotKwargs, PlotKwargs, StyleKwargs
+from .trait import BarCyclerKwargs, BarPlotKwargs, PlotKwargs, StyleKwargs
 
 def close_figure(fig: Figure | None = None) -> None: ...
 @overload

@@ -4,7 +4,7 @@ __all__ = [
     "LEGEND_DEFAULT",
     "STYLE_DEFAULT",
 ]
-from .typing import CyclerKwargs, FigureKwargs, LegendKwargs
+from .trait import CyclerKwargs, FigureKwargs, LegendKwargs
 
 LEGEND_DEFAULT: LegendKwargs = {
     "loc": "outside lower center",

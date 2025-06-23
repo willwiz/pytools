@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Unpack
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
-    from .typing import (
+    from .trait import (
         CyclerKwargs,
         FigureKwargs,
         FontKwargs,

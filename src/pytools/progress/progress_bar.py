@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+__all__ = ["ProgressBar"]
 import sys
 from typing import Final, Literal, TypedDict, Unpack
 

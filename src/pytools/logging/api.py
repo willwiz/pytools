@@ -3,15 +3,14 @@ from __future__ import annotations
 import sys
 
 __all__ = [
-    "LOG_LEVEL",
     "NULL_LOGGER",
+    "BColors",
     "BLogger",
-    "ILogger",
-    "LogLevel",
     "TLogger",
     "TXLogger",
     "XLogger",
 ]
+import enum
 import os
 import re
 import traceback
@@ -22,7 +21,7 @@ from multiprocessing import Lock
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, TextIO
 
-from .trait import LOG_LEVEL, BColors, ILogger, LogLevel
+from .trait import LOG_LEVEL, ILogger, LogLevel
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -31,6 +30,18 @@ if TYPE_CHECKING:
 
 def now() -> str:
     return datetime.now().strftime("%H:%M:%S")  # noqa: DTZ005
+
+
+class BColors(enum.StrEnum):
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARN = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 LB: Mapping[LogLevel, str] = {
