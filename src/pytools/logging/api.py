@@ -1,77 +1,21 @@
 from __future__ import annotations
 
-import sys
-
-__all__ = [
-    "NULL_LOGGER",
-    "BColors",
-    "BLogger",
-    "TLogger",
-    "TXLogger",
-    "XLogger",
-]
-import enum
+__all__ = ["NULL_LOGGER", "BColors", "BLogger", "TLogger", "TXLogger", "XLogger"]
 import os
-import re
+import sys
 import traceback
 from concurrent.futures import Executor, ThreadPoolExecutor
-from datetime import datetime
 from inspect import Traceback, getframeinfo, stack
 from multiprocessing import Lock
-from pathlib import Path
 from typing import TYPE_CHECKING, Literal, TextIO
 
+from ._highlight import BColors
+from ._string_parse import cstr, debug_str, filter_ansi, now
 from .trait import LOG_LEVEL, ILogger, LogLevel
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
     from multiprocessing.synchronize import Lock as LockBase
-
-
-def now() -> str:
-    return datetime.now().strftime("%H:%M:%S")  # noqa: DTZ005
-
-
-class BColors(enum.StrEnum):
-    HEADER = "\033[95m"
-    OKBLUE = "\033[94m"
-    OKCYAN = "\033[96m"
-    OKGREEN = "\033[92m"
-    WARN = "\033[93m"
-    FAIL = "\033[91m"
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
-
-
-LB: Mapping[LogLevel, str] = {
-    LogLevel.NULL: "",
-    LogLevel.FATAL: BColors.FAIL,
-    LogLevel.ERROR: BColors.FAIL,
-    LogLevel.WARN: BColors.WARN,
-    LogLevel.BRIEF: BColors.OKCYAN,
-    LogLevel.INFO: BColors.OKGREEN,
-    LogLevel.DEBUG: BColors.OKBLUE,
-}
-
-RB: Mapping[LogLevel, str] = {
-    LogLevel.NULL: "",
-    LogLevel.FATAL: BColors.ENDC,
-    LogLevel.ERROR: BColors.ENDC,
-    LogLevel.WARN: BColors.ENDC,
-    LogLevel.BRIEF: BColors.ENDC,
-    LogLevel.INFO: BColors.ENDC,
-    LogLevel.DEBUG: BColors.ENDC,
-}
-
-
-def _debug_str(frame: Traceback) -> str:
-    file = Path(*Path(frame.filename).parts[-3:])
-    return f"({file}:{frame.lineno}|{frame.function})>>>"
-
-
-def _cstr(level: LogLevel) -> str:
-    return f"{LB[level]}{level}{RB[level]}"
+    from pathlib import Path
 
 
 class BLogger(ILogger):
@@ -92,7 +36,7 @@ class BLogger(ILogger):
         if len(msg) < 1:
             return
         frame = getframeinfo(stack()[2][0])
-        print(f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}", *msg, sep="\n")
+        print(f"\n[{now()}|{cstr(level)}]{debug_str(frame)}", *msg, sep="\n")
 
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
         if len(msg) < 1:
@@ -173,7 +117,7 @@ class XLogger(ILogger):
         if len(msg) < 1:
             return
         frame = getframeinfo(stack()[2][0])
-        header = f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}"
+        header = f"\n[{now()}|{cstr(level)}]{debug_str(frame)}"
         message = "\n".join([str(m) for m in msg])
         print(header, message)
         if self._f is None:
@@ -248,7 +192,7 @@ class TLogger(ILogger):
         level: LogLevel = LogLevel.BRIEF,
     ) -> None:
         with lock:
-            print(f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}", *msg, sep="\n")
+            print(f"\n[{now()}|{cstr(level)}]{debug_str(frame)}", *msg, sep="\n")
 
     def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         if len(msg) < 1:
@@ -356,7 +300,7 @@ class TXLogger(ILogger):
         level: LogLevel = LogLevel.BRIEF,
     ) -> None:
         with lock:
-            header = f"\n[{now()}|{_cstr(level)}]{_debug_str(frame)}"
+            header = f"\n[{now()}|{cstr(level)}]{debug_str(frame)}"
             message = "\n".join([str(m) for m in msg])
             sys.stdout.write(f"{header}\n{message}" + "\n")
             if self._f is None:
@@ -455,59 +399,3 @@ class _NullLogger(ILogger):
 
 
 NULL_LOGGER = _NullLogger()
-# 7-bit and 8-bit C1 ANSI sequences
-ANSI_ESCAPE_8BIT = re.compile(
-    r"""
-    (?: # either 7-bit C1, two bytes, ESC Fe (omitting CSI)
-        \x1B
-        [@-Z\\-_]
-    |   # or a single 8-bit byte Fe (omitting CSI)
-        [\x80-\x9A\x9C-\x9F]
-    |   # or CSI + control codes
-        (?: # 7-bit CSI, ESC [
-            \x1B\[
-        |   # 8-bit CSI, 9B
-            \x9B
-        )
-        [0-?]*  # Parameter bytes
-        [ -/]*  # Intermediate bytes
-        [@-~]   # Final byte
-    )
-""",
-    re.VERBOSE,
-)
-
-# 7-bit and 8-bit C1 ANSI sequences
-ANSI_ESCAPE_8BITB = re.compile(
-    rb"""
-    (?: # either 7-bit C1, two bytes, ESC Fe (omitting CSI)
-        \x1B
-        [@-Z\\-_]
-    |   # or a single 8-bit byte Fe (omitting CSI)
-        [\x80-\x9A\x9C-\x9F]
-    |   # or CSI + control codes
-        (?: # 7-bit CSI, ESC [
-        \x1B\[
-    |   # 8-bit CSI, 9B
-        \x9B
-        )
-        [0-?]*  # Parameter bytes
-        [ -/]*  # Intermediate bytes
-        [@-~]   # Final byte
-    )
-""",
-    re.VERBOSE,
-)
-
-
-def filter_ansi(text: object) -> str:
-    return ANSI_ESCAPE_8BIT.sub("", str(text))
-
-
-def filter_ansi_char[T: (str, bytes)](text: T) -> T:
-    if isinstance(text, str):
-        return ANSI_ESCAPE_8BIT.sub("", text)
-    if isinstance(text, bytes):
-        return ANSI_ESCAPE_8BITB.sub(b"", text)
-    err_msg = f"text must be str or bytes, got {type(text).__name__}"
-    raise TypeError(err_msg)
