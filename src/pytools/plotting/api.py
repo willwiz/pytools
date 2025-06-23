@@ -1,7 +1,9 @@
-# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false
+# pyright: reportUnknownMemberType=false
 from __future__ import annotations
 
 from itertools import cycle
+
+from matplotlib.axes import Axes
 
 __all__ = [
     "bar_cycler",
@@ -11,7 +13,7 @@ __all__ = [
     "update_figure_setting",
 ]
 
-from typing import TYPE_CHECKING, Any, Literal, Unpack
+from typing import TYPE_CHECKING, Any, Unpack
 
 from matplotlib import pyplot as plt
 
@@ -37,11 +39,9 @@ def create_figure(
     | tuple[Figure, np.ndarray[tuple[int, int], Any]]
 ):
     opts = figure_kwargs(**kwargs)
-    dims: dict[Literal["ncols", "nrows"], int] = {
-        "ncols": ncols if ncols is not None else 1,
-        "nrows": nrows if nrows is not None else 1,
-    }
-    fig, ax = plt.subplots(**dims, squeeze=False, **opts)
+    _ncols = ncols if ncols is not None else 1
+    _nrows = nrows if nrows is not None else 1
+    fig, ax = plt.subplots(_nrows, _ncols, squeeze=False, **opts)
     match ncols, nrows:
         case None, None:
             return fig, ax[0, 0]

@@ -1,4 +1,3 @@
-# pyright: reportOverlappingOverload=false
 __all__ = [
     "bar_cycler",
     "close_figure",

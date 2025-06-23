@@ -10,7 +10,5 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Development Status :: 1 - Beta",
 ]
-dependencies = [
-  "microsoft-python-type-stubs@git+https://github.com/microsoft/python-type-stubs.git"
-]
+dependencies = []
 
