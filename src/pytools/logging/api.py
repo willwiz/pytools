@@ -71,6 +71,9 @@ class BLogger(ILogger):
         self.disp(traceback.format_exc())
         return e
 
+    def close(self) -> None:
+        pass  # No resources to close for BLogger
+
 
 class XLogger(ILogger):
     __slots__ = ["_f", "_level"]
@@ -162,6 +165,12 @@ class XLogger(ILogger):
         self.disp(traceback.format_exc())
         return e
 
+    def close(self) -> None:
+        if self._f is None:
+            return
+        self._f.write(f"\nLog file closed at {now()}\n")
+        self._f.close()
+
 
 class TLogger(ILogger):
     __slots__ = ["_level", "_lock", "_thread"]
@@ -242,6 +251,9 @@ class TLogger(ILogger):
     def exception(self, e: Exception) -> Exception:
         self.disp(traceback.format_exc())
         return e
+
+    def close(self) -> None:
+        self._thread.shutdown(wait=True)
 
 
 class TXLogger(ILogger):
@@ -355,6 +367,13 @@ class TXLogger(ILogger):
         self.disp(traceback.format_exc())
         return e
 
+    def close(self) -> None:
+        self._thread.shutdown(wait=True)
+        if self._f is None:
+            return
+        self._f.write(f"\nLog file closed at {now()}\n")
+        self._f.close()
+
 
 class _NullLogger(ILogger):
     __slots__ = ["_level"]
@@ -396,6 +415,9 @@ class _NullLogger(ILogger):
 
     def exception(self, e: Exception) -> Exception:
         return e
+
+    def close(self) -> None:
+        pass
 
 
 NULL_LOGGER = _NullLogger()
