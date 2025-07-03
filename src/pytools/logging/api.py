@@ -103,6 +103,8 @@ class XLogger(ILogger):
     def __del__(self) -> None:
         if self._f is None:
             return
+        if self._f.closed:
+            return
         self._f.write(f"\nLog file closed at {now()}\n")
         self._f.close()
 
@@ -167,6 +169,8 @@ class XLogger(ILogger):
 
     def close(self) -> None:
         if self._f is None:
+            return
+        if self._f.closed:
             return
         self._f.write(f"\nLog file closed at {now()}\n")
         self._f.close()
@@ -291,6 +295,8 @@ class TXLogger(ILogger):
         self._thread.shutdown(wait=True)
         if self._f is None:
             return
+        if self._f.closed:
+            return
         self._f.write(f"\nLog file closed at {now()}\n")
         self._f.close()
 
@@ -370,6 +376,8 @@ class TXLogger(ILogger):
     def close(self) -> None:
         self._thread.shutdown(wait=True)
         if self._f is None:
+            return
+        if self._f.closed:
             return
         self._f.write(f"\nLog file closed at {now()}\n")
         self._f.close()
