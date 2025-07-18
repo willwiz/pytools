@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__all__ = ["LOG_LEVEL", "ILogger", "LogLevel"]
+__all__ = ["LOG_LEVEL", "NULL_LOG", "ILogger", "LogLevel"]
 import abc
 import enum
 from typing import Literal
@@ -49,7 +49,7 @@ class ILogger(abc.ABC):
     def close(self) -> None: ...
 
 
-class NullLog(ILogger):
+class _NullLogger(ILogger):
     @property
     def level(self) -> LogLevel:
         return LogLevel.NULL
@@ -86,3 +86,6 @@ class NullLog(ILogger):
 
     def close(self) -> None:
         pass
+
+
+NULL_LOG: ILogger = _NullLogger()
