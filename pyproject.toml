@@ -4,7 +4,7 @@ version = "1.0.1a2"
 authors = [{ name = "Will Zhang", email = "willwz@gmail.com" }]
 description = "Basic tools for Python development"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 license = "MIT"
 classifiers = [
   "Programming Language :: Python :: 3",
@@ -12,3 +12,8 @@ classifiers = [
 ]
 dependencies = []
 
+[tool.uv.sources]
+pytools = { workspace = true }
+
+[tool.uv.build-backend]
+namespace = true

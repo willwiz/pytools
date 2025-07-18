@@ -47,3 +47,42 @@ class ILogger(abc.ABC):
     def exception(self, e: Exception) -> Exception: ...
     @abc.abstractmethod
     def close(self) -> None: ...
+
+
+class NullLog(ILogger):
+    @property
+    def level(self) -> LogLevel:
+        return LogLevel.NULL
+
+    def flush(self) -> None:
+        pass
+
+    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
+        pass
+
+    def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
+        pass
+
+    def debug(self, *msg: object) -> None:
+        pass
+
+    def info(self, *msg: object) -> None:
+        pass
+
+    def brief(self, *msg: object) -> None:
+        pass
+
+    def warn(self, *msg: object) -> None:
+        pass
+
+    def error(self, *msg: object) -> None:
+        pass
+
+    def fatal(self, *msg: object) -> None:
+        pass
+
+    def exception(self, e: Exception) -> Exception:
+        return e
+
+    def close(self) -> None:
+        pass
