@@ -30,8 +30,8 @@ if TYPE_CHECKING:
 
 
 def create_figure(
-    ncols: int | None = None,
     nrows: int | None = None,
+    ncols: int | None = None,
     **kwargs: Unpack[PlotKwargs],
 ) -> (
     tuple[Figure, Axes]
@@ -39,8 +39,8 @@ def create_figure(
     | tuple[Figure, np.ndarray[tuple[int, int], Any]]
 ):
     opts = figure_kwargs(**kwargs)
-    _ncols = ncols if ncols is not None else 1
     _nrows = nrows if nrows is not None else 1
+    _ncols = ncols if ncols is not None else 1
     fig, ax = plt.subplots(_nrows, _ncols, squeeze=False, **opts)
     match ncols, nrows:
         case None, None:

@@ -31,8 +31,8 @@ def create_figure(
 ) -> tuple[Figure, Sequence[Axes]]: ...
 @overload
 def create_figure(
-    ncols: int,
     nrows: int,
+    ncols: int,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Sequence[Sequence[Axes]]]: ...
 def update_figure_setting(
