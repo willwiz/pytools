@@ -23,6 +23,7 @@ __all__ = [
     "close_figure",
     "create_figure",
     "figstyle",
+    "legend_kwargs",
     "update_figure_setting",
 ]
 
@@ -94,8 +95,6 @@ def update_figure_setting(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> None:
         return
     cyclers: dict[str, Any] = {**cycler_kwargs(**kwargs)}
     fig.subplots_adjust(**padding_kwargs(fig, **kwargs))
-    if "curve_labels" in kwargs:
-        fig.legend(**legend_kwargs(**kwargs))
     for ax in fig.axes:
         if cyclers:
             ax.set_prop_cycle(**cyclers)

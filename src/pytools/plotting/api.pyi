@@ -3,6 +3,7 @@ __all__ = [
     "close_figure",
     "create_figure",
     "figstyle",
+    "legend_kwargs",
     "update_figure_setting",
 ]
 
@@ -12,7 +13,7 @@ from typing import Unpack, overload
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from .trait import BarCyclerKwargs, BarPlotKwargs, PlotKwargs, StyleKwargs
+from .trait import BarCyclerKwargs, BarPlotKwargs, LegendKwargs, PlotKwargs, StyleKwargs
 
 def close_figure(fig: Figure | None = None) -> None: ...
 @overload
@@ -41,3 +42,4 @@ def update_figure_setting(
 ) -> None: ...
 def figstyle(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs: ...
 def bar_cycler(n: int, **kwargs: Unpack[BarPlotKwargs]) -> Sequence[BarCyclerKwargs]: ...
+def legend_kwargs(**kwargs: Unpack[PlotKwargs]) -> LegendKwargs: ...
