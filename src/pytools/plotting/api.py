@@ -94,13 +94,13 @@ def update_figure_setting(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> None:
         return
     cyclers: dict[str, Any] = {**cycler_kwargs(**kwargs)}
     fig.subplots_adjust(**padding_kwargs(fig, **kwargs))
+    if "curve_labels" in kwargs:
+        fig.legend(**legend_kwargs(**kwargs))
     for ax in fig.axes:
         if cyclers:
             ax.set_prop_cycle(**cyclers)
         if "fontsize" in kwargs:
             ax.tick_params(axis="both", which="major", labelsize=kwargs["fontsize"] - 2)
-        if "curve_labels" in kwargs:
-            ax.legend(**legend_kwargs(**kwargs))
         if "xlabel" in kwargs:
             ax.set_xlabel(kwargs["xlabel"], **font_kwargs(**kwargs))
         if "ylabel" in kwargs:
