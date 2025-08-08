@@ -34,7 +34,7 @@ def legend_kwargs(**kwargs: Unpack[PlotKwargs]) -> LegendKwargs:
         "fontsize": kwargs.get("fontsize", 9),
         "labelspacing": kwargs.get("labelspacing", 0.25),
         "columnspacing": kwargs.get("columnspacing", 1.0),
-        "legendlabelcols": kwargs.get("legendlabelcols", 4),
+        "ncols": kwargs.get("legendlabelcols", 4),
     }
 
 

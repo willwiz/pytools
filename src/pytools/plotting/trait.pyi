@@ -69,7 +69,7 @@ class LegendKwargs(TypedDict, total=False):
     fontsize: float
     labelspacing: float
     columnspacing: float
-    legendlabelcols: int
+    ncols: int
 
 class CyclerKwargs(TypedDict, total=False):
     color: Sequence[str]

@@ -2,20 +2,10 @@
 from __future__ import annotations
 
 from itertools import cycle
-
-from matplotlib.axes import Axes
-
-__all__ = [
-    "bar_cycler",
-    "close_figure",
-    "create_figure",
-    "figstyle",
-    "update_figure_setting",
-]
-
 from typing import TYPE_CHECKING, Any, Unpack
 
 from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 
 from ._impl_default import cycler_kwargs, figure_kwargs, font_kwargs, legend_kwargs, padding_kwargs
 
@@ -27,6 +17,14 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
     from .trait import BarCyclerKwargs, BarPlotKwargs, PlotKwargs, StyleKwargs
+
+__all__ = [
+    "bar_cycler",
+    "close_figure",
+    "create_figure",
+    "figstyle",
+    "update_figure_setting",
+]
 
 
 def create_figure(

@@ -10,7 +10,10 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Development Status :: 1 - Beta",
 ]
-dependencies = []
+dependencies = [
+    "matplotlib>=3.10.5",
+    "numpy>=2.3.2",
+]
 
 [tool.uv.sources]
 pytools = { workspace = true }
