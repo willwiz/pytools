@@ -22,8 +22,8 @@ __all__ = [
     "bar_cycler",
     "close_figure",
     "create_figure",
-    "figstyle",
     "legend_kwargs",
+    "style_kwargs",
     "update_figure_setting",
 ]
 
@@ -62,7 +62,7 @@ def close_figure(fig: Figure | None = None) -> None:
         plt.close(fig)
 
 
-def figstyle(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs:
+def style_kwargs(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs:
     style: StyleKwargs = {}
     if "markevery" in kwargs:
         style["markevery"] = kwargs["markevery"]
@@ -78,7 +78,7 @@ def figstyle(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs:
 
 
 def bar_cycler(n: int, **kwargs: Unpack[BarPlotKwargs]) -> Sequence[BarCyclerKwargs]:
-    hatches: Sequence[BarCyclerKwargs] = [{**figstyle(**kwargs)} for _ in range(n)]
+    hatches: Sequence[BarCyclerKwargs] = [{**style_kwargs(**kwargs)} for _ in range(n)]
     if "hatch" in kwargs:
         cycler = cycle(kwargs["hatch"])
         for v in hatches:

@@ -2,8 +2,8 @@ __all__ = [
     "bar_cycler",
     "close_figure",
     "create_figure",
-    "figstyle",
     "legend_kwargs",
+    "style_kwargs",
     "update_figure_setting",
 ]
 
@@ -40,6 +40,6 @@ def update_figure_setting(
     fig: Figure,
     **kwargs: Unpack[PlotKwargs],
 ) -> None: ...
-def figstyle(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs: ...
+def style_kwargs(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs: ...
 def bar_cycler(n: int, **kwargs: Unpack[BarPlotKwargs]) -> Sequence[BarCyclerKwargs]: ...
 def legend_kwargs(**kwargs: Unpack[PlotKwargs]) -> LegendKwargs: ...
