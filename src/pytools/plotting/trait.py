@@ -52,6 +52,8 @@ class PlotKwargs(TypedDict, total=False):
     padright: float
     padtop: float
     padbottom: float
+    hspace: float
+    wspace: float
     transparency: bool
     width: float
 
