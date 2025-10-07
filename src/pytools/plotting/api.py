@@ -74,6 +74,9 @@ def style_kwargs(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs:
         style["markeredgewidth"] = kwargs["markeredgewidth"]
     if "width" in kwargs:
         style["width"] = kwargs["width"]
+    linewidth = kwargs.get("linewidth")
+    if isinstance(linewidth, (int, float)):
+        style["linewidth"] = linewidth
     return style
 
 

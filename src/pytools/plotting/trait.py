@@ -32,7 +32,7 @@ class PlotKwargs(TypedDict, total=False):
     color: Sequence[str]
     alpha: Sequence[float]
     linestyle: Sequence[str]
-    linewidth: Sequence[float]
+    linewidth: Sequence[float] | float
     edgecolor: Sequence[str]
     facecolor: Sequence[str]
     mec: Sequence[str]
@@ -92,6 +92,7 @@ class StyleKwargs(TypedDict, total=False):
     markersize: int | float
     fillstyle: str
     markeredgewidth: float
+    linewidth: float | int
     width: float
 
 

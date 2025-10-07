@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 __all__ = [
     "cycler_kwargs",
     "figure_kwargs",
@@ -48,10 +50,11 @@ def cycler_kwargs(**kwargs: Unpack[PlotKwargs]) -> CyclerKwargs:
         cycler["alpha"] = kwargs["alpha"]
     if "linestyle" in kwargs:
         cycler["linestyle"] = kwargs["linestyle"]
-    if "linewidth" in kwargs:
-        cycler["linewidth"] = kwargs["linewidth"]
     if "marker" in kwargs:
         cycler["marker"] = kwargs["marker"]
+    linewidth = kwargs.get("linewidth")
+    if isinstance(linewidth, Sequence):
+        cycler["linewidth"] = linewidth
     return cycler
 
 

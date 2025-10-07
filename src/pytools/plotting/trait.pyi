@@ -34,7 +34,7 @@ class PlotKwargs(TypedDict, total=False):
     color: Sequence[str]
     alpha: Sequence[float]
     linestyle: Sequence[str]
-    linewidth: Sequence[float]
+    linewidth: Sequence[float] | float
     edgecolor: Sequence[str]
     facecolor: Sequence[str]
     mec: Sequence[str]
@@ -57,7 +57,6 @@ class PlotKwargs(TypedDict, total=False):
     hspace: float
     wspace: float
     transparency: bool
-    width: float
 
 class BarPlotKwargs(PlotKwargs, TypedDict, total=False):
     fill: bool
@@ -90,6 +89,7 @@ class StyleKwargs(TypedDict, total=False):
     fillstyle: str
     markeredgewidth: float
     width: float
+    linewidth: float
 
 class FigureKwargs(TypedDict, total=False):
     figsize: tuple[int, int]
