@@ -77,6 +77,9 @@ def style_kwargs(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs:
     linewidth = kwargs.get("linewidth")
     if isinstance(linewidth, (int, float)):
         style["linewidth"] = linewidth
+    hatch = kwargs.get("hatch")
+    if isinstance(hatch, str):
+        style["hatch"] = hatch
     return style
 
 

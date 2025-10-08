@@ -55,6 +55,9 @@ def cycler_kwargs(**kwargs: Unpack[PlotKwargs]) -> CyclerKwargs:
     linewidth = kwargs.get("linewidth")
     if isinstance(linewidth, Sequence):
         cycler["linewidth"] = linewidth
+    hatch = kwargs.get("hatch")
+    if isinstance(hatch, (str, Sequence)):
+        cycler["hatch"] = hatch
     return cycler
 
 
