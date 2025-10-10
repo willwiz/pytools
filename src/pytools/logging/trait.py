@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__all__ = ["LOG_LEVEL", "NULL_LOG", "ILogger", "LogLevel"]
+__all__ = ["LOG_LEVEL", "NULL_LOG", "BColors", "ILogger", "LogLevel"]
 import abc
 import enum
 from typing import Literal
@@ -19,6 +19,19 @@ class LogLevel(enum.IntEnum):
 
     def __str__(self) -> str:
         return self.name
+
+
+class BColors(enum.StrEnum):
+    NULL = ""
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARN = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 class ILogger(abc.ABC):

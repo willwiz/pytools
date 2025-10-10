@@ -6,6 +6,7 @@ description = "Basic tools for Python development"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
+license-files = ["LICENSE"]
 classifiers = [
   "Programming Language :: Python :: 3",
   "Development Status :: 1 - Beta",
@@ -20,3 +21,32 @@ pytools = { workspace = true }
 
 [tool.uv.build-backend]
 namespace = true
+
+[tool.pyright]
+typeCheckingMode = "basic"
+[tool.ruff]
+line-length = 100
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "T201",
+    "T203",
+    # COM812: Adds trailing comma to array expressions, resulting in bad autoformatting
+    "COM812",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D107",
+    "G004",
+    "G010",
+    "ERA001",
+    "PLE1205",
+    "S603",
+    "S607",
+]
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"

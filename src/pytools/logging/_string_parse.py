@@ -9,14 +9,33 @@ __all__ = [
 import re
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
-from ._highlight import LB, RB
+from .trait import BColors, LogLevel
 
 if TYPE_CHECKING:
     from inspect import Traceback
 
-    from .trait import LogLevel
+
+LB: Final = {
+    LogLevel.NULL: BColors.NULL,
+    LogLevel.FATAL: BColors.FAIL,
+    LogLevel.ERROR: BColors.FAIL,
+    LogLevel.WARN: BColors.WARN,
+    LogLevel.BRIEF: BColors.OKCYAN,
+    LogLevel.INFO: BColors.OKGREEN,
+    LogLevel.DEBUG: BColors.OKBLUE,
+}
+
+RB: Final = {
+    LogLevel.NULL: BColors.ENDC,
+    LogLevel.FATAL: BColors.ENDC,
+    LogLevel.ERROR: BColors.ENDC,
+    LogLevel.WARN: BColors.ENDC,
+    LogLevel.BRIEF: BColors.ENDC,
+    LogLevel.INFO: BColors.ENDC,
+    LogLevel.DEBUG: BColors.ENDC,
+}
 
 
 def now() -> str:
