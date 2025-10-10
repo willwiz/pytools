@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__all__ = ["LOG_LEVEL", "NULL_LOG", "BColors", "ILogger", "LogLevel"]
+__all__ = ["LOG_LEVEL", "BColors", "ILogger", "LogLevel"]
 import abc
 import enum
 from typing import Literal
@@ -60,45 +60,3 @@ class ILogger(abc.ABC):
     def exception(self, e: Exception) -> Exception: ...
     @abc.abstractmethod
     def close(self) -> None: ...
-
-
-class _NullLogger(ILogger):
-    @property
-    def level(self) -> LogLevel:
-        return LogLevel.NULL
-
-    def flush(self) -> None:
-        pass
-
-    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
-        pass
-
-    def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
-        pass
-
-    def debug(self, *msg: object) -> None:
-        pass
-
-    def info(self, *msg: object) -> None:
-        pass
-
-    def brief(self, *msg: object) -> None:
-        pass
-
-    def warn(self, *msg: object) -> None:
-        pass
-
-    def error(self, *msg: object) -> None:
-        pass
-
-    def fatal(self, *msg: object) -> None:
-        pass
-
-    def exception(self, e: Exception) -> Exception:
-        return e
-
-    def close(self) -> None:
-        pass
-
-
-NULL_LOG: ILogger = _NullLogger()
