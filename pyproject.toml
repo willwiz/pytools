@@ -11,10 +11,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Development Status :: 1 - Beta",
 ]
-dependencies = [
-    "matplotlib>=3.10.5",
-    "numpy>=2.3.2",
-]
+dependencies = ["matplotlib>=3.10.5", "numpy>=2.3.2"]
 
 [tool.uv.sources]
 pytools = { workspace = true }
@@ -29,24 +26,24 @@ line-length = 100
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "T201",
-    "T203",
-    # COM812: Adds trailing comma to array expressions, resulting in bad autoformatting
-    "COM812",
-    "D100",
-    "D101",
-    "D102",
-    "D103",
-    "D104",
-    "D105",
-    "D106",
-    "D107",
-    "G004",
-    "G010",
-    "ERA001",
-    "PLE1205",
-    "S603",
-    "S607",
+  "T201",
+  "T203",
+  # COM812: Adds trailing comma to array expressions, resulting in bad autoformatting
+  "COM812",
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D105",
+  "D106",
+  "D107",
+  "G004",
+  "G010",
+  "ERA001",
+  "PLE1205",
+  "S603",
+  "S607",
 ]
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"

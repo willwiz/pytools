@@ -5,7 +5,7 @@ import abc
 import enum
 from typing import Literal
 
-type LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
+LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
 
 
 class LogLevel(enum.IntEnum):
