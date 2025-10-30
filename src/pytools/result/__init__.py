@@ -4,14 +4,18 @@ from typing import Any
 
 
 class Okay[T: Any]:
-    value: T
+    __slots__ = ("val",)
+    __match_args__ = ("val",)
+    val: T
 
     def __init__(self, value: T) -> None:
-        self.value = value
+        self.val = value
 
 
 class Err:
-    value: Exception
+    __slots__ = ("val",)
+    __match_args__ = ("val",)
+    val: Exception
 
     def __init__(self, value: Exception) -> None:
         match inspect.currentframe():
@@ -23,4 +27,4 @@ class Err:
             case None:
                 msg = "Failed to get current frame for Err. Should never reach here."
                 raise RuntimeError(msg)
-        self.value = value.with_traceback(tb)
+        self.val = value.with_traceback(tb)
