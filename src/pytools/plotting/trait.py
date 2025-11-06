@@ -48,6 +48,7 @@ class PlotKwargs(TypedDict, total=False):
     labelspacing: float
     columnspacing: float
     legendlabelcols: int
+    title: str
     padleft: float
     padright: float
     padtop: float
