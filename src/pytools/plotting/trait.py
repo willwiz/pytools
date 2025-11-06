@@ -21,7 +21,7 @@ LEGEND_KEYS = Literal["loc", "handlelength", "frameon", "fontsize", "labelspacin
 
 
 class PlotKwargs(TypedDict, total=False):
-    figsize: tuple[int, int]
+    figsize: tuple[float, float]
     dpi: int
     layout: Literal["constrained"]
     xlabel: str
@@ -101,7 +101,7 @@ class BarCyclerKwargs(CyclerKwargs, TypedDict, total=False):
 
 
 class FigureKwargs(TypedDict, total=False):
-    figsize: tuple[int, int]
+    figsize: tuple[float, float]
     dpi: int
     layout: Literal["constrained"]
 
