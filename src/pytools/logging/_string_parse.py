@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pytools.result import Err, Okay
+
 __all__ = [
     "cstr",
     "debug_str",
@@ -100,10 +102,10 @@ def filter_ansi(text: object) -> str:
     return ANSI_ESCAPE_8BIT.sub("", str(text))
 
 
-def filter_ansi_char[T: (str, bytes)](text: T) -> T:
+def filter_ansi_char[T: (str, bytes)](text: T) -> Okay[T] | Err:
     if isinstance(text, str):
-        return ANSI_ESCAPE_8BIT.sub("", text)
+        return Okay(ANSI_ESCAPE_8BIT.sub("", text))
     if isinstance(text, bytes):
-        return ANSI_ESCAPE_8BITB.sub(b"", text)
+        return Okay(ANSI_ESCAPE_8BITB.sub(b"", text))
     err_msg = f"text must be str or bytes, got {type(text).__name__}"
-    raise TypeError(err_msg)
+    return Err(TypeError(err_msg))
