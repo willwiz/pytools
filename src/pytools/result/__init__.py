@@ -3,7 +3,7 @@ import types
 from typing import Any
 
 
-class Okay[T: Any]:
+class Ok[T: Any]:
     __slots__ = ("val",)
     __match_args__ = ("val",)
     val: T
