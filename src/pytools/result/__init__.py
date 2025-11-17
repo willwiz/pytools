@@ -1,6 +1,6 @@
 import inspect
 import types
-from typing import Any
+from typing import Any, Never
 
 
 class Ok[T: Any]:
@@ -10,6 +10,9 @@ class Ok[T: Any]:
 
     def __init__(self, value: T) -> None:
         self.val = value
+
+    def unwrap(self) -> T:
+        return self.val
 
 
 class Err:
@@ -28,3 +31,6 @@ class Err:
                 msg = "Failed to get current frame for Err. Should never reach here."
                 raise RuntimeError(msg)
         self.val = value.with_traceback(tb)
+
+    def unwrap(self) -> Never:
+        raise self.val
