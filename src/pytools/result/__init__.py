@@ -1,9 +1,20 @@
+import abc
 import inspect
 import types
 from typing import Any, Never
 
 
-class Ok[T: Any]:
+class ResultType[T: Any](abc.ABC):
+    @abc.abstractmethod
+    def unwrap(self) -> T:
+        pass
+
+    @abc.abstractmethod
+    def unwrap_or[O: Any](self, default: O, /) -> T | O:
+        pass
+
+
+class Ok[T: Any](ResultType[T]):
     __slots__ = ("val",)
     __match_args__ = ("val",)
     val: T
@@ -14,8 +25,11 @@ class Ok[T: Any]:
     def unwrap(self) -> T:
         return self.val
 
+    def unwrap_or[O: Any](self, _default: O, /) -> T:  # type: ignore[reportInvalidTypeVarUse]
+        return self.val
 
-class Err:
+
+class Err(ResultType[Never]):
     __slots__ = ("val",)
     __match_args__ = ("val",)
     val: Exception
@@ -34,3 +48,6 @@ class Err:
 
     def unwrap(self) -> Never:
         raise self.val
+
+    def unwrap_or[O: Any](self, default: O, /) -> O:
+        return default

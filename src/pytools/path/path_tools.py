@@ -4,7 +4,7 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from pytools.logging.api import NULL_LOGGER
+from pytools.logging.api import NLOGGER
 
 if TYPE_CHECKING:
     from pytools.logging.trait import ILogger
@@ -17,7 +17,7 @@ def path(*v: str | None) -> str:
     return str(Path(*[s for s in v if s]))
 
 
-def clear_dir(folder: Path | str, *suffix: str, log: ILogger = NULL_LOGGER) -> None:
+def clear_dir(folder: Path | str, *suffix: str, log: ILogger = NLOGGER) -> None:
     """Remove all files in directory with suffixes."""
     folder = Path(folder)
     if not folder.is_dir():
