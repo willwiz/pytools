@@ -3,8 +3,10 @@ import inspect
 import types
 from typing import Any, Never
 
+__all__ = ["Err", "Ok"]
 
-class ResultType[T: Any](abc.ABC):
+
+class _ResultType[T: Any](abc.ABC):
     @abc.abstractmethod
     def unwrap(self) -> T:
         pass
@@ -14,7 +16,7 @@ class ResultType[T: Any](abc.ABC):
         pass
 
 
-class Ok[T: Any](ResultType[T]):
+class Ok[T: Any](_ResultType[T]):
     __slots__ = ("val",)
     __match_args__ = ("val",)
     val: T
@@ -29,7 +31,7 @@ class Ok[T: Any](ResultType[T]):
         return self.val
 
 
-class Err(ResultType[Never]):
+class Err(_ResultType[Never]):
     __slots__ = ("val",)
     __match_args__ = ("val",)
     val: Exception
