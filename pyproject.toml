@@ -1,6 +1,6 @@
 [project]
 name = "pytools"
-version = "1.0.2a1"
+version = "1.0.3a"
 authors = [{ name = "Will Zhang", email = "willwz@gmail.com" }]
 description = "Basic tools for Python development"
 readme = "README.md"
