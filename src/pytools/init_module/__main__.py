@@ -19,9 +19,10 @@ def main(folder: Path) -> None:
     folder.mkdir(parents=True, exist_ok=True)
     (folder / "__init__.py").touch()
     (folder / "__main__.py").touch()
+    (folder / "_argparse.py").touch()
+    (folder / "_types.py").touch()
     (folder / "types.py").touch()
     (folder / "api.py").touch()
-    (folder / "_argparse.py").touch()
 
 
 if __name__ == "__main__":

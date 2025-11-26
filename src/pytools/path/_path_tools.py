@@ -7,7 +7,7 @@ from warnings import deprecated
 from pytools.logging.api import NLOGGER
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Generator, Sequence
 
     from pytools.logging.trait import ILogger
 
@@ -36,3 +36,7 @@ def clear_dir(folder: Path | str, *suffix: str, log: ILogger = NLOGGER) -> None:
 def expand_as_path(files: Sequence[str]) -> Sequence[Path]:
     """Expand user and vars in path."""
     return [Path(f) for name in files for f in Path().glob(name)]
+
+
+def expanded_path_generator(files: Sequence[str]) -> Generator[Path, None, None]:
+    return (Path(f) for name in files for f in Path().glob(name))
