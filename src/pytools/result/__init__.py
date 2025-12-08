@@ -2,7 +2,7 @@ import abc
 import inspect
 import types
 from collections.abc import Sequence
-from typing import Any, Never, TypeGuard
+from typing import Any, Never, TypeGuard, cast
 
 __all__ = ["Err", "Ok"]
 
@@ -58,3 +58,10 @@ class Err(_ResultType[Never]):
 
 def all_ok[T](results: Sequence[Ok[T] | Err]) -> TypeGuard[Sequence[Ok[T]]]:
     return all(isinstance(res, Ok) for res in results)
+
+
+def enforce_ok[T](result: Sequence[Ok[T] | Err]) -> Sequence[Ok[T]] | Err:
+    for res in result:
+        if isinstance(res, Err):
+            return Err(res.val)
+    return cast("Sequence[Ok[T]]", result)
