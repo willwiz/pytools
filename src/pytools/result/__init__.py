@@ -1,7 +1,8 @@
 import abc
 import inspect
 import types
-from typing import Any, Never
+from collections.abc import Sequence
+from typing import Any, Never, TypeGuard
 
 __all__ = ["Err", "Ok"]
 
@@ -53,3 +54,7 @@ class Err(_ResultType[Never]):
 
     def unwrap_or[O: Any](self, default: O, /) -> O:
         return default
+
+
+def all_ok[T](results: Sequence[Ok[T] | Err]) -> TypeGuard[Sequence[Ok[T]]]:
+    return all(isinstance(res, Ok) for res in results)
