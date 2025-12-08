@@ -56,12 +56,41 @@ class Err(_ResultType[Never]):
         return default
 
 
-def all_ok[T](results: Sequence[Ok[T] | Err]) -> TypeGuard[Sequence[Ok[T]]]:
+def is_ok_sequence[T](results: Sequence[Ok[T] | Err]) -> TypeGuard[Sequence[Ok[T]]]:
+    """Is a sequence of results all Ok[T]."""
     return all(isinstance(res, Ok) for res in results)
 
 
-def enforce_ok[T](result: Sequence[Ok[T] | Err]) -> Sequence[Ok[T]] | Err:
+def all_ok[T](result: Sequence[Ok[T] | Err]) -> Ok[Sequence[T]] | Err:
+    """Return Ok[Sequence[T]] if all results are Ok, otherwise return the first Err.
+
+    Parameters
+    ----------
+    result : Sequence[Ok[T] | Err]
+        A sequence of Ok or Err results.
+
+    Returns
+    -------
+    Ok[Sequence[T]] | Err
+        An Ok containing a sequence of T if all results are Ok, otherwise an Err.
+    """
     for res in result:
         if isinstance(res, Err):
             return Err(res.val)
-    return cast("Sequence[Ok[T]]", result)
+    return Ok([res.val for res in cast("Sequence[Ok[T]]", result)])
+
+
+def filter_ok[T](results: Sequence[Ok[T] | Err]) -> Sequence[T]:
+    """Filter out all Ok values from a sequence of Ok and Err results.
+
+    Parameters
+    ----------
+    results : Sequence[Ok[T] | Err]
+        A sequence of Ok or Err results.
+
+    Returns
+    -------
+    Sequence[T]
+        A sequence of T values from the Ok results.
+    """
+    return [res.val for res in results if isinstance(res, Ok)]
