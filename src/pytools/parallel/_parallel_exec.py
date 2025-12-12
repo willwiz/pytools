@@ -1,17 +1,16 @@
-__all__ = ["PEXEC_ARGS", "parallel_exec"]
-from collections.abc import Callable, Collection
+from collections.abc import Callable, Collection, Mapping, Sequence
 from concurrent import futures
 from typing import Any
 
 from pytools.progress import ProgressBar
 
-PEXEC_ARGS = Collection[tuple[list[Any], dict[str, Any]]]
+PEXEC_ARGS = Collection[tuple[Sequence[Any], Mapping[str, Any]]]
 
 
 def parallel_exec(
-    exe: futures.ProcessPoolExecutor,
+    exe: futures.Executor,
     func: Callable[..., Any],
-    args: Collection[tuple[list[Any], dict[str, Any]]],
+    args: PEXEC_ARGS,
     *,
     prog_bar: bool = False,
 ) -> None:
