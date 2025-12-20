@@ -64,8 +64,9 @@ def close_figure(fig: Figure | None = None) -> None:
 
 def style_kwargs(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs:
     style: StyleKwargs = {}
-    if "markevery" in kwargs:
-        style["markevery"] = kwargs["markevery"]
+    markevery = kwargs.get("markevery")
+    if isinstance(markevery, (int, float)):
+        style["markevery"] = markevery
     if "markersize" in kwargs:
         style["markersize"] = kwargs["markersize"]
     if "fillstyle" in kwargs:
@@ -74,6 +75,12 @@ def style_kwargs(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs:
         style["markeredgewidth"] = kwargs["markeredgewidth"]
     if "width" in kwargs:
         style["width"] = kwargs["width"]
+    color = kwargs.get("color")
+    if isinstance(color, str):
+        style["color"] = color
+    linestyle = kwargs.get("linestyle")
+    if isinstance(linestyle, str):
+        style["linestyle"] = linestyle
     linewidth = kwargs.get("linewidth")
     if isinstance(linewidth, (int, float)):
         style["linewidth"] = linewidth
@@ -114,3 +121,21 @@ def update_figure_setting(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> None:
             ax.set_xlim(kwargs["xlim"])
         if "ylim" in kwargs:
             ax.set_ylim(kwargs["ylim"])
+
+
+def update_axis_setting(ax: Axes, **kwargs: Unpack[PlotKwargs]) -> None:
+    cyclers: dict[str, Any] = {**cycler_kwargs(**kwargs)}
+    if cyclers:
+        ax.set_prop_cycle(**cyclers)
+    if "fontsize" in kwargs:
+        ax.tick_params(axis="both", which="major", labelsize=kwargs["fontsize"] - 2)
+    if "xlabel" in kwargs:
+        ax.set_xlabel(kwargs["xlabel"], **font_kwargs(**kwargs))
+    if "ylabel" in kwargs:
+        ax.set_ylabel(kwargs["ylabel"], **font_kwargs(**kwargs))
+    if "xlim" in kwargs:
+        ax.set_xlim(kwargs["xlim"])
+    if "ylim" in kwargs:
+        ax.set_ylim(kwargs["ylim"])
+    if "title" in kwargs:
+        ax.set_title(kwargs["title"], **font_kwargs(**kwargs))

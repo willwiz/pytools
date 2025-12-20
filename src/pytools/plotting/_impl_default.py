@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
-
 __all__ = [
     "cycler_kwargs",
     "figure_kwargs",
@@ -9,6 +7,7 @@ __all__ = [
     "padding_kwargs",
 ]
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Unpack
 
 if TYPE_CHECKING:
@@ -42,21 +41,26 @@ def legend_kwargs(**kwargs: Unpack[PlotKwargs]) -> LegendKwargs:
 
 def cycler_kwargs(**kwargs: Unpack[PlotKwargs]) -> CyclerKwargs:
     cycler: CyclerKwargs = {}
-    if "color" in kwargs:
-        cycler["color"] = kwargs["color"]
-    if "mec" in kwargs:
-        cycler["mec"] = kwargs["mec"]
-    if "alpha" in kwargs:
-        cycler["alpha"] = kwargs["alpha"]
-    if "linestyle" in kwargs:
-        cycler["linestyle"] = kwargs["linestyle"]
-    if "marker" in kwargs:
-        cycler["marker"] = kwargs["marker"]
+    color = kwargs.get("color")
+    if isinstance(color, Iterable) and not isinstance(color, str):
+        cycler["color"] = color
+    mec = kwargs.get("mec")
+    if isinstance(mec, Iterable) and not isinstance(mec, str):
+        cycler["mec"] = mec
+    alpha = kwargs.get("alpha")
+    if isinstance(alpha, Iterable):
+        cycler["alpha"] = alpha
+    linestyle = kwargs.get("linestyle")
+    if isinstance(linestyle, Iterable) and not isinstance(linestyle, str):
+        cycler["linestyle"] = linestyle
+    marker = kwargs.get("marker")
+    if isinstance(marker, Iterable) and not isinstance(marker, str):
+        cycler["marker"] = marker
     linewidth = kwargs.get("linewidth")
-    if isinstance(linewidth, Sequence):
+    if isinstance(linewidth, Iterable):
         cycler["linewidth"] = linewidth
     hatch = kwargs.get("hatch")
-    if isinstance(hatch, (str, Sequence)):
+    if isinstance(hatch, (str, Iterable)) and not isinstance(hatch, str):
         cycler["hatch"] = hatch
     return cycler
 
@@ -74,7 +78,9 @@ def figure_kwargs(**kwargs: Unpack[PlotKwargs]) -> FigureKwargs:
 def padding_kwargs(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> PaddingKwargs:
     if "layout" in kwargs:
         return {}
+    head_space: float = kwargs.get("head_space", 0.0)
     width, height = fig.get_size_inches()
+    height = height - head_space * height
     ratio = width / height
     left = kwargs.get("padleft", 0.15)
     if "ylabel" in kwargs:
@@ -94,6 +100,7 @@ def padding_kwargs(fig: Figure, **kwargs: Unpack[PlotKwargs]) -> PaddingKwargs:
     left = left / grid.ncols
     right = right / grid.ncols
     top = top / grid.nrows
+    top = top + 0.5 * head_space
     bottom = bottom / grid.nrows
     right = 1.0 - right
     top = 1.0 - top

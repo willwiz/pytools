@@ -4,6 +4,7 @@ __all__ = [
     "create_figure",
     "legend_kwargs",
     "style_kwargs",
+    "update_axis_setting",
     "update_figure_setting",
 ]
 
@@ -38,6 +39,10 @@ def create_figure(
 ) -> tuple[Figure, Sequence[Sequence[Axes]]]: ...
 def update_figure_setting(
     fig: Figure,
+    **kwargs: Unpack[PlotKwargs],
+) -> None: ...
+def update_axis_setting(
+    ax: Axes,
     **kwargs: Unpack[PlotKwargs],
 ) -> None: ...
 def style_kwargs(**kwargs: Unpack[PlotKwargs]) -> StyleKwargs: ...

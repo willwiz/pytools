@@ -58,6 +58,7 @@ class PlotKwargs(TypedDict, total=False):
     transparency: bool
     width: float
     hatch: str | Sequence[str]
+    head_space: float
 
 
 class BarPlotKwargs(PlotKwargs, TypedDict, total=False):
@@ -87,14 +88,16 @@ class CyclerKwargs(TypedDict, total=False):
 
 
 class StyleKwargs(TypedDict, total=False):
-    markevery: int | Sequence[int] | float | Sequence[float]
+    markevery: int | float
     markersize: int | float
     fillstyle: str
     markeredgewidth: float
     linewidth: float | int
     width: float
-    hatch: str | Sequence[str]
-    edgecolor: str | Sequence[str]
+    hatch: str
+    edgecolor: str
+    color: str
+    linestyle: str
 
 
 class BarCyclerKwargs(CyclerKwargs, TypedDict, total=False):
