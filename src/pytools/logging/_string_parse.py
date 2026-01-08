@@ -44,9 +44,9 @@ def now() -> str:
     return time.strftime("%H:%M:%S", time.localtime())
 
 
-def debug_str(frame: Traceback) -> str:
-    file = Path(*Path(frame.filename).parts[-3:])
-    return f"({file}:{frame.lineno}|{frame.function})>>>"
+def debug_str(tb: Traceback) -> str:
+    file = Path(*Path(tb.filename).parts[-3:])
+    return f"({file}:{tb.lineno}|{tb.function})>>>"
 
 
 def cstr(level: LogLevel) -> str:

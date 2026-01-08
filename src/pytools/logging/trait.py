@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-__all__ = ["LOG_LEVEL", "BColors", "ILogger", "LogLevel"]
 import abc
 import enum
 from typing import Literal
+
+__all__ = ["LOG_LEVEL", "BColors", "ILogger", "LogLevel"]
 
 LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
 
@@ -34,6 +35,17 @@ class BColors(enum.StrEnum):
     UNDERLINE = "\033[4m"
 
 
+class IHandler(abc.ABC):
+    @abc.abstractmethod
+    def __del__(self) -> None: ...
+
+    @abc.abstractmethod
+    def log(self, msg: str) -> None: ...
+
+    @abc.abstractmethod
+    def flush(self) -> None: ...
+
+
 class ILogger(abc.ABC):
     @property
     @abc.abstractmethod
@@ -41,9 +53,9 @@ class ILogger(abc.ABC):
     @abc.abstractmethod
     def flush(self) -> None: ...
     @abc.abstractmethod
-    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None: ...
+    def log(self, *msg: object, level: LogLevel = ...) -> None: ...
     @abc.abstractmethod
-    def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None: ...
+    def disp(self, *msg: object, end: Literal["\n", "\r", ""] = ...) -> None: ...
     @abc.abstractmethod
     def debug(self, *msg: object) -> None: ...
     @abc.abstractmethod
@@ -58,5 +70,3 @@ class ILogger(abc.ABC):
     def fatal(self, *msg: object) -> None: ...
     @abc.abstractmethod
     def exception(self, e: Exception) -> Exception: ...
-    @abc.abstractmethod
-    def close(self) -> None: ...

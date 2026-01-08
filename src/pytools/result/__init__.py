@@ -1,10 +1,11 @@
+# ruff: noqa: D418
 import abc
 import inspect
 import types
-from collections.abc import Sequence
-from typing import Any, Never, TypeGuard, cast
+from collections.abc import Mapping, Sequence
+from typing import Any, Never, TypeGuard, cast, overload
 
-__all__ = ["Err", "Ok"]
+__all__ = ["Err", "Ok", "all_ok", "filter_ok"]
 
 
 class _ResultType[T: Any](abc.ABC):
@@ -61,7 +62,48 @@ def is_ok_sequence[T](results: Sequence[Ok[T] | Err]) -> TypeGuard[Sequence[Ok[T
     return all(isinstance(res, Ok) for res in results)
 
 
-def all_ok[T](result: Sequence[Ok[T] | Err]) -> Ok[Sequence[T]] | Err:
+def _all_ok_dict[K, V](result: Mapping[K, Ok[V] | Err]) -> Ok[Mapping[K, V]] | Err:
+    """Return Ok[dict[Any, T]] if all results are Ok, otherwise return the first Err.
+
+    Parameters
+    ----------
+    result : Mapping[Any, Ok[T] | Err]
+        A mapping of Ok or Err results.
+
+    Returns
+    -------
+    Ok[Mapping[Any, T]] | Err
+        An Ok containing a mapping of T if all results are Ok, otherwise an Err.
+    """
+    for res in result.values():
+        if isinstance(res, Err):
+            return Err(res.val)
+    return Ok({key: res.val for key, res in cast("Mapping[K, Ok[V]]", result).items()})
+
+
+def _all_ok_sequence[V](result: Sequence[Ok[V] | Err]) -> Ok[Sequence[V]] | Err:
+    """Return Ok[Sequence[V]] if all results are Ok, otherwise return the first Err.
+
+    Parameters
+    ----------
+    result : Sequence[Ok[V] | Err]
+        A sequence of Ok or Err results.
+
+    Returns
+    -------
+    Ok[Sequence[V]] | Err
+        An Ok containing a sequence of V if all results are Ok, otherwise an Err.
+    """
+    for res in result:
+        if isinstance(res, Err):
+            return Err(res.val)
+    return Ok([res.val for res in cast("Sequence[Ok[V]]", result)])
+
+
+@overload
+def all_ok[T](
+    result: Sequence[Ok[T] | Err],
+) -> Ok[Sequence[T]] | Err:
     """Return Ok[Sequence[T]] if all results are Ok, otherwise return the first Err.
 
     Parameters
@@ -73,11 +115,37 @@ def all_ok[T](result: Sequence[Ok[T] | Err]) -> Ok[Sequence[T]] | Err:
     -------
     Ok[Sequence[T]] | Err
         An Ok containing a sequence of T if all results are Ok, otherwise an Err.
+
     """
-    for res in result:
-        if isinstance(res, Err):
-            return Err(res.val)
-    return Ok([res.val for res in cast("Sequence[Ok[T]]", result)])
+
+
+@overload
+def all_ok[K, V](
+    result: Mapping[K, Ok[V] | Err],
+) -> Ok[Mapping[K, V]] | Err:
+    """Return Ok[Mapping[K, V]] if all results are Ok, otherwise return the first Err.
+
+    Parameters
+    ----------
+    result : Mapping[K, Ok[V] | Err]
+        A mapping of Ok or Err results.
+
+    Returns
+    -------
+    Ok[Mapping[K, V]] | Err
+        An Ok containing a mapping of V if all results are Ok, otherwise an Err.
+
+    """
+
+
+def all_ok[K, V](
+    result: Sequence[Ok[V] | Err] | Mapping[K, Ok[V] | Err],
+):
+    match result:
+        case Mapping():
+            return _all_ok_dict(result)
+        case Sequence():
+            return _all_ok_sequence(result)
 
 
 def filter_ok[T](results: Sequence[Ok[T] | Err]) -> Sequence[T]:

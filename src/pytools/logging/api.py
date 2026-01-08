@@ -31,7 +31,7 @@ class BLogger(ILogger):
     def flush(self) -> None:
         pass
 
-    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
+    def log(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         if len(msg) < 1:
             return
         frame = getframeinfo(stack()[2][0])
@@ -44,27 +44,27 @@ class BLogger(ILogger):
 
     def debug(self, *msg: object) -> None:
         if self._level >= LogLevel.DEBUG:
-            self.print(*msg, level=LogLevel.DEBUG)
+            self.log(*msg, level=LogLevel.DEBUG)
 
     def info(self, *msg: object) -> None:
         if self._level >= LogLevel.INFO:
-            self.print(*msg, level=LogLevel.INFO)
+            self.log(*msg, level=LogLevel.INFO)
 
     def brief(self, *msg: object) -> None:
         if self._level >= LogLevel.BRIEF:
-            self.print(*msg, level=LogLevel.BRIEF)
+            self.log(*msg, level=LogLevel.BRIEF)
 
     def warn(self, *msg: object) -> None:
         if self._level >= LogLevel.WARN:
-            self.print(*msg, level=LogLevel.WARN)
+            self.log(*msg, level=LogLevel.WARN)
 
     def error(self, *msg: object) -> None:
         if self._level >= LogLevel.ERROR:
-            self.print(*msg, level=LogLevel.ERROR)
+            self.log(*msg, level=LogLevel.ERROR)
 
     def fatal(self, *msg: object) -> None:
         if self._level >= LogLevel.FATAL:
-            self.print(*msg, level=LogLevel.FATAL)
+            self.log(*msg, level=LogLevel.FATAL)
 
     def exception(self, e: Exception) -> Exception:
         self.disp(traceback.format_exc())
@@ -117,7 +117,7 @@ class XLogger(ILogger):
         self._f.flush()
         os.fsync(self._f.fileno())
 
-    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
+    def log(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         if len(msg) < 1:
             return
         frame = getframeinfo(stack()[2][0])
@@ -140,27 +140,27 @@ class XLogger(ILogger):
 
     def debug(self, *msg: object) -> None:
         if self._level >= LogLevel.DEBUG:
-            self.print(*msg, level=LogLevel.DEBUG)
+            self.log(*msg, level=LogLevel.DEBUG)
 
     def info(self, *msg: object) -> None:
         if self._level >= LogLevel.INFO:
-            self.print(*msg, level=LogLevel.INFO)
+            self.log(*msg, level=LogLevel.INFO)
 
     def brief(self, *msg: object) -> None:
         if self._level >= LogLevel.BRIEF:
-            self.print(*msg, level=LogLevel.BRIEF)
+            self.log(*msg, level=LogLevel.BRIEF)
 
     def warn(self, *msg: object) -> None:
         if self._level >= LogLevel.WARN:
-            self.print(*msg, level=LogLevel.WARN)
+            self.log(*msg, level=LogLevel.WARN)
 
     def error(self, *msg: object) -> None:
         if self._level >= LogLevel.ERROR:
-            self.print(*msg, level=LogLevel.ERROR)
+            self.log(*msg, level=LogLevel.ERROR)
 
     def fatal(self, *msg: object) -> None:
         if self._level >= LogLevel.FATAL:
-            self.print(*msg, level=LogLevel.FATAL)
+            self.log(*msg, level=LogLevel.FATAL)
 
     def exception(self, e: Exception) -> Exception:
         self.disp(traceback.format_exc())
@@ -206,7 +206,7 @@ class TLogger(ILogger):
         with lock:
             print(f"\n[{now()}|{cstr(level)}]{debug_str(frame)}", *msg, sep="\n")
 
-    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
+    def log(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         if len(msg) < 1:
             return
         frame = getframeinfo(stack()[2][0])
@@ -229,27 +229,27 @@ class TLogger(ILogger):
 
     def debug(self, *msg: object) -> None:
         if self._level >= LogLevel.DEBUG:
-            self.print(*msg, level=LogLevel.DEBUG)
+            self.log(*msg, level=LogLevel.DEBUG)
 
     def info(self, *msg: object) -> None:
         if self._level >= LogLevel.INFO:
-            self.print(*msg, level=LogLevel.INFO)
+            self.log(*msg, level=LogLevel.INFO)
 
     def brief(self, *msg: object) -> None:
         if self._level >= LogLevel.BRIEF:
-            self.print(*msg, level=LogLevel.BRIEF)
+            self.log(*msg, level=LogLevel.BRIEF)
 
     def warn(self, *msg: object) -> None:
         if self._level >= LogLevel.WARN:
-            self.print(*msg, level=LogLevel.WARN)
+            self.log(*msg, level=LogLevel.WARN)
 
     def error(self, *msg: object) -> None:
         if self._level >= LogLevel.ERROR:
-            self.print(*msg, level=LogLevel.ERROR)
+            self.log(*msg, level=LogLevel.ERROR)
 
     def fatal(self, *msg: object) -> None:
         if self._level >= LogLevel.FATAL:
-            self.print(*msg, level=LogLevel.FATAL)
+            self.log(*msg, level=LogLevel.FATAL)
 
     def exception(self, e: Exception) -> Exception:
         self.disp(traceback.format_exc())
@@ -325,7 +325,7 @@ class TXLogger(ILogger):
             message = f"{header}\n{message}" if self._h else message
             self._f.write(filter_ansi(message).replace("\r", "") + "\n")
 
-    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
+    def log(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         if len(msg) < 1:
             return
         frame = getframeinfo(stack()[2][0])
@@ -346,27 +346,27 @@ class TXLogger(ILogger):
 
     def debug(self, *msg: object) -> None:
         if self._level >= LogLevel.DEBUG:
-            self.print(*msg, level=LogLevel.DEBUG)
+            self.log(*msg, level=LogLevel.DEBUG)
 
     def info(self, *msg: object) -> None:
         if self._level >= LogLevel.INFO:
-            self.print(*msg, level=LogLevel.INFO)
+            self.log(*msg, level=LogLevel.INFO)
 
     def brief(self, *msg: object) -> None:
         if self._level >= LogLevel.BRIEF:
-            self.print(*msg, level=LogLevel.BRIEF)
+            self.log(*msg, level=LogLevel.BRIEF)
 
     def warn(self, *msg: object) -> None:
         if self._level >= LogLevel.WARN:
-            self.print(*msg, level=LogLevel.WARN)
+            self.log(*msg, level=LogLevel.WARN)
 
     def error(self, *msg: object) -> None:
         if self._level >= LogLevel.ERROR:
-            self.print(*msg, level=LogLevel.ERROR)
+            self.log(*msg, level=LogLevel.ERROR)
 
     def fatal(self, *msg: object) -> None:
         if self._level >= LogLevel.FATAL:
-            self.print(*msg, level=LogLevel.FATAL)
+            self.log(*msg, level=LogLevel.FATAL)
 
     def exception(self, e: Exception) -> Exception:
         self.disp(traceback.format_exc())
@@ -390,7 +390,7 @@ class _NullLogger(ILogger):
     def flush(self) -> None:
         pass
 
-    def print(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
+    def log(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
         pass
 
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
