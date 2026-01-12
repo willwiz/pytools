@@ -17,6 +17,10 @@ class _ResultType[T: Any](abc.ABC):
     def unwrap_or[O: Any](self, default: O, /) -> T | O:
         pass
 
+    @abc.abstractmethod
+    def next(self) -> "_ResultType[T]":
+        pass
+
 
 class Ok[T: Any](_ResultType[T]):
     __slots__ = ("val",)
@@ -31,6 +35,9 @@ class Ok[T: Any](_ResultType[T]):
 
     def unwrap_or[O: Any](self, _default: O, /) -> T:  # type: ignore[reportInvalidTypeVarUse]
         return self.val
+
+    def next(self) -> "Ok[T]":
+        return self
 
 
 class Err(_ResultType[Never]):
@@ -55,6 +62,9 @@ class Err(_ResultType[Never]):
 
     def unwrap_or[O: Any](self, default: O, /) -> O:
         return default
+
+    def next(self) -> "Err":
+        return Err(self.val)
 
 
 def is_ok_sequence[T](results: Sequence[Ok[T] | Err]) -> TypeGuard[Sequence[Ok[T]]]:
