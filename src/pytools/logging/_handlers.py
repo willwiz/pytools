@@ -18,6 +18,9 @@ class FileHandler(IHandler):
     def __del__(self) -> None:
         self._f.close()
 
+    def __repr__(self) -> str:
+        return f"<FileHandler: {self._f.name}>"
+
     def log(self, msg: str) -> None:
         self._f.write(filter_ansi(msg).replace("\r", "\n"))
         self.flush()
@@ -33,6 +36,9 @@ class _STDOUTHandler(IHandler):
 
     def __del__(self) -> None:
         pass
+
+    def __repr__(self) -> str:
+        return "<STDOUTHandler: sys.stdout>"
 
     def log(self, msg: str) -> None:
         sys.stdout.write(msg)

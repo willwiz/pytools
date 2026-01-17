@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-__all__ = ["NLOGGER", "BLogger", "TLogger", "TXLogger", "XLogger"]
 import os
 import sys
 import traceback
@@ -15,6 +14,9 @@ from .trait import LOG_LEVEL, ILogger, LogLevel
 if TYPE_CHECKING:
     from multiprocessing.synchronize import Lock as LockBase
     from pathlib import Path
+
+
+__all__ = ["NLOGGER", "BLogger", "TLogger", "TXLogger", "XLogger"]
 
 
 class BLogger(ILogger):
@@ -383,6 +385,9 @@ class TXLogger(ILogger):
 
 
 class _NullLogger(ILogger):
+    def __repr__(self) -> str:
+        return "<NullLogger>"
+
     @property
     def level(self) -> LogLevel:
         return LogLevel.NULL

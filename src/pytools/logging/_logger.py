@@ -39,6 +39,12 @@ class BLogger(ILogger):
     def __del__(self) -> None:
         self.close()
 
+    def __repr__(self) -> str:
+        return (
+            f"<BLogger level={self._level.name} header={self._header} >\n"
+            f"handlers={len(self._handlers)}>\n" + pformat(self._handlers)
+        )
+
     @property
     def header(self) -> bool:
         return self._header
@@ -62,7 +68,7 @@ class BLogger(ILogger):
         self.disp(*msg)
 
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
-        message = "\n".join([pformat(m, compact=True, sort_dicts=False) for m in msg])
+        message = "\n".join([str(m) for m in msg])
         for h in self._handlers:
             h.log(message + end)
 
@@ -98,3 +104,48 @@ class BLogger(ILogger):
         for h in self._handlers:
             h.log(f"\n\n{BColors.UNDERLINE}Log file closed at {now()}{BColors.ENDC}\n")
         self._handlers.clear()
+
+
+class _NullLogger(ILogger):
+    def __repr__(self) -> str:
+        return "<NullLogger>"
+
+    @property
+    def level(self) -> LogLevel:
+        return LogLevel.NULL
+
+    def flush(self) -> None:
+        pass
+
+    def log(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
+        pass
+
+    def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
+        pass
+
+    def debug(self, *msg: object) -> None:
+        pass
+
+    def info(self, *msg: object) -> None:
+        pass
+
+    def brief(self, *msg: object) -> None:
+        pass
+
+    def warn(self, *msg: object) -> None:
+        pass
+
+    def error(self, *msg: object) -> None:
+        pass
+
+    def fatal(self, *msg: object) -> None:
+        pass
+
+    def exception(self, e: Exception) -> Exception:
+        return e
+
+    def close(self) -> None:
+        pass
+
+
+NLOGGER: ILogger = _NullLogger()

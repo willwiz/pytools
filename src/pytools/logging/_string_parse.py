@@ -1,23 +1,18 @@
 from __future__ import annotations
 
-from pytools.result import Err, Ok
-
-__all__ = [
-    "cstr",
-    "debug_str",
-    "filter_ansi",
-    "now",
-]
 import re
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
+
+from pytools.result import Err, Ok
 
 from .trait import BColors, LogLevel
 
 if TYPE_CHECKING:
     from inspect import Traceback
 
+__all__ = ["cstr", "debug_str", "filter_ansi", "now"]
 
 LB: Final = {
     LogLevel.NULL: BColors.NULL,
