@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-__all__ = ["ProgressBar"]
 import sys
 from typing import Final, Literal, TypedDict, Unpack
+
+__all__ = ["ProgressBar"]
 
 
 class PBarKwargs(TypedDict, total=False):
