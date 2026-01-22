@@ -18,7 +18,9 @@ def path(*v: str | None) -> str:
     return str(Path(*[s for s in v if s]))
 
 
-def clear_dir(folder: Path | str, *suffix: str, log: ILogger = NLOGGER) -> None:
+def clear_dir(
+    folder: Path | str, *suffix: str, exist_ok: bool = True, log: ILogger = NLOGGER
+) -> None:
     """Remove all files in directory with suffixes.
 
     If no suffix is given, all files are removed.
@@ -26,11 +28,16 @@ def clear_dir(folder: Path | str, *suffix: str, log: ILogger = NLOGGER) -> None:
     folder = Path(folder)
     if not folder.is_dir():
         log.warn(f"Dir {folder} was not found.")
-        folder.mkdir(parents=True, exist_ok=True)
+        folder.mkdir(parents=True, exist_ok=exist_ok)
     if len(suffix) == 0:
         [v.unlink() for v in folder.glob("*") if v.is_file()]
         return
-    [v.unlink() for s in suffix for v in folder.glob(f"*.{s}") if v.is_file()]
+    valid_sfx = {s: s.startswith(".") for s in suffix}
+    if not all(valid_sfx.values()):
+        invalid = [s for s, valid in valid_sfx.items() if not valid]
+        msg = f"Suffixes must start with a dot. Invalid suffixes ignored: {invalid}"
+        log.warn(msg)
+    [v.unlink() for s in suffix for v in folder.glob(f"*{s}") if v.is_file()]
 
 
 def expand_as_path(files: Sequence[str]) -> Sequence[Path]:
@@ -38,5 +45,5 @@ def expand_as_path(files: Sequence[str]) -> Sequence[Path]:
     return [Path(f) for name in files for f in Path().glob(name)]
 
 
-def expanded_path_generator(files: Sequence[str]) -> Generator[Path, None, None]:
+def expanded_path_generator(files: Sequence[str]) -> Generator[Path]:
     return (Path(f) for name in files for f in Path().glob(name))

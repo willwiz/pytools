@@ -1,4 +1,5 @@
 # ruff: noqa: D418
+
 import abc
 import inspect
 import types
@@ -18,7 +19,7 @@ class _ResultType[T: Any](abc.ABC):
         pass
 
     @abc.abstractmethod
-    def next(self) -> "_ResultType[T]":
+    def next(self) -> _ResultType[T]:
         pass
 
 
@@ -36,7 +37,7 @@ class Ok[T: Any](_ResultType[T]):
     def unwrap_or[O: Any](self, _default: O, /) -> T:  # type: ignore[reportInvalidTypeVarUse]
         return self.val
 
-    def next(self) -> "Ok[T]":
+    def next(self) -> Ok[T]:
         return self
 
 
@@ -63,7 +64,7 @@ class Err(_ResultType[Never]):
     def unwrap_or[O: Any](self, default: O, /) -> O:
         return default
 
-    def next(self) -> "Err":
+    def next(self) -> Err:
         return Err(self.val)
 
 
@@ -84,6 +85,7 @@ def _all_ok_dict[K, V](result: Mapping[K, Ok[V] | Err]) -> Ok[Mapping[K, V]] | E
     -------
     Ok[Mapping[Any, T]] | Err
         An Ok containing a mapping of T if all results are Ok, otherwise an Err.
+
     """
     for res in result.values():
         if isinstance(res, Err):
@@ -103,6 +105,7 @@ def _all_ok_sequence[V](result: Sequence[Ok[V] | Err]) -> Ok[Sequence[V]] | Err:
     -------
     Ok[Sequence[V]] | Err
         An Ok containing a sequence of V if all results are Ok, otherwise an Err.
+
     """
     for res in result:
         if isinstance(res, Err):
@@ -170,5 +173,6 @@ def filter_ok[T](results: Sequence[Ok[T] | Err]) -> Sequence[T]:
     -------
     Sequence[T]
         A sequence of T values from the Ok results.
+
     """
     return [res.val for res in results if isinstance(res, Ok)]

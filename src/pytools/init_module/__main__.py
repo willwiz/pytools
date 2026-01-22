@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import dataclasses as dc
 import enum

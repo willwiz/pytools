@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Literal, TypedDict
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+
 __all__ = [
     "LEGEND_KEYS",
     "BarPlotKwargs",
@@ -11,11 +17,6 @@ __all__ = [
     "PlotKwargs",
     "StyleKwargs",
 ]
-
-from typing import TYPE_CHECKING, Literal, TypedDict
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
 
 LEGEND_KEYS = Literal["loc", "handlelength", "frameon", "fontsize", "labelspacing", "columnspacing"]
 

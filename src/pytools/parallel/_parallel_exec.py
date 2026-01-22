@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections.abc import Callable, Collection, Mapping, Sequence
 from concurrent import futures
 from typing import Any

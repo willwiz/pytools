@@ -1,3 +1,11 @@
+from collections.abc import Sequence
+from typing import Unpack, overload
+
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
+
+from .trait import BarCyclerKwargs, BarPlotKwargs, LegendKwargs, PlotKwargs, StyleKwargs
+
 __all__ = [
     "bar_cycler",
     "close_figure",
@@ -7,14 +15,6 @@ __all__ = [
     "update_axis_setting",
     "update_figure_setting",
 ]
-
-from collections.abc import Sequence
-from typing import Unpack, overload
-
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
-
-from .trait import BarCyclerKwargs, BarPlotKwargs, LegendKwargs, PlotKwargs, StyleKwargs
 
 def close_figure(fig: Figure | None = None) -> None: ...
 @overload

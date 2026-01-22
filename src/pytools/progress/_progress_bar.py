@@ -73,6 +73,9 @@ class ProgressBar:
 
     def reset(self) -> None:
         self.i = 0
+        self.p = 0
+        self.b = 0
+        self.bar = f"{self._pfx}|{' ':{self._bmt}}|"
 
     def next(self) -> None:
         self.i = self.i + 1
@@ -93,6 +96,6 @@ class ProgressBar:
         sys.stdout.write(self._endl)
         sys.stdout.write(self.bar)
         sys.stdout.write(f"{p:{self._pmt}}{self._sfx}")
-        if self.i == self._n:
+        if self.i >= self._n:
             sys.stdout.write("\n")
         sys.stdout.flush()

@@ -1,13 +1,17 @@
+from __future__ import annotations
+
 import traceback
-from collections.abc import Sequence
 from inspect import getframeinfo, stack
 from pathlib import Path
 from pprint import pformat
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from ._handlers import STDOUT_HANDLER, FileHandler
 from ._string_parse import cstr, debug_str, now
 from .trait import LOG_LEVEL, BColors, IHandler, ILogger, LogLevel
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class BLogger(ILogger):
