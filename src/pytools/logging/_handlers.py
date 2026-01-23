@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TextIO
 
 from ._string_parse import filter_ansi
-from .trait import IHandler
+from ._trait import IHandler
 
 
 class FileHandler(IHandler):

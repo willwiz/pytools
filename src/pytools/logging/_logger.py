@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Literal
 
 from ._handlers import STDOUT_HANDLER, FileHandler
 from ._string_parse import cstr, debug_str, now
-from .trait import LOG_LEVEL, BColors, IHandler, ILogger, LogLevel
+from ._trait import LOG_LEVEL, BColors, IHandler, ILogger, LogLevel
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -34,9 +34,12 @@ class BLogger(ILogger):
         if files is not None:
             self._handlers += [FileHandler(Path(f)) for f in files]
         for h in self._handlers:
+            if h is STDOUT_HANDLER:
+                continue
             h.log(
                 f"{BColors.UNDERLINE}Log file created at {now()}\n"
-                f"Log level: {self._level.name}{BColors.ENDC}\n\n",
+                f"Logger instance: {self!r}\n"
+                f"Log level: {self._level.name}{BColors.ENDC}\n\n"
             )
             h.flush()
 
@@ -106,6 +109,8 @@ class BLogger(ILogger):
 
     def close(self) -> None:
         for h in self._handlers:
+            if h is STDOUT_HANDLER:
+                continue
             h.log(f"\n\n{BColors.UNDERLINE}Log file closed at {now()}{BColors.ENDC}\n")
         self._handlers.clear()
 

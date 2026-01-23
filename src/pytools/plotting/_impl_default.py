@@ -1,12 +1,5 @@
 from __future__ import annotations
 
-__all__ = [
-    "cycler_kwargs",
-    "figure_kwargs",
-    "legend_kwargs",
-    "padding_kwargs",
-]
-
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Unpack
 
@@ -21,6 +14,13 @@ if TYPE_CHECKING:
         PaddingKwargs,
         PlotKwargs,
     )
+
+__all__ = [
+    "cycler_kwargs",
+    "figure_kwargs",
+    "legend_kwargs",
+    "padding_kwargs",
+]
 
 
 def font_kwargs(**kwargs: Unpack[PlotKwargs]) -> FontKwargs:

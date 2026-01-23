@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Final
 
 from pytools.result import Err, Ok
 
-from .trait import BColors, LogLevel
+from ._trait import BColors, LogLevel
 
 if TYPE_CHECKING:
     from inspect import Traceback
