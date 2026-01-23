@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Collection, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from concurrent import futures
-from typing import Any
+from typing import Any, Protocol
 
-from pytools.progress import ProgressBar
+PEXEC_ARGS = Iterable[tuple[Sequence[Any], Mapping[str, Any]]]
 
-PEXEC_ARGS = Collection[tuple[Sequence[Any], Mapping[str, Any]]]
+
+class _SupportNext(Protocol):
+    def next(self) -> None: ...
 
 
 def parallel_exec(
@@ -14,12 +16,11 @@ def parallel_exec(
     func: Callable[..., Any],
     args: PEXEC_ARGS,
     *,
-    prog_bar: bool = False,
+    prog_bar: _SupportNext | None = None,
 ) -> None:
     jobs: dict[futures.Future[Any], int] = {}
-    bart = ProgressBar(len(args)) if prog_bar else None
     for i, (a, k) in enumerate(args):
         jobs[exe.submit(func, *a, **k)] = i
     for future in futures.as_completed(jobs):
         future.result()
-        bart.next() if bart else print(f"<<< Completed {jobs[future]}")
+        prog_bar.next() if prog_bar else print(f"<<< Completed {jobs[future]}")
