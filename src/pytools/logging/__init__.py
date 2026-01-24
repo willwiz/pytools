@@ -1,4 +1,4 @@
 from ._logger import NLOGGER, BLogger
-from .trait import LOG_LEVEL, IHandler, ILogger, LogLevel
+from ._trait import LOG_LEVEL, BColors, IHandler, ILogger, LogLevel
 
-__all__ = ["LOG_LEVEL", "NLOGGER", "BLogger", "IHandler", "ILogger", "LogLevel"]
+__all__ = ["LOG_LEVEL", "NLOGGER", "BColors", "BLogger", "IHandler", "ILogger", "LogLevel"]

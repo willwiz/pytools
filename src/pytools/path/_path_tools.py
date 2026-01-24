@@ -4,12 +4,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from warnings import deprecated
 
-from pytools.logging.api import NLOGGER
+from pytools.logging import NLOGGER, ILogger
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Sequence
-
-    from pytools.logging.trait import ILogger
 
 
 @deprecated("Use pathlib.Path directly instead.")

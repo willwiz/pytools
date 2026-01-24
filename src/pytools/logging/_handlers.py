@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
-from ._string_parse import filter_ansi
-from .trait import IHandler
+from ._string_parse import filter_ansi, now
+from ._trait import IHandler
 
 
 class FileHandler(IHandler):
@@ -16,8 +16,11 @@ class FileHandler(IHandler):
     def __init__(self, file: Path | str) -> None:
         file = Path(file)
         self._f = file.open("a", encoding="utf-8")
+        self._f.write(f"Log file created at {now()}\n")
+        self._f.write(f"Logger instance: {self!r}\n")
 
     def __del__(self) -> None:
+        self._f.write(f"\n\nLog file closed at {now()}\n")
         self._f.close()
 
     def __repr__(self) -> str:
@@ -32,7 +35,7 @@ class FileHandler(IHandler):
         os.fsync(self._f.fileno())
 
 
-class _STDOUTHandler(IHandler):
+class STDOUTHandler(IHandler):
     def __init__(self) -> None:
         pass
 
@@ -40,7 +43,7 @@ class _STDOUTHandler(IHandler):
         pass
 
     def __repr__(self) -> str:
-        return "<STDOUTHandler: sys.stdout>"
+        return f"<STDOUTHandler: sys.stdout> id = {id(self)}>"
 
     def log(self, msg: str) -> None:
         sys.stdout.write(msg)
@@ -49,4 +52,4 @@ class _STDOUTHandler(IHandler):
         sys.stdout.flush()
 
 
-STDOUT_HANDLER = _STDOUTHandler()
+STDOUT_HANDLER = STDOUTHandler()
