@@ -17,7 +17,7 @@ def path(*v: str | None) -> str:
 
 
 def clear_dir(
-    folder: Path | str, *suffix: str, exist_ok: bool = True, log: ILogger = NLOGGER
+    folder: Path | str, *pattern: str, exist_ok: bool = True, log: ILogger = NLOGGER
 ) -> None:
     """Remove all files in directory with suffixes.
 
@@ -27,15 +27,18 @@ def clear_dir(
     if not folder.is_dir():
         log.warn(f"Dir {folder} was not found.")
         folder.mkdir(parents=True, exist_ok=exist_ok)
-    if len(suffix) == 0:
+    if len(pattern) == 0:
         [v.unlink() for v in folder.glob("*") if v.is_file()]
         return
-    valid_sfx = {s: s.startswith(".") for s in suffix}
-    if not all(valid_sfx.values()):
-        invalid = [s for s, valid in valid_sfx.items() if not valid]
-        msg = f"Suffixes must start with a dot. Invalid suffixes ignored: {invalid}"
+    # valid_sfx = {s: s.startswith(".") for s in suffix}
+    # if not all(valid_sfx.values()):
+    #     invalid = [s for s, valid in valid_sfx.items() if not valid]
+    #     msg = f"Suffixes must start with a dot. Invalid suffixes ignored: {invalid}"
+    #     log.warn(msg)
+    removed = [v.unlink() for s in pattern for v in folder.glob(f"{s}") if v.is_file()]
+    if len(removed) == 0:
+        msg = f"No files with patterns {pattern} found in dir {folder} to remove."
         log.warn(msg)
-    [v.unlink() for s in suffix for v in folder.glob(f"*{s}") if v.is_file()]
 
 
 def expand_as_path(files: Sequence[str]) -> Sequence[Path]:
