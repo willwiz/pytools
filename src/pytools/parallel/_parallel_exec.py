@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from concurrent import futures
-from typing import Any, Literal, Protocol, Self
+from typing import Any, Protocol, Self, TypedDict, Unpack
 
 PEXEC_ARGS = tuple[Sequence[Any], Mapping[str, Any]]
 
@@ -28,26 +28,31 @@ def parallel_exec(
         prog_bar.next() if prog_bar else print(f"<<< Completed {jobs[future]}")
 
 
+class _ThreadMethods(TypedDict, total=False):
+    core: int
+    thread: int
+    interpreter: int
+    prog_bar: _SupportNext
+
+
 class ThreadedRunner:
     _exe: futures.Executor
     _futures: dict[futures.Future[Any], int]
     _counter: int
     prog_bar: _SupportNext | None
 
-    def __init__(
-        self,
-        cores: int,
-        mode: Literal["thread", "core"] = "core",
-        prog_bar: _SupportNext | None = None,
-    ) -> None:
-        match mode:
-            case "thread":
-                self._exe = futures.ThreadPoolExecutor(cores)
-            case "core":
-                self._exe = futures.ProcessPoolExecutor(cores)
+    def __init__(self, **kwargs: Unpack[_ThreadMethods]) -> None:
+        if (n := kwargs.get("core")) is not None:
+            self._exe = futures.ProcessPoolExecutor(n)
+        elif (n := kwargs.get("thread")) is not None:
+            self._exe = futures.ThreadPoolExecutor(n)
+        elif (n := kwargs.get("interpreter")) is not None:
+            self._exe = futures.ProcessPoolExecutor(n)
+        else:
+            self._exe = futures.ThreadPoolExecutor(1)
         self._futures = {}
         self._counter = 0
-        self.prog_bar = prog_bar
+        self.prog_bar = kwargs.get("prog_bar")
 
     def __enter__(self) -> Self:
         return self
