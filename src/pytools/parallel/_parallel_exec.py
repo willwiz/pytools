@@ -28,11 +28,10 @@ def parallel_exec(
         prog_bar.next() if prog_bar else print(f"<<< Completed {jobs[future]}")
 
 
-class _ThreadMethods(TypedDict, total=False):
+class ThreadMethods(TypedDict, total=False):
     core: int
     thread: int
     interpreter: int
-    prog_bar: _SupportNext
 
 
 class ThreadedRunner:
@@ -41,7 +40,9 @@ class ThreadedRunner:
     _counter: int
     prog_bar: _SupportNext | None
 
-    def __init__(self, **kwargs: Unpack[_ThreadMethods]) -> None:
+    def __init__(
+        self, *, prog_bar: _SupportNext | None = None, **kwargs: Unpack[ThreadMethods]
+    ) -> None:
         if (n := kwargs.get("core")) is not None:
             self._exe = futures.ProcessPoolExecutor(n)
         elif (n := kwargs.get("thread")) is not None:
@@ -52,7 +53,7 @@ class ThreadedRunner:
             self._exe = futures.ThreadPoolExecutor(1)
         self._futures = {}
         self._counter = 0
-        self.prog_bar = kwargs.get("prog_bar")
+        self.prog_bar = prog_bar
 
     def __enter__(self) -> Self:
         return self
