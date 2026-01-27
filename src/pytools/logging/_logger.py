@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 import traceback
 from inspect import getframeinfo, stack
 from pathlib import Path
@@ -175,13 +176,13 @@ class _NullLogger(ILogger):
         pass
 
     def warn(self, *msg: object) -> None:
-        pass
+        sys.stderr.write("<<< Warning: " + "\n".join(str(m) for m in msg) + "\n")
 
     def error(self, *msg: object) -> None:
-        pass
+        sys.stderr.write("<<< Error: " + "\n".join(str(m) for m in msg) + "\n")
 
     def fatal(self, *msg: object) -> None:
-        pass
+        sys.stderr.write("<<< Fatal: " + "\n".join(str(m) for m in msg) + "\n")
 
     def exception(self, e: Exception) -> Exception:
         return e
