@@ -37,13 +37,13 @@ class FileHandler(IHandler):
 
 class STDOUTHandler(IHandler):
     def __init__(self) -> None:
-        pass
+        sys.stdout.write(f"Logger instance: {self!r} created at {now()}\n")
 
     def __del__(self) -> None:
         pass
 
     def __repr__(self) -> str:
-        return f"<STDOUTHandler: sys.stdout> id = {id(self)}>"
+        return f"<STDOUTHandler: {id(self)}>"
 
     def log(self, msg: str) -> None:
         sys.stdout.write(msg)

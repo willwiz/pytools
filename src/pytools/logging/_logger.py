@@ -4,7 +4,7 @@ import traceback
 from inspect import getframeinfo, stack
 from pathlib import Path
 from pprint import pformat
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Final, Literal
 
 from ._handlers import STDOUT_HANDLER, FileHandler
 from ._string_parse import cstr, debug_str, now
@@ -14,10 +14,27 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 
+_LOGGERS_DICT: Final[dict[str, ILogger]] = {}
+
+
+def get_logger(name: str = "__root__", level: LOG_LEVEL | LogLevel = LogLevel.NULL) -> ILogger:
+    level = level if isinstance(level, LogLevel) else LogLevel[level]
+    if name in _LOGGERS_DICT:
+        logger = _LOGGERS_DICT[name]
+        if logger.level != level:
+            msg = f"Logger '{name}' level does not match the requested level. Skipped"
+            logger.warn(msg)
+        return logger
+    if level is LogLevel.NULL:
+        return NLOGGER
+    _LOGGERS_DICT[name] = BLogger(level=level)
+    return _LOGGERS_DICT[name]
+
+
 class BLogger(ILogger):
     __slots__ = ["_handlers", "_header", "_level"]
     _level: LogLevel
-    _handlers: list[IHandler]
+    _handlers: dict[str, IHandler]
     _header: bool
 
     def __init__(
@@ -30,10 +47,10 @@ class BLogger(ILogger):
     ) -> None:
         self._level = level if isinstance(level, LogLevel) else LogLevel[level]
         self._header = header
-        self._handlers = [STDOUT_HANDLER] if stdout else []
+        self._handlers = {"stdout": STDOUT_HANDLER} if stdout else {}
         if files is not None:
-            self._handlers += [FileHandler(Path(f)) for f in files]
-        for h in self._handlers:
+            self._handlers.update({repr(f): FileHandler(f) for f in files})
+        for h in self._handlers.values():
             if self._level < LogLevel.INFO:
                 continue
             h.log(
@@ -59,8 +76,19 @@ class BLogger(ILogger):
     def level(self) -> LogLevel:
         return self._level
 
+    def add_handler(self, handler: IHandler | Path | str, *, name: str | None = None) -> None:
+        if isinstance(handler, (str, Path)):
+            handler = FileHandler(handler)
+        key = name or repr(handler)
+        self._handlers[key] = handler
+
+    def remove_handler(self, handler: IHandler | str) -> None:
+        key = handler if isinstance(handler, str) else repr(handler)
+        if key in self._handlers:
+            del self._handlers[key]
+
     def flush(self) -> None:
-        for h in self._handlers:
+        for h in self._handlers.values():
             h.flush()
 
     def log(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
@@ -69,13 +97,13 @@ class BLogger(ILogger):
         if self._header:
             tb = getframeinfo(stack()[2][0])
             header = f"\n[{now()}|{cstr(level)}]{debug_str(tb)}\n"
-            for h in self._handlers:
+            for h in self._handlers.values():
                 h.log(header)
         self.disp(*msg)
 
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
         message = "\n".join([str(m) for m in msg])
-        for h in self._handlers:
+        for h in self._handlers.values():
             h.log(message + end)
 
     def debug(self, *msg: object) -> None:
@@ -115,8 +143,18 @@ class _NullLogger(ILogger):
         return "<NullLogger>"
 
     @property
+    def header(self) -> bool:
+        return False
+
+    @property
     def level(self) -> LogLevel:
         return LogLevel.NULL
+
+    def add_handler(self, handler: IHandler | Path | str, *, name: str | None = None) -> None:
+        pass
+
+    def remove_handler(self, handler: IHandler | str) -> None:
+        pass
 
     def flush(self) -> None:
         pass

@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import abc
 import enum
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 __all__ = ["LOG_LEVEL", "BColors", "ILogger", "LogLevel"]
 
@@ -49,7 +52,14 @@ class IHandler(abc.ABC):
 class ILogger(abc.ABC):
     @property
     @abc.abstractmethod
+    def header(self) -> bool: ...
+    @property
+    @abc.abstractmethod
     def level(self) -> LogLevel: ...
+    @abc.abstractmethod
+    def add_handler(self, handler: IHandler | str | Path, *, name: str | None = None) -> None: ...
+    @abc.abstractmethod
+    def remove_handler(self, handler: IHandler | str) -> None: ...
     @abc.abstractmethod
     def flush(self) -> None: ...
     @abc.abstractmethod
