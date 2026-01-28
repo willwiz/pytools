@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 _LOGGERS_DICT: Final[dict[str, ILogger]] = {}
-_NONE_NULL = Literal[
+_NOT_NULL = Literal[
     "DEBUG",
     "INFO",
     "BRIEF",
@@ -36,9 +36,9 @@ _NONE_NULL = Literal[
 @overload
 def get_logger() -> ILogger: ...
 @overload
-def get_logger(name: str = ..., *, level: Literal["NULL"]) -> _NullLogger: ...
+def get_logger(name: str = ..., *, level: Literal["NULL", LogLevel.NULL]) -> _NullLogger: ...
 @overload
-def get_logger(name: str = ..., *, level: _NONE_NULL) -> BLogger: ...
+def get_logger(name: str = ..., *, level: _NOT_NULL) -> BLogger: ...
 def get_logger(
     name: str | None = "__main__",
     *,
