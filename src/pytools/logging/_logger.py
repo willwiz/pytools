@@ -159,7 +159,11 @@ class BLogger(ILogger):
                 h.log(header)
         self.disp(*msg)
 
-    def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
+    def disp(
+        self, *msg: object, end: Literal["\n", "\r", ""] = "\n", filt: LogEnum | None = None
+    ) -> None:
+        if filt and self._level > filt:
+            return
         message = "\n".join([str(m) for m in msg])
         for h in self._handlers.values():
             h.log(message + end)
@@ -234,7 +238,9 @@ class _NullLogger(ILogger):
     def log(self, *msg: object, level: LogEnum = LogEnum.BRIEF) -> None:
         pass
 
-    def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:
+    def disp(
+        self, *msg: object, end: Literal["\n", "\r", ""] = "\n", filt: LogEnum | None = None
+    ) -> None:
         pass
 
     def debug(self, *msg: object) -> None:
