@@ -1,5 +1,5 @@
 from ._logger import NLOGGER, BLogger, get_logger
-from ._trait import BColors, IHandler, ILogger, LogLevel, LogLevelType
+from ._trait import BColors, IHandler, ILogger, LogEnum, LogLevel
 
 __all__ = [
     "NLOGGER",
@@ -7,7 +7,7 @@ __all__ = [
     "BLogger",
     "IHandler",
     "ILogger",
+    "LogEnum",
     "LogLevel",
-    "LogLevelType",
     "get_logger",
 ]

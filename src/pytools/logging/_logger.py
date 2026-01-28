@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Final, Literal, overload, override
 
 from ._handlers import STDOUT_HANDLER, FileHandler
 from ._string_parse import cstr, debug_str, now
-from ._trait import BColors, IHandler, ILogger, LogLevel, LogLevelType
+from ._trait import BColors, IHandler, ILogger, LogEnum, LogLevel
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -24,25 +24,25 @@ _NOT_NULL = Literal[
     "WARN",
     "ERROR",
     "FATAL",
-    LogLevel.DEBUG,
-    LogLevel.INFO,
-    LogLevel.BRIEF,
-    LogLevel.WARN,
-    LogLevel.ERROR,
-    LogLevel.FATAL,
+    LogEnum.DEBUG,
+    LogEnum.INFO,
+    LogEnum.BRIEF,
+    LogEnum.WARN,
+    LogEnum.ERROR,
+    LogEnum.FATAL,
 ]
 
 
 @overload
 def get_logger() -> ILogger: ...
 @overload
-def get_logger(name: str = ..., *, level: Literal["NULL", LogLevel.NULL]) -> _NullLogger: ...
+def get_logger(name: str = ..., *, level: Literal["NULL", LogEnum.NULL]) -> _NullLogger: ...
 @overload
 def get_logger(name: str = ..., *, level: _NOT_NULL) -> BLogger: ...
 def get_logger(
     name: str | None = "__main__",
     *,
-    level: LogLevelType | LogLevel = LogLevel.INFO,
+    level: LogLevel | LogEnum = LogEnum.INFO,
     console: bool = True,
     file: Sequence[str | Path] | None = None,
 ) -> ILogger:
@@ -50,16 +50,16 @@ def get_logger(
         return NLOGGER
     if name is None:
         return NLOGGER
-    level = level if isinstance(level, LogLevel) else LogLevel[level]
+    level = level if isinstance(level, LogEnum) else LogEnum[level]
     logger = _LOGGERS_DICT.get(name)
     if logger is None:
         _LOGGERS_DICT[name] = (
-            NLOGGER if level is LogLevel.NULL else BLogger(level=level, stdout=console, files=file)
+            NLOGGER if level is LogEnum.NULL else BLogger(level=level, stdout=console, files=file)
         )
         return _LOGGERS_DICT[name]
     if logger.level == level:
         return logger
-    if logger.level is LogLevel.NULL:
+    if logger.level is LogEnum.NULL:
         # Allow NullLogger to be replaced, but not BLoggers
         _LOGGERS_DICT[name] = BLogger(level=level, stdout=console, files=file)
         return _LOGGERS_DICT[name]
@@ -73,25 +73,25 @@ def get_logger(
 
 class BLogger(ILogger):
     __slots__ = ["_handlers", "_header", "_level"]
-    _level: LogLevel
+    _level: LogEnum
     _handlers: dict[str, IHandler]
     _header: bool
 
     def __init__(
         self,
-        level: LogLevelType | LogLevel,
+        level: LogLevel | LogEnum,
         *,
         header: bool = True,
         stdout: bool = True,
         files: Sequence[str | Path] | None = None,
     ) -> None:
-        self._level = level if isinstance(level, LogLevel) else LogLevel[level]
+        self._level = level if isinstance(level, LogEnum) else LogEnum[level]
         self._header = header
         self._handlers = {"STDOUT": STDOUT_HANDLER} if stdout else {}
         if files is not None:
             self._handlers.update({str(f): FileHandler(f) for f in files})
         for h in self._handlers.values():
-            if self._level < LogLevel.INFO:
+            if self._level < LogEnum.INFO:
                 continue
             h.log(
                 f"{BColors.UNDERLINE}Logger created with level: "
@@ -113,12 +113,12 @@ class BLogger(ILogger):
         return self._header
 
     @property
-    def level(self) -> LogLevel:
+    def level(self) -> LogEnum:
         return self._level
 
     @level.setter
-    def level(self, level: LogLevelType | LogLevel) -> None:
-        self._level = level if isinstance(level, LogLevel) else LogLevel[level]
+    def level(self, level: LogLevel | LogEnum) -> None:
+        self._level = level if isinstance(level, LogEnum) else LogEnum[level]
 
     @property
     def console(self) -> bool:
@@ -148,7 +148,7 @@ class BLogger(ILogger):
         for h in self._handlers.values():
             h.flush()
 
-    def log(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
+    def log(self, *msg: object, level: LogEnum = LogEnum.BRIEF) -> None:
         if len(msg) < 1:
             return
         if self._header:
@@ -164,28 +164,28 @@ class BLogger(ILogger):
             h.log(message + end)
 
     def debug(self, *msg: object) -> None:
-        if self._level >= LogLevel.DEBUG:
-            self.log(*msg, level=LogLevel.DEBUG)
+        if self._level >= LogEnum.DEBUG:
+            self.log(*msg, level=LogEnum.DEBUG)
 
     def info(self, *msg: object) -> None:
-        if self._level >= LogLevel.INFO:
-            self.log(*msg, level=LogLevel.INFO)
+        if self._level >= LogEnum.INFO:
+            self.log(*msg, level=LogEnum.INFO)
 
     def brief(self, *msg: object) -> None:
-        if self._level >= LogLevel.BRIEF:
-            self.log(*msg, level=LogLevel.BRIEF)
+        if self._level >= LogEnum.BRIEF:
+            self.log(*msg, level=LogEnum.BRIEF)
 
     def warn(self, *msg: object) -> None:
-        if self._level >= LogLevel.WARN:
-            self.log(*msg, level=LogLevel.WARN)
+        if self._level >= LogEnum.WARN:
+            self.log(*msg, level=LogEnum.WARN)
 
     def error(self, *msg: object) -> None:
-        if self._level >= LogLevel.ERROR:
-            self.log(*msg, level=LogLevel.ERROR)
+        if self._level >= LogEnum.ERROR:
+            self.log(*msg, level=LogEnum.ERROR)
 
     def fatal(self, *msg: object) -> None:
-        if self._level >= LogLevel.FATAL:
-            self.log(*msg, level=LogLevel.FATAL)
+        if self._level >= LogEnum.FATAL:
+            self.log(*msg, level=LogEnum.FATAL)
 
     def exception(self, e: Exception) -> Exception:
         self.disp(traceback.format_exc())
@@ -204,12 +204,12 @@ class _NullLogger(ILogger):
         return False
 
     @property
-    def level(self) -> LogLevel:
-        return LogLevel.NULL
+    def level(self) -> LogEnum:
+        return LogEnum.NULL
 
     @level.setter
     @override
-    def level(self, level: LogLevelType | LogLevel) -> None:
+    def level(self, level: LogLevel | LogEnum) -> None:
         sys.stderr.write("<<< Warning: Cannot set level on NullLogger\n")
 
     @property
@@ -230,7 +230,7 @@ class _NullLogger(ILogger):
     def flush(self) -> None:
         pass
 
-    def log(self, *msg: object, level: LogLevel = LogLevel.BRIEF) -> None:
+    def log(self, *msg: object, level: LogEnum = LogEnum.BRIEF) -> None:
         pass
 
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = "\n") -> None:

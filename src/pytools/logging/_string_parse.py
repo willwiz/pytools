@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Final
 
 from pytools.result import Err, Ok
 
-from ._trait import BColors, LogLevel
+from ._trait import BColors, LogEnum
 
 if TYPE_CHECKING:
     from inspect import Traceback
@@ -15,23 +15,23 @@ if TYPE_CHECKING:
 __all__ = ["cstr", "debug_str", "filter_ansi", "now"]
 
 LB: Final = {
-    LogLevel.NULL: BColors.NULL,
-    LogLevel.FATAL: BColors.FAIL,
-    LogLevel.ERROR: BColors.FAIL,
-    LogLevel.WARN: BColors.WARN,
-    LogLevel.BRIEF: BColors.OKCYAN,
-    LogLevel.INFO: BColors.OKGREEN,
-    LogLevel.DEBUG: BColors.OKBLUE,
+    LogEnum.NULL: BColors.NULL,
+    LogEnum.FATAL: BColors.FAIL,
+    LogEnum.ERROR: BColors.FAIL,
+    LogEnum.WARN: BColors.WARN,
+    LogEnum.BRIEF: BColors.OKCYAN,
+    LogEnum.INFO: BColors.OKGREEN,
+    LogEnum.DEBUG: BColors.OKBLUE,
 }
 
 RB: Final = {
-    LogLevel.NULL: BColors.ENDC,
-    LogLevel.FATAL: BColors.ENDC,
-    LogLevel.ERROR: BColors.ENDC,
-    LogLevel.WARN: BColors.ENDC,
-    LogLevel.BRIEF: BColors.ENDC,
-    LogLevel.INFO: BColors.ENDC,
-    LogLevel.DEBUG: BColors.ENDC,
+    LogEnum.NULL: BColors.ENDC,
+    LogEnum.FATAL: BColors.ENDC,
+    LogEnum.ERROR: BColors.ENDC,
+    LogEnum.WARN: BColors.ENDC,
+    LogEnum.BRIEF: BColors.ENDC,
+    LogEnum.INFO: BColors.ENDC,
+    LogEnum.DEBUG: BColors.ENDC,
 }
 
 
@@ -44,7 +44,7 @@ def debug_str(tb: Traceback) -> str:
     return f"({file}:{tb.lineno}|{tb.function})>>>"
 
 
-def cstr(level: LogLevel) -> str:
+def cstr(level: LogEnum) -> str:
     return f"{LB[level]}{level}{RB[level]}"
 
 

@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from pathlib import Path
 
-__all__ = ["BColors", "ILogger", "LogLevel", "LogLevelType"]
+__all__ = ["BColors", "ILogger", "LogEnum", "LogLevel"]
 
-LogLevelType = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
+LogLevel = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
 
 
-class LogLevel(enum.IntEnum):
+class LogEnum(enum.IntEnum):
     NULL = 0
     FATAL = 1
     ERROR = 2
@@ -55,7 +55,7 @@ class ILogger(abc.ABC):
     def header(self) -> bool: ...
     @property
     @abc.abstractmethod
-    def level(self) -> LogLevel: ...
+    def level(self) -> LogEnum: ...
     @property
     @abc.abstractmethod
     def console(self) -> bool: ...
@@ -66,7 +66,7 @@ class ILogger(abc.ABC):
     @abc.abstractmethod
     def flush(self) -> None: ...
     @abc.abstractmethod
-    def log(self, *msg: object, level: LogLevel = ...) -> None: ...
+    def log(self, *msg: object, level: LogEnum = ...) -> None: ...
     @abc.abstractmethod
     def disp(self, *msg: object, end: Literal["\n", "\r", ""] = ...) -> None: ...
     @abc.abstractmethod
