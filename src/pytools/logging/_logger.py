@@ -5,7 +5,6 @@ import sys
 import traceback
 from inspect import getframeinfo, stack
 from pathlib import Path
-from pprint import pformat
 from typing import TYPE_CHECKING, Final, Literal, overload, override
 
 from ._handlers import STDOUT_HANDLER, FileHandler
@@ -94,9 +93,8 @@ class BLogger(ILogger):
             if self._level < LogEnum.BRIEF:
                 continue
             h.log(
-                f"Logger instance: {self!r} created at {now()}\n"
-                f"{BColors.UNDERLINE}Logger created with level: "
-                f"{self._level.name}{BColors.ENDC}\n\n"
+                f"{BColors.UNDERLINE}Logger instance {self!r} created at {now()}{BColors.ENDC}\n"
+                f"{'\n'.join(f'  - {hand!r}' for hand in self._handlers.values())}\n"
             )
             h.flush()
 
@@ -105,8 +103,9 @@ class BLogger(ILogger):
 
     def __repr__(self) -> str:
         return (
-            f"<BLogger level={self._level.name} header={self._header} >\n"
-            f"handlers={len(self._handlers)}>\n" + pformat(self._handlers)
+            f"<BLogger level={self._level.name}"
+            f" header={self._header}"
+            f" handlers={len(self._handlers)}>"
         )
 
     @property
