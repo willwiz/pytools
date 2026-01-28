@@ -42,7 +42,7 @@ class FileHandler(IHandler):
 
 class STDOUTHandler(IHandler):
     def __init__(self) -> None:
-        sys.stdout.write(f"Logger instance: {self!r} created at {now()}\n")
+        sys.stdout.write(f"\nLogger instance: {self!r} created at {now()}\n")
 
     def __del__(self) -> None:
         pass
