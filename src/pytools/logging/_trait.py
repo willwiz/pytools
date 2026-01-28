@@ -56,6 +56,9 @@ class ILogger(abc.ABC):
     @property
     @abc.abstractmethod
     def level(self) -> LogLevel: ...
+    @property
+    @abc.abstractmethod
+    def console(self) -> bool: ...
     @abc.abstractmethod
     def add_handler(self, handler: IHandler | str | Path, *, name: str | None = None) -> None: ...
     @abc.abstractmethod

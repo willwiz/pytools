@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from warnings import deprecated
 
-from pytools.logging import NLOGGER, ILogger
+from pytools.logging import get_logger
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Sequence
@@ -16,14 +16,13 @@ def path(*v: str | None) -> str:
     return str(Path(*[s for s in v if s]))
 
 
-def clear_dir(
-    folder: Path | str, *pattern: str, exist_ok: bool = True, log: ILogger = NLOGGER
-) -> None:
+def clear_dir(folder: Path | str, *pattern: str, exist_ok: bool = True) -> None:
     """Remove all files in directory with suffixes.
 
     If no suffix is given, all files are removed.
     """
     folder = Path(folder)
+    log = get_logger()
     if not folder.is_dir():
         log.warn(f"Dir {folder} was not found.")
         folder.mkdir(parents=True, exist_ok=exist_ok)

@@ -4,9 +4,13 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 from concurrent import futures
 from typing import Any, Protocol, Self, TypedDict, Unpack
 
+from pytools.logging import get_logger
+
 PEXEC_ARGS = tuple[Sequence[Any], Mapping[str, Any]]
 
 PEXEC_ARG_LIST = Iterable[PEXEC_ARGS]
+
+logger = get_logger()
 
 
 class _SupportNext(Protocol):
@@ -25,7 +29,7 @@ def parallel_exec(
         jobs[exe.submit(func, *a, **k)] = i
     for future in futures.as_completed(jobs):
         future.result()
-        prog_bar.next() if prog_bar else print(f"<<< Completed {jobs[future]}")
+        prog_bar.next() if prog_bar else logger.disp(f"<<< Completed {jobs[future]}")
 
 
 class ThreadMethods(TypedDict, total=False):
@@ -68,7 +72,7 @@ class ThreadedRunner:
     def wait_then_shutdown(self) -> None:
         for future in futures.as_completed(self._futures):
             future.result()
-            self.prog_bar.next() if self.prog_bar else print(
+            self.prog_bar.next() if self.prog_bar else logger.disp(
                 f"<<< Completed {self._futures[future]}"
             )
         self._exe.shutdown()

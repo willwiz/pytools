@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+import threading
 from pathlib import Path
 from typing import TextIO
 
@@ -10,14 +11,16 @@ from ._trait import IHandler
 
 
 class FileHandler(IHandler):
-    __slots__ = ("_f",)
+    __slots__ = ("_f", "_lock")
     _f: TextIO
+    _lock: threading.Lock
 
     def __init__(self, file: Path | str) -> None:
         file = Path(file)
         self._f = file.open("a", encoding="utf-8")
         self._f.write(f"Log file created at {now()}\n")
         self._f.write(f"Logger instance: {self!r}\n")
+        self._lock = threading.Lock()
 
     def __del__(self) -> None:
         self._f.write(f"\n\nLog file closed at {now()}\n")
@@ -27,12 +30,14 @@ class FileHandler(IHandler):
         return f"<FileHandler: {self._f.name}>"
 
     def log(self, msg: str) -> None:
-        self._f.write(filter_ansi(msg).replace("\r", "\n"))
-        self.flush()
+        with self._lock:
+            self._f.write(filter_ansi(msg).replace("\r", "\n"))
+            self.flush()
 
     def flush(self) -> None:
-        self._f.flush()
-        os.fsync(self._f.fileno())
+        with self._lock:
+            self._f.flush()
+            os.fsync(self._f.fileno())
 
 
 class STDOUTHandler(IHandler):

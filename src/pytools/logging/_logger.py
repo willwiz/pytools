@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import multiprocessing
 import sys
 import traceback
 from inspect import getframeinfo, stack
 from pathlib import Path
 from pprint import pformat
-from typing import TYPE_CHECKING, Final, Literal
+from typing import TYPE_CHECKING, Final, Literal, overload, override
 
 from ._handlers import STDOUT_HANDLER, FileHandler
 from ._string_parse import cstr, debug_str, now
@@ -16,20 +17,58 @@ if TYPE_CHECKING:
 
 
 _LOGGERS_DICT: Final[dict[str, ILogger]] = {}
+_NONE_NULL = Literal[
+    "DEBUG",
+    "INFO",
+    "BRIEF",
+    "WARN",
+    "ERROR",
+    "FATAL",
+    LogLevel.DEBUG,
+    LogLevel.INFO,
+    LogLevel.BRIEF,
+    LogLevel.WARN,
+    LogLevel.ERROR,
+    LogLevel.FATAL,
+]
 
 
-def get_logger(name: str = "__root__", level: LOG_LEVEL | LogLevel = LogLevel.NULL) -> ILogger:
-    level = level if isinstance(level, LogLevel) else LogLevel[level]
-    if name in _LOGGERS_DICT:
-        logger = _LOGGERS_DICT[name]
-        if logger.level != level:
-            msg = f"Logger '{name}' level does not match the requested level. Skipped"
-            logger.warn(msg)
-        return logger
-    if level is LogLevel.NULL:
+@overload
+def get_logger() -> ILogger: ...
+@overload
+def get_logger(name: str = ..., *, level: Literal["NULL"]) -> _NullLogger: ...
+@overload
+def get_logger(name: str = ..., *, level: _NONE_NULL) -> BLogger: ...
+def get_logger(
+    name: str | None = "__main__",
+    *,
+    level: LOG_LEVEL | LogLevel = LogLevel.INFO,
+    console: bool = True,
+    file: Sequence[str | Path] | None = None,
+) -> ILogger:
+    if multiprocessing.parent_process() is not None:
         return NLOGGER
-    _LOGGERS_DICT[name] = BLogger(level=level)
-    return _LOGGERS_DICT[name]
+    if name is None:
+        return NLOGGER
+    level = level if isinstance(level, LogLevel) else LogLevel[level]
+    logger = _LOGGERS_DICT.get(name)
+    if logger is None:
+        _LOGGERS_DICT[name] = (
+            NLOGGER if level is LogLevel.NULL else BLogger(level=level, stdout=console, files=file)
+        )
+        return _LOGGERS_DICT[name]
+    if logger.level == level:
+        return logger
+    if logger.level is LogLevel.NULL:
+        # Allow NullLogger to be replaced, but not BLoggers
+        _LOGGERS_DICT[name] = BLogger(level=level, stdout=console, files=file)
+        return _LOGGERS_DICT[name]
+    msg = (
+        f"Logger '{name}' already exists with level {logger.level.name}. "
+        f"Requested level {level.name} is ignored."
+    )
+    logger.warn(msg)
+    return logger
 
 
 class BLogger(ILogger):
@@ -48,9 +87,9 @@ class BLogger(ILogger):
     ) -> None:
         self._level = level if isinstance(level, LogLevel) else LogLevel[level]
         self._header = header
-        self._handlers = {"stdout": STDOUT_HANDLER} if stdout else {}
+        self._handlers = {"STDOUT": STDOUT_HANDLER} if stdout else {}
         if files is not None:
-            self._handlers.update({repr(f): FileHandler(f) for f in files})
+            self._handlers.update({str(f): FileHandler(f) for f in files})
         for h in self._handlers.values():
             if self._level < LogLevel.INFO:
                 continue
@@ -76,6 +115,23 @@ class BLogger(ILogger):
     @property
     def level(self) -> LogLevel:
         return self._level
+
+    @level.setter
+    def level(self, level: LOG_LEVEL | LogLevel) -> None:
+        self._level = level if isinstance(level, LogLevel) else LogLevel[level]
+
+    @property
+    def console(self) -> bool:
+        return "STDOUT" in self._handlers
+
+    @console.setter
+    def console(self, console: bool) -> None:
+        if ("STDOUT" in self._handlers) == console:
+            return
+        if console:
+            self._handlers["STDOUT"] = STDOUT_HANDLER
+            return
+        del self._handlers["STDOUT"]
 
     def add_handler(self, handler: IHandler | Path | str, *, name: str | None = None) -> None:
         if isinstance(handler, (str, Path)):
@@ -150,6 +206,20 @@ class _NullLogger(ILogger):
     @property
     def level(self) -> LogLevel:
         return LogLevel.NULL
+
+    @level.setter
+    @override
+    def level(self, level: LOG_LEVEL | LogLevel) -> None:
+        sys.stderr.write("<<< Warning: Cannot set level on NullLogger\n")
+
+    @property
+    def console(self) -> bool:
+        return True
+
+    @console.setter
+    @override
+    def console(self, console: bool) -> None:
+        sys.stderr.write("<<< Warning: Cannot set console on NullLogger\n")
 
     def add_handler(self, handler: IHandler | Path | str, *, name: str | None = None) -> None:
         pass
