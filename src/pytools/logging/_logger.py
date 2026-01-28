@@ -91,9 +91,10 @@ class BLogger(ILogger):
         if files is not None:
             self._handlers.update({str(f): FileHandler(f) for f in files})
         for h in self._handlers.values():
-            if self._level < LogEnum.INFO:
+            if self._level < LogEnum.BRIEF:
                 continue
             h.log(
+                f"Logger instance: {self!r} created at {now()}\n"
                 f"{BColors.UNDERLINE}Logger created with level: "
                 f"{self._level.name}{BColors.ENDC}\n\n"
             )

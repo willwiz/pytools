@@ -18,8 +18,7 @@ class FileHandler(IHandler):
     def __init__(self, file: Path | str) -> None:
         file = Path(file)
         self._f = file.open("a", encoding="utf-8")
-        self._f.write(f"Log file created at {now()}\n")
-        self._f.write(f"Logger instance: {self!r}\n")
+        self._f.write(f"Log file created at {file}\n")
         self._lock = threading.Lock()
 
     def __del__(self) -> None:
@@ -42,7 +41,7 @@ class FileHandler(IHandler):
 
 class STDOUTHandler(IHandler):
     def __init__(self) -> None:
-        sys.stdout.write(f"\nLogger instance: {self!r} created at {now()}\n")
+        pass
 
     def __del__(self) -> None:
         pass
