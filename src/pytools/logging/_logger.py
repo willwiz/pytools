@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Final, Literal, overload, override
 
 from ._handlers import STDOUT_HANDLER, FileHandler
 from ._string_parse import cstr, debug_str, now
-from ._trait import LOG_LEVEL, BColors, IHandler, ILogger, LogLevel
+from ._trait import BColors, IHandler, ILogger, LogLevel, LogLevelType
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -42,7 +42,7 @@ def get_logger(name: str = ..., *, level: _NOT_NULL) -> BLogger: ...
 def get_logger(
     name: str | None = "__main__",
     *,
-    level: LOG_LEVEL | LogLevel = LogLevel.INFO,
+    level: LogLevelType | LogLevel = LogLevel.INFO,
     console: bool = True,
     file: Sequence[str | Path] | None = None,
 ) -> ILogger:
@@ -79,7 +79,7 @@ class BLogger(ILogger):
 
     def __init__(
         self,
-        level: LOG_LEVEL | LogLevel,
+        level: LogLevelType | LogLevel,
         *,
         header: bool = True,
         stdout: bool = True,
@@ -117,7 +117,7 @@ class BLogger(ILogger):
         return self._level
 
     @level.setter
-    def level(self, level: LOG_LEVEL | LogLevel) -> None:
+    def level(self, level: LogLevelType | LogLevel) -> None:
         self._level = level if isinstance(level, LogLevel) else LogLevel[level]
 
     @property
@@ -209,7 +209,7 @@ class _NullLogger(ILogger):
 
     @level.setter
     @override
-    def level(self, level: LOG_LEVEL | LogLevel) -> None:
+    def level(self, level: LogLevelType | LogLevel) -> None:
         sys.stderr.write("<<< Warning: Cannot set level on NullLogger\n")
 
     @property

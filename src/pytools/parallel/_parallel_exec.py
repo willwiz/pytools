@@ -6,9 +6,9 @@ from typing import Any, Protocol, Self, TypedDict, Unpack
 
 from pytools.logging import get_logger
 
-PEXEC_ARGS = tuple[Sequence[Any], Mapping[str, Any]]
+PExecArgs = tuple[Sequence[Any], Mapping[str, Any]]
 
-PEXEC_ARG_LIST = Iterable[PEXEC_ARGS]
+PExecArgList = Iterable[PExecArgs]
 
 logger = get_logger()
 
@@ -20,7 +20,7 @@ class _SupportNext(Protocol):
 def parallel_exec(
     exe: futures.Executor,
     func: Callable[..., Any],
-    args: PEXEC_ARG_LIST,
+    args: PExecArgList,
     *,
     prog_bar: _SupportNext | None = None,
 ) -> None:

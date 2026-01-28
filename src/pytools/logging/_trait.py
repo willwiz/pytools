@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from pathlib import Path
 
-__all__ = ["LOG_LEVEL", "BColors", "ILogger", "LogLevel"]
+__all__ = ["BColors", "ILogger", "LogLevel", "LogLevelType"]
 
-LOG_LEVEL = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
+LogLevelType = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
 
 
 class LogLevel(enum.IntEnum):

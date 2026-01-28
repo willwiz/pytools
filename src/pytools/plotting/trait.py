@@ -7,18 +7,19 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-    "LEGEND_KEYS",
     "BarPlotKwargs",
     "CyclerKwargs",
     "FigureKwargs",
     "FontKwargs",
+    "LegendKeys",
     "LegendKwargs",
     "PaddingKwargs",
     "PlotKwargs",
     "StyleKwargs",
 ]
 
-LEGEND_KEYS = Literal["loc", "handlelength", "frameon", "fontsize", "labelspacing", "columnspacing"]
+LegendKeys = Literal["loc", "handlelength", "frameon", "fontsize", "labelspacing", "columnspacing"]
+LegendLocs = Literal["outside lower center", "upper right", "lower left", "best"]
 
 
 class PlotKwargs(TypedDict, total=False):
@@ -69,7 +70,7 @@ class BarPlotKwargs(PlotKwargs, TypedDict, total=False):
 
 
 class LegendKwargs(TypedDict, total=False):
-    loc: Literal["outside lower center", "upper right", "lower left", "best"]
+    loc: LegendLocs
     handlelength: float
     frameon: bool
     fontsize: float

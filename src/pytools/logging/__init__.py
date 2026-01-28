@@ -1,13 +1,13 @@
 from ._logger import NLOGGER, BLogger, get_logger
-from ._trait import LOG_LEVEL, BColors, IHandler, ILogger, LogLevel
+from ._trait import BColors, IHandler, ILogger, LogLevel, LogLevelType
 
 __all__ = [
-    "LOG_LEVEL",
     "NLOGGER",
     "BColors",
     "BLogger",
     "IHandler",
     "ILogger",
     "LogLevel",
+    "LogLevelType",
     "get_logger",
 ]
