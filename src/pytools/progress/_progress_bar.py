@@ -73,7 +73,7 @@ class ProgressBar:
         self._endl = kwargs.get("end", "\r")
         self.bar = f"{self._pfx}|{' ':{self._bmt}}|"
         self._dec = 0.01 * 0.1**decimal
-        self._log = get_logger()
+        self._log = get_logger(verbose=False)
 
     def reset(self) -> None:
         self.i = 0
@@ -97,9 +97,9 @@ class ProgressBar:
         if self.b != b:
             self.b = b
             self.bar = f"{self._pfx}|{self._x * b:{self._bmt}}|"
-        self._log.disp(self._endl)
-        self._log.disp(self.bar)
-        self._log.disp(f"{p:{self._pmt}}{self._sfx}")
+        self._log.disp(self._endl, end="")
+        self._log.disp(self.bar, end="")
+        self._log.disp(f"{p:{self._pmt}}{self._sfx}", end=self._endl)
         if self.i >= self._n:
-            self._log.disp("\n")
+            self._log.disp("\n", end="")
         self._log.flush()

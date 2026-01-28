@@ -33,17 +33,34 @@ _NOT_NULL = Literal[
 
 
 @overload
-def get_logger() -> ILogger: ...
+def get_logger(
+    *, console: bool = ..., file: Sequence[str | Path] | None = ..., verbose: bool = ...
+) -> ILogger: ...
 @overload
-def get_logger(name: str = ..., *, level: Literal["NULL", LogEnum.NULL]) -> _NullLogger: ...
+def get_logger(
+    name: str = ...,
+    *,
+    level: Literal["NULL", LogEnum.NULL],
+    console: bool = ...,
+    file: Sequence[str | Path] | None = ...,
+    verbose: bool = ...,
+) -> _NullLogger: ...
 @overload
-def get_logger(name: str = ..., *, level: _NOT_NULL) -> BLogger: ...
+def get_logger(
+    name: str = ...,
+    *,
+    level: _NOT_NULL,
+    console: bool = ...,
+    file: Sequence[str | Path] | None = ...,
+    verbose: bool = ...,
+) -> BLogger: ...
 def get_logger(
     name: str | None = "__main__",
     *,
     level: LogLevel | LogEnum = LogEnum.INFO,
     console: bool = True,
     file: Sequence[str | Path] | None = None,
+    verbose: bool = True,
 ) -> ILogger:
     if multiprocessing.parent_process() is not None:
         return NLOGGER
@@ -53,14 +70,16 @@ def get_logger(
     logger = _LOGGERS_DICT.get(name)
     if logger is None:
         _LOGGERS_DICT[name] = (
-            NLOGGER if level is LogEnum.NULL else BLogger(level=level, stdout=console, files=file)
+            NLOGGER
+            if level is LogEnum.NULL
+            else BLogger(level=level, stdout=console, files=file, verbose=verbose)
         )
         return _LOGGERS_DICT[name]
     if logger.level == level:
         return logger
     if logger.level is LogEnum.NULL:
         # Allow NullLogger to be replaced, but not BLoggers
-        _LOGGERS_DICT[name] = BLogger(level=level, stdout=console, files=file)
+        _LOGGERS_DICT[name] = BLogger(level=level, stdout=console, files=file, verbose=verbose)
         return _LOGGERS_DICT[name]
     msg = (
         f"Logger '{name}' already exists with level {logger.level.name}. "
@@ -83,12 +102,15 @@ class BLogger(ILogger):
         header: bool = True,
         stdout: bool = True,
         files: Sequence[str | Path] | None = None,
+        verbose: bool = True,
     ) -> None:
         self._level = level if isinstance(level, LogEnum) else LogEnum[level]
         self._header = header
         self._handlers = {"STDOUT": STDOUT_HANDLER} if stdout else {}
         if files is not None:
             self._handlers.update({str(f): FileHandler(f) for f in files})
+        if verbose:
+            return
         for h in self._handlers.values():
             if self._level < LogEnum.BRIEF:
                 continue
