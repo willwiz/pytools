@@ -109,7 +109,7 @@ class BLogger(ILogger):
         self._handlers = {"STDOUT": STDOUT_HANDLER} if stdout else {}
         if files is not None:
             self._handlers.update({str(f): FileHandler(f) for f in files})
-        if verbose:
+        if not verbose:
             return
         for h in self._handlers.values():
             if self._level < LogEnum.BRIEF:
