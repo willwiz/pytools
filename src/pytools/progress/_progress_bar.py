@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import sys
 from typing import Final, Literal, TypedDict, Unpack
+
+from pytools.logging import ILogger, get_logger
 
 __all__ = ["ProgressBar"]
 
@@ -22,6 +23,7 @@ class ProgressBar:
         "_dec",
         "_endl",
         "_l",
+        "_log",
         "_n",
         "_pdiv",
         "_pfx",
@@ -45,6 +47,7 @@ class ProgressBar:
     _bdiv: Final[float]
     _pdiv: Final[float]
     _dec: Final[float]
+    _log: Final[ILogger]
     b: int
     i: int
     p: float
@@ -70,6 +73,7 @@ class ProgressBar:
         self._endl = kwargs.get("end", "\r")
         self.bar = f"{self._pfx}|{' ':{self._bmt}}|"
         self._dec = 0.01 * 0.1**decimal
+        self._log = get_logger()
 
     def reset(self) -> None:
         self.i = 0
@@ -93,9 +97,9 @@ class ProgressBar:
         if self.b != b:
             self.b = b
             self.bar = f"{self._pfx}|{self._x * b:{self._bmt}}|"
-        sys.stdout.write(self._endl)
-        sys.stdout.write(self.bar)
-        sys.stdout.write(f"{p:{self._pmt}}{self._sfx}")
+        self._log.disp(self._endl)
+        self._log.disp(self.bar)
+        self._log.disp(f"{p:{self._pmt}}{self._sfx}")
         if self.i >= self._n:
-            sys.stdout.write("\n")
-        sys.stdout.flush()
+            self._log.disp("\n")
+        self._log.flush()
