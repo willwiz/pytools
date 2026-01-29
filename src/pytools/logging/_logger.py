@@ -7,6 +7,8 @@ from inspect import getframeinfo, stack
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, Literal, overload, override
 
+from pytools.parsing import ppfmt
+
 from ._handlers import STDOUT_HANDLER, FileHandler
 from ._string_parse import cstr, debug_str, now
 from ._trait import BColors, IHandler, ILogger, LogEnum, LogLevel
@@ -185,7 +187,7 @@ class BLogger(ILogger):
     ) -> None:
         if filt and self._level > filt:
             return
-        message = "\n".join([str(m) for m in msg])
+        message = "\n".join([ppfmt(m) for m in msg])
         for h in self._handlers.values():
             h.log(message + end)
 
