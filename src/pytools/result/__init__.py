@@ -1,5 +1,6 @@
-# ruff: noqa: D418
+from __future__ import annotations
 
+# ruff: noqa: D418
 import abc
 import inspect
 import types
