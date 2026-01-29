@@ -37,7 +37,7 @@ def clear_dir(folder: Path | str, *pattern: str, exist_ok: bool = True) -> None:
     removed = [v.unlink() for s in pattern for v in folder.glob(f"{s}") if v.is_file()]
     if len(removed) == 0:
         msg = f"No files with patterns {pattern} found in dir {folder} to remove."
-        log.warn(msg)
+        log.debug(msg)
 
 
 def expand_as_path(files: Sequence[str]) -> Sequence[Path]:

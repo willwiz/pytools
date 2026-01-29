@@ -85,7 +85,7 @@ def get_logger(
         f"Logger '{name}' already exists with level {logger.level.name}. "
         f"Requested level {level.name} is ignored."
     )
-    logger.warn(msg)
+    logger.debug(msg)
     return logger
 
 
