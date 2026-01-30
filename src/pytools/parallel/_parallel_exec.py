@@ -10,8 +10,6 @@ PExecArgs = tuple[Sequence[Any], Mapping[str, Any]]
 
 PExecArgList = Iterable[PExecArgs]
 
-logger = get_logger()
-
 
 class _SupportNext(Protocol):
     def next(self) -> None: ...
@@ -25,6 +23,7 @@ def parallel_exec(
     prog_bar: _SupportNext | None = None,
 ) -> None:
     jobs: dict[futures.Future[Any], int] = {}
+    logger = get_logger()
     for i, (a, k) in enumerate(args):
         jobs[exe.submit(func, *a, **k)] = i
     for future in futures.as_completed(jobs):
@@ -70,6 +69,7 @@ class ThreadedRunner:
         self._futures[self._exe.submit(func, *args, **kwargs)] = self._counter
 
     def wait_then_shutdown(self) -> None:
+        logger = get_logger()
         for future in futures.as_completed(self._futures):
             future.result()
             self.prog_bar.next() if self.prog_bar else logger.disp(
