@@ -5,9 +5,12 @@ import abc
 import inspect
 import types
 from collections.abc import Mapping, Sequence
-from typing import Any, Never, TypeGuard, cast, overload
+from typing import Any, Generic, Never, TypeGuard, TypeVar, cast, overload
 
 __all__ = ["Err", "Ok", "all_ok", "filter_ok"]
+
+
+T_co = TypeVar("T_co", covariant=True)
 
 
 class _ResultType[T: Any](abc.ABC):
@@ -24,21 +27,21 @@ class _ResultType[T: Any](abc.ABC):
         pass
 
 
-class Ok[T: Any](_ResultType[T]):
+class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
     __slots__ = ("val",)
     __match_args__ = ("val",)
-    val: T
+    val: T_co
 
-    def __init__(self, value: T) -> None:
+    def __init__(self, value: T_co) -> None:
         self.val = value
 
-    def unwrap(self) -> T:
+    def unwrap(self) -> T_co:
         return self.val
 
-    def unwrap_or[O: Any](self, _default: O, /) -> T:  # type: ignore[reportInvalidTypeVarUse]
+    def unwrap_or[O: Any](self, _default: O, /) -> T_co | O:
         return self.val
 
-    def next(self) -> Ok[T]:
+    def next(self) -> Ok[T_co]:
         return self
 
 
@@ -67,6 +70,9 @@ class Err(_ResultType[Never]):
 
     def next(self) -> Err:
         return Err(self.val)
+
+
+type Result[T] = Ok[T] | Err
 
 
 def is_ok_sequence[T](results: Sequence[Ok[T] | Err]) -> TypeGuard[Sequence[Ok[T]]]:
