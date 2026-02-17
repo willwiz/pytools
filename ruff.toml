@@ -1,1 +1,2 @@
+target-version = "py38"
 per-file-ignores = { "tests/**/*.py" = ["S101"] }

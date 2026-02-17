@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import multiprocessing
 import sys
+import threading
 import traceback
 from inspect import getframeinfo, stack
 from pathlib import Path
@@ -35,6 +36,8 @@ _NOT_NULL = Literal[
 
 
 @overload
+def get_logger(name: None) -> _NullLogger: ...
+@overload
 def get_logger(
     *, console: bool = ..., file: Sequence[str | Path] | None = ..., verbose: bool = ...
 ) -> ILogger: ...
@@ -64,7 +67,10 @@ def get_logger(
     file: Sequence[str | Path] | None = None,
     verbose: bool = True,
 ) -> ILogger:
-    if multiprocessing.parent_process() is not None:
+    if (
+        multiprocessing.parent_process() is not None
+        or threading.current_thread() is not threading.main_thread()
+    ):
         return NLOGGER
     if name is None:
         return NLOGGER
@@ -185,7 +191,7 @@ class BLogger(ILogger):
     def disp(
         self, *msg: object, end: Literal["\n", "\r", ""] = "\n", filt: LogEnum | None = None
     ) -> None:
-        if filt and self._level > filt:
+        if filt and self._level <= filt:
             return
         message = "\n".join([ppfmt(m) for m in msg])
         for h in self._handlers.values():

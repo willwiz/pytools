@@ -1,3 +1,3 @@
-from ._path_tools import clear_dir, expand_as_path, expanded_path_generator
+from ._path_tools import IterateAsPath, IterUnpack, clear_dir, expand_as_path, iter_unpack
 
-__all__ = ["clear_dir", "expand_as_path", "expanded_path_generator"]
+__all__ = ["IterUnpack", "IterateAsPath", "clear_dir", "expand_as_path", "iter_unpack"]

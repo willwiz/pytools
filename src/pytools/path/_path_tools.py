@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypeVar
 from warnings import deprecated
 
 from pytools.logging import get_logger
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Sequence
+    from collections.abc import Generator
 
 
 @deprecated("Use pathlib.Path directly instead.")
@@ -45,5 +46,58 @@ def expand_as_path(files: Sequence[str]) -> Sequence[Path]:
     return [Path(f) for name in files for f in Path().glob(name)]
 
 
-def expanded_path_generator(files: Sequence[str]) -> Generator[Path]:
-    return (Path(f) for name in files for f in Path().glob(name))
+# def iterate_as_path(files: Sequence[str]) -> Generator[Path]:
+#     for name in files:
+#         for f in Path().glob(name):
+#             yield Path(f)
+
+
+class IterateAsPath:
+    def __init__(self, files: Sequence[str]) -> None:
+        self.files = files
+
+    def __iter__(self) -> Generator[Path]:
+        for name in self.files:
+            for f in Path().glob(name):
+                yield Path(f)
+
+
+T = TypeVar("T")
+IterableValues = (
+    Mapping[Any, "IterableValues[T]"]
+    | Sequence["IterableValues[T]"]
+    | Mapping[Any, T]
+    | Sequence[T]
+    | T
+)
+
+
+class IterUnpack[T]:
+    __slots__ = ("var",)
+    var: IterableValues[T]
+
+    def __init__(self, var: IterableValues[T]) -> None:
+        self.var = var
+
+    def __iter__(self) -> Generator[T]:
+        match self.var:
+            case Mapping():
+                for v in self.var.values():
+                    yield from IterUnpack(v)
+            case Sequence():
+                for v in self.var:
+                    yield from IterUnpack(v)
+            case _:
+                yield self.var
+
+
+def iter_unpack(var: IterableValues[T]) -> Generator[T]:
+    match var:
+        case Mapping():
+            for v in var.values():
+                yield from iter_unpack(v)
+        case Sequence():
+            for v in var:
+                yield from iter_unpack(v)
+        case _:
+            yield var

@@ -30,11 +30,13 @@ def dict_format(dct: Mapping[str, object], *, layer: int = 0) -> str:
 
 def ppfmt(items: object, *, layer: int = 0) -> str:
     match items:
-        case Mapping():
-            return dict_format(cast("Mapping[str, object]", items), layer=layer)
         case str() | float() | int():
             return str(items)
+        case Mapping():
+            return dict_format(cast("Mapping[str, object]", items), layer=layer)
         case Sequence():
             return list_format(cast("Sequence[object]", items), layer=layer)
+        # case Iterable():
+        #     return list_format(items, layer=layer)
         case _:
             return str(items)

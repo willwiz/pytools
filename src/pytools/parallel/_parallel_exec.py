@@ -71,8 +71,7 @@ class ThreadedRunner:
     def wait_then_shutdown(self) -> None:
         logger = get_logger()
         for future in futures.as_completed(self._futures):
-            future.result()
             self.prog_bar.next() if self.prog_bar else logger.disp(
-                f"<<< Completed {self._futures[future]}"
+                future.result() or f"<<< Completed {self._futures[future]}"
             )
         self._exe.shutdown()
