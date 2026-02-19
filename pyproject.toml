@@ -4,7 +4,7 @@ version = "1.1.0a"
 authors = [{ name = "Will Zhang", email = "willwz@gmail.com" }]
 description = "Basic tools for Python development"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 license = "MIT"
 license-files = ["LICENSE"]
 classifiers = [
