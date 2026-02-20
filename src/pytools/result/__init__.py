@@ -15,6 +15,8 @@ T_co = TypeVar("T_co", covariant=True)
 
 class _ResultType[T: Any](abc.ABC):
     @abc.abstractmethod
+    def __str__(self) -> str: ...
+    @abc.abstractmethod
     def unwrap(self) -> T: ...
 
     @abc.abstractmethod
@@ -22,6 +24,9 @@ class _ResultType[T: Any](abc.ABC):
 
     @abc.abstractmethod
     def next(self) -> _ResultType[T]: ...
+
+    @abc.abstractmethod
+    def ok(self) -> bool: ...
 
 
 class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
@@ -32,6 +37,9 @@ class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
     def __init__(self, value: T_co) -> None:
         self.val = value
 
+    def __str__(self) -> str:
+        return f"{self.val!s}"
+
     def unwrap(self) -> T_co:
         return self.val
 
@@ -40,6 +48,9 @@ class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
 
     def next(self) -> Ok[T_co]:
         return self
+
+    def ok(self) -> bool:
+        return True
 
 
 class Err(_ResultType[Never]):
@@ -59,6 +70,9 @@ class Err(_ResultType[Never]):
                 raise RuntimeError(msg)
         self.val = value.with_traceback(tb)
 
+    def __str__(self) -> str:
+        return f"{self.val!s}"
+
     def unwrap(self) -> Never:
         raise self.val
 
@@ -67,6 +81,9 @@ class Err(_ResultType[Never]):
 
     def next(self) -> Err:
         return Err(self.val)
+
+    def ok(self) -> bool:
+        return False
 
 
 type Result[T] = Ok[T] | Err
