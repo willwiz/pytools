@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Generator, Mapping, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any
 from warnings import deprecated
 
 from pytools.logging import get_logger
-
-if TYPE_CHECKING:
-    from collections.abc import Generator
 
 
 @deprecated("Use pathlib.Path directly instead.")
@@ -62,26 +59,34 @@ class IterateAsPath:
                 yield Path(f)
 
 
-type IterableValues[T] = (
-    Mapping[Any, "IterableValues[T]"]
-    | Sequence["IterableValues[T]"]
-    | Mapping[Any, T]
-    | Sequence[T]
-    | T
+type PackedValues[T] = (
+    Mapping[Any, Mapping[Any, T]]
+    | Mapping[Any, Sequence[T]]
+    | Sequence[Mapping[Any, T]]
+    | Sequence[Sequence[T]]
+    | Generator[Mapping[Any, T]]
+    | Generator[Sequence[T]]
 )
 
+type IterableValues[T] = Mapping[Any, T] | Sequence[T] | Generator[T]
 
-def iter_unpack[T: Any](var: IterableValues[T]) -> Generator[T]:
+
+def iter_from[T](var: IterableValues[T]) -> Generator[T]:
     match var:
-        case str():
-            yield var
         case Mapping():
-            var = cast("Mapping[Any, IterableValues[T]]|Mapping[Any, T]", var)
-            for v in var.values():
-                yield from iter_unpack(v)
-        case Sequence():
-            var = cast("Sequence[IterableValues[T]]|Sequence[T]", var)
+            yield from var.values()
+        case Generator() | Sequence():
+            yield from var
+
+
+def iter_unpack[T: Any](var: PackedValues[T]) -> Generator[T]:
+    match var:
+        case Generator():
             for v in var:
-                yield from iter_unpack(v)
-        case _:
-            yield var
+                yield from iter_from(v)
+        case Mapping():
+            for v in var.values():
+                yield from iter_from(v)
+        case Sequence():
+            for v in var:
+                yield from iter_from(v)

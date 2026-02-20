@@ -40,11 +40,9 @@ class FileHandler(IHandler):
 
 
 class STDOUTHandler(IHandler):
-    def __init__(self) -> None:
-        pass
+    def __init__(self) -> None: ...
 
-    def __del__(self) -> None:
-        pass
+    def __del__(self) -> None: ...
 
     def __repr__(self) -> str:
         return f"<STDOUTHandler: {id(self)}>"

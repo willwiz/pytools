@@ -15,16 +15,13 @@ T_co = TypeVar("T_co", covariant=True)
 
 class _ResultType[T: Any](abc.ABC):
     @abc.abstractmethod
-    def unwrap(self) -> T:
-        pass
+    def unwrap(self) -> T: ...
 
     @abc.abstractmethod
-    def unwrap_or[O: Any](self, default: O, /) -> T | O:
-        pass
+    def unwrap_or[O: Any](self, default: O, /) -> T | O: ...
 
     @abc.abstractmethod
-    def next(self) -> _ResultType[T]:
-        pass
+    def next(self) -> _ResultType[T]: ...
 
 
 class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
@@ -168,7 +165,13 @@ def all_ok[K, V](
             return _all_ok_sequence(result)
 
 
-def filter_ok[T](results: Sequence[Ok[T] | Err]) -> Sequence[T]:
+@overload
+def filter_ok[V](results: Sequence[Ok[V] | Err]) -> Sequence[V]: ...
+@overload
+def filter_ok[K, V](results: Mapping[K, Ok[V] | Err]) -> Mapping[K, V]: ...
+def filter_ok[K, V](
+    results: Sequence[Ok[V] | Err] | Mapping[K, Ok[V] | Err],
+) -> Sequence[V] | Mapping[K, V]:
     """Filter out all Ok values from a sequence of Ok and Err results.
 
     Parameters
@@ -178,8 +181,12 @@ def filter_ok[T](results: Sequence[Ok[T] | Err]) -> Sequence[T]:
 
     Returns
     -------
-    Sequence[T]
-        A sequence of T values from the Ok results.
+    Sequence[V]
+        A sequence of V values from the Ok results.
 
     """
-    return [res.val for res in results if isinstance(res, Ok)]
+    match results:
+        case Mapping():
+            return {k: res.val for k, res in results.items() if isinstance(res, Ok)}
+        case Sequence():
+            return [res.val for res in results if isinstance(res, Ok)]

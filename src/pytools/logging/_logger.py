@@ -255,31 +255,23 @@ class _NullLogger(ILogger):
     def console(self, console: bool) -> None:
         sys.stderr.write("<<< Warning: Cannot set console on NullLogger\n")
 
-    def add_handler(self, handler: IHandler | Path | str, *, name: str | None = None) -> None:
-        pass
+    def add_handler(self, handler: IHandler | Path | str, *, name: str | None = None) -> None: ...
 
-    def remove_handler(self, handler: IHandler | str) -> None:
-        pass
+    def remove_handler(self, handler: IHandler | str) -> None: ...
 
-    def flush(self) -> None:
-        pass
+    def flush(self) -> None: ...
 
-    def log(self, *msg: object, level: LogEnum = LogEnum.BRIEF) -> None:
-        pass
+    def log(self, *msg: object, level: LogEnum = LogEnum.BRIEF) -> None: ...
 
     def disp(
         self, *msg: object, end: Literal["\n", "\r", ""] = "\n", filt: LogEnum | None = None
-    ) -> None:
-        pass
+    ) -> None: ...
 
-    def debug(self, *msg: object) -> None:
-        pass
+    def debug(self, *msg: object) -> None: ...
 
-    def info(self, *msg: object) -> None:
-        pass
+    def info(self, *msg: object) -> None: ...
 
-    def brief(self, *msg: object) -> None:
-        pass
+    def brief(self, *msg: object) -> None: ...
 
     def warn(self, *msg: object) -> None:
         sys.stderr.write("<<< Warning: " + "\n".join(str(m) for m in msg) + "\n")
@@ -293,8 +285,7 @@ class _NullLogger(ILogger):
     def exception(self, e: Exception) -> Exception:
         return e
 
-    def close(self) -> None:
-        pass
+    def close(self) -> None: ...
 
 
 NLOGGER: ILogger = _NullLogger()
