@@ -70,9 +70,7 @@ def get_logger(
     if (
         multiprocessing.parent_process() is not None
         or threading.current_thread() is not threading.main_thread()
-    ):
-        return NLOGGER
-    if name is None:
+    ) or (name is None):
         return NLOGGER
     logger = _LOGGERS_DICT.get(name)
     if logger is None:
@@ -84,9 +82,7 @@ def get_logger(
             else BLogger(level=level, stdout=console, files=file, verbose=verbose)
         )
         return _LOGGERS_DICT[name]
-    if level is None:
-        return logger
-    if logger.level == level:
+    if level is None or (logger.level == level):
         return logger
     if logger.level is LogEnum.NULL:
         # Allow NullLogger to be replaced, but not BLoggers
