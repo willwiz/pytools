@@ -54,7 +54,7 @@ def get_logger(
 def get_logger(
     name: str = ...,
     *,
-    level: _NOT_NULL,
+    level: _NOT_NULL | None,
     console: bool = ...,
     file: Sequence[str | Path] | None = ...,
     verbose: bool = ...,
@@ -62,7 +62,7 @@ def get_logger(
 def get_logger(
     name: str | None = "__main__",
     *,
-    level: LogLevel | LogEnum = LogEnum.INFO,
+    level: LogLevel | LogEnum | None = None,
     console: bool = True,
     file: Sequence[str | Path] | None = None,
     verbose: bool = True,
@@ -74,15 +74,18 @@ def get_logger(
         return NLOGGER
     if name is None:
         return NLOGGER
-    level = level if isinstance(level, LogEnum) else LogEnum[level]
     logger = _LOGGERS_DICT.get(name)
     if logger is None:
+        level = LogEnum.INFO if level is None else level
+        level = level if isinstance(level, LogEnum) else LogEnum[level]
         _LOGGERS_DICT[name] = (
             NLOGGER
             if level is LogEnum.NULL
             else BLogger(level=level, stdout=console, files=file, verbose=verbose)
         )
         return _LOGGERS_DICT[name]
+    if level is None:
+        return logger
     if logger.level == level:
         return logger
     if logger.level is LogEnum.NULL:
@@ -90,8 +93,8 @@ def get_logger(
         _LOGGERS_DICT[name] = BLogger(level=level, stdout=console, files=file, verbose=verbose)
         return _LOGGERS_DICT[name]
     msg = (
-        f"Logger '{name}' already exists with level {logger.level.name}. "
-        f"Requested level {level.name} is ignored."
+        f"Logger '{name}' already exists with level {logger.level!s}. "
+        f"Requested level {level!s} is ignored."
     )
     logger.debug(msg)
     return logger
