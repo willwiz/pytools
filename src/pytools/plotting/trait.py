@@ -57,7 +57,7 @@ class PlotKwargs(TypedDict, total=False):
     padbottom: float
     hspace: float
     wspace: float
-    transparency: bool
+    transparent: bool
     width: float
     hatch: str | Sequence[str]
     head_space: float

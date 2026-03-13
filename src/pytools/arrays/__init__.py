@@ -33,7 +33,7 @@ type T1[T] = tuple[T]
 type T2[T] = tuple[T, T]
 type T3[T] = tuple[T, T, T]
 
-_DTypeT_co = TypeVar("_DTypeT_co", bound=np.dtype, covariant=True)
+_DTypeT_co = TypeVar("_DTypeT_co", bound=np.dtype[np.generic], covariant=True)
 
 
 @runtime_checkable
@@ -42,4 +42,4 @@ class _SupportsDType(Protocol[_DTypeT_co]):
     def dtype(self) -> _DTypeT_co: ...
 
 
-type DType[T: np.generic] = type[T] | np.dtype[T] | _SupportsDType[np.dtype[T]]
+type DType[T: np.generic = np.generic] = type[T] | np.dtype[T] | _SupportsDType[np.dtype[T]]
