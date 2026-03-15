@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Protocol, TypeVar, runtime_checkable
+from typing import Any, Protocol, TypeVar, runtime_checkable
 
 import numpy as np
 
@@ -33,13 +33,18 @@ type T1[T] = tuple[T]
 type T2[T] = tuple[T, T]
 type T3[T] = tuple[T, T, T]
 
-_DTypeT_co = TypeVar("_DTypeT_co", bound=np.dtype[np.generic], covariant=True)
+_DType_co = TypeVar("_DType_co", bound=np.dtype[np.generic[Any]], covariant=True)
 
 
 @runtime_checkable
-class _SupportsDType(Protocol[_DTypeT_co]):
+class _SupportsDType(Protocol[_DType_co]):
     @property
-    def dtype(self) -> _DTypeT_co: ...
+    def dtype(self) -> _DType_co: ...
 
 
-type DType[T: np.generic = np.generic] = type[T] | np.dtype[T] | _SupportsDType[np.dtype[T]]
+type DType[T: np.generic[Any] = np.generic[Any]] = (
+    type[T] | np.dtype[T] | _SupportsDType[np.dtype[T]]
+)
+
+type ToInt = int | np.integer[Any]
+type ToFloat = float | np.floating[Any] | np.integer[Any]
