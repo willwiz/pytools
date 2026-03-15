@@ -46,5 +46,6 @@ type DType[T: np.generic[Any] = np.generic[Any]] = (
     type[T] | np.dtype[T] | _SupportsDType[np.dtype[T]]
 )
 
+type ToIndex = int | np.integer[Any] | bool | np.bool_
 type ToInt = int | np.integer[Any]
 type ToFloat = float | np.floating[Any] | np.integer[Any]
