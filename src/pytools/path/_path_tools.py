@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Generator, Mapping, Sequence
+from collections.abc import Generator, Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 from warnings import deprecated
@@ -38,9 +38,9 @@ def clear_dir(folder: Path | str, *pattern: str, exist_ok: bool = True) -> None:
         log.debug(msg)
 
 
-def expand_as_path(files: Sequence[str]) -> Sequence[Path]:
+def expand_as_path(files: Iterable[str | Path]) -> Sequence[Path]:
     """Expand user and vars in path."""
-    return [Path(f) for name in files for f in Path().glob(name)]
+    return [Path(f) for name in files for f in Path().glob(str(name))]
 
 
 # def iterate_as_path(files: Sequence[str]) -> Generator[Path]:

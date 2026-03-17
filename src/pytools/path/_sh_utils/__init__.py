@@ -1,3 +1,3 @@
-from ._archive import archive_cli
+from ._zip import zip_cli, zip_parser
 
-__all__ = ["archive_cli"]
+__all__ = ["zip_cli", "zip_parser"]

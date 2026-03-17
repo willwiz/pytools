@@ -1,10 +1,14 @@
+[build-system]
+requires = ["uv_build>=0.10.9,<0.11"]
+build-backend = "uv_build"
+
 [project]
 name = "pytools"
 version = "1.1.0a"
 authors = [{ name = "Will Zhang", email = "willwz@gmail.com" }]
 description = "Basic tools for Python development"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 license = "MIT"
 license-files = ["LICENSE"]
 classifiers = [
@@ -12,6 +16,9 @@ classifiers = [
   "Development Status :: 1 - Beta",
 ]
 dependencies = ["matplotlib>=3.10.5", "numpy>=2.3.2"]
+
+[project.scripts]
+archive = "pytools.path.__main__:main_cli"
 
 [tool.uv.sources]
 pytools = { workspace = true }
