@@ -1,6 +1,4 @@
 import argparse
-import dataclasses as dc
-from typing import Literal
 
 from ._sh_utils import zip_cli, zip_parser
 
@@ -11,14 +9,8 @@ subparsers.add_parser(
 )
 
 
-@dc.dataclass(slots=True)
-class MainArguments:
-    command: Literal["archive"] | None
-    _unrecognized_args: list[str]
-
-
 def main_cli(args: list[str] | None = None) -> None:
-    main_args = parser.parse_args(args, namespace=MainArguments(None, []))
+    main_args = parser.parse_args(args)
     match main_args.command:
         case "zip":
             zip_cli(args)

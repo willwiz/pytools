@@ -24,7 +24,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
     from types import UnionType
 
-type Filter = Literal["MACOS", "GIT", "PYTHON", "HIDDEN", "LOG", "DATA", "DEFAULT"]
+
+Filter = Literal["MACOS", "GIT", "PYTHON", "HIDDEN", "LOG", "DATA", "DEFAULT"]
+
+
 FILTERS: Mapping[Filter, Mapping[Literal["match", "prefix", "suffix"], Sequence[str]]] = {
     "MACOS": {"match": [".DS_Store", "__MACOSX"]},
     "GIT": {"match": [".git"]},
@@ -34,6 +37,15 @@ FILTERS: Mapping[Filter, Mapping[Literal["match", "prefix", "suffix"], Sequence[
     "DATA": {"suffix": [".dat", ".D"]},
     "DEFAULT": {"prefix": ["."], "match": ["__MACOSX", "__pycache__"], "suffix": [".D", ".log"]},
 }
+
+API_KWARGS: Mapping[str, type | UnionType] = {
+    "output_dir": Path,
+    "thread": int,
+    "log_level": LogLevel,
+    "dry_run": bool,
+    "dir_only": bool,
+}
+
 
 zip_parser = argparse.ArgumentParser(
     description="Compress a directory into a tar.gz archive.", add_help=False
@@ -45,7 +57,7 @@ zip_parser.add_argument(
     "--exclude",
     "-x",
     type=str.upper,
-    choices=get_args(Filter.__value__),
+    choices=get_args(Filter),
     action="append",
     help="Filters to apply when compressing.",
 )
@@ -64,9 +76,9 @@ zip_parser.add_argument(
 zip_parser.add_argument(
     "--thread",
     type=int,
-    default=1,
     help="Number of parallel compressions to run.",
 )
+zip_parser.add_argument("--dir-only", action="store_true", help="Only compress directories.")
 zip_parser.add_argument("names", type=str, nargs="+", help="The input directories to compress.")
 
 
@@ -88,6 +100,7 @@ class APIKwargs(TypedDict, total=False):
     log_level: LogLevel
     thread: int
     dry_run: bool
+    dir_only: bool
 
 
 class _CmdLineArguments(NamedTuple):
@@ -130,13 +143,34 @@ def compress(output_file: Path, *input_dir: Path, filt: ArchiveFilter) -> None:
 
 
 def archive_core(output_dir: Path, input_dir: Path, filt: ArchiveFilter) -> str:
-    archive_file = output_dir / input_dir.stem
+    archive_file = output_dir / input_dir.parent / input_dir.stem
+    archive_file.parent.mkdir(parents=True, exist_ok=True)
     compress(archive_file, input_dir, filt=filt)
     return f"Archive for {input_dir} created successfully.\n"
 
 
+def compose_program_args(
+    filter_list: Mapping[str, Mapping[Literal["match", "prefix", "suffix"], Sequence[str]]],
+    archives: Mapping[Path, Path],
+    **kwargs: Unpack[APIKwargs],
+) -> list[object]:
+    files = {v for k, v in archives.items() if v.is_file()}
+    folders = {v for k, v in archives.items() if v.is_dir()}
+    return [
+        "  Archive Folders:",
+        folders,
+        "  Archive Files:",
+        files,
+        "  Selected Filters:"
+        if kwargs.get("filters")
+        else "  No filters specified, using default.",
+        filter_list,
+    ]
+
+
 def archive_api(*names: str | Path, **kwargs: Unpack[APIKwargs]) -> Result[None]:
     log = get_logger(level=kwargs.get("log_level"))
+    log.info(">>> Running sessions with settings:", dict(kwargs))
     output_dir = kwargs.get("output_dir", Path.cwd())
     if output_dir.is_file():
         msg = f"Output directory: {output_dir} is a file!"
@@ -144,22 +178,20 @@ def archive_api(*names: str | Path, **kwargs: Unpack[APIKwargs]) -> Result[None]
         msg = f"Output directory: {output_dir} was not found!"
         return Err(ValueError(msg))
     filters = kwargs.get("filters", [])
-    if not filters:
-        log.debug("No filters specified, using default.")
-    log.info("Running sessions with settings", dict(kwargs))
     filter_list = {k: FILTERS[k] for k in (filters or ["DEFAULT"])}
     item_filter = ArchiveFilter(filter_list)
     items = expand_as_path(names)
+    items = [i for i in items if not i.name.endswith(".tar.gz")]
+    if kwargs.get("dir_only"):
+        items = [i for i in items if i.is_dir()]
     if not items:
         msg = "No item found for compression"
         log.warn(msg)
         return Err(FileNotFoundError(msg))
-    log.info("Files Found:", items)
+    archives = {output_dir / i.with_suffix(".tar.gz"): i for i in items}
+    log.info(*compose_program_args(filter_list, archives, **kwargs))
     if kwargs.get("dry_run"):
-        files = [i for i in items if i.is_file()]
-        folders = [i for i in items if i.is_dir()]
-        log.disp("  Filter:", filter_list, "  Archive Folders:", folders, "  Archive Files:", files)
-        log.disp("Dry run enabled. No archives will be created.")
+        log.info(">>> Dry run complete. No archives were created.")
         return Ok(None)
     if threads := kwargs.get("thread"):
         with ThreadedRunner(thread=threads) as runner:
@@ -169,21 +201,12 @@ def archive_api(*names: str | Path, **kwargs: Unpack[APIKwargs]) -> Result[None]
     else:
         for input_dir in items:
             log.info(f"Compressing {(output_dir / input_dir.stem).with_suffix('.tar.gz')}\n")
-            msg = archive_core(output_dir, input_dir, filt=item_filter)
-            log.info(msg)
+            log.info(archive_core(output_dir, input_dir, filt=item_filter))
     log.info(
         "Completed Archives:",
-        [f for input_dir in items for f in output_dir.glob(f"{input_dir.stem}.tar.gz")],
+        [k for k in archives if k.is_file()],
     )
     return Ok(None)
-
-
-API_KWARGS: Mapping[str, type | UnionType] = {
-    "output_dir": Path,
-    "thread": int,
-    "log_level": LogLevel,
-    "dry_run": bool,
-}
 
 
 def get_command_line_arguments(args: Sequence[str] | None = None) -> Result[_CmdLineArguments]:
@@ -195,8 +218,12 @@ def get_command_line_arguments(args: Sequence[str] | None = None) -> Result[_Cmd
     for n, k in API_KWARGS.items():
         if _is_type(v := namespace.get(n), k):
             kwargs[n] = v
+        elif v is None:
+            continue
+        else:
+            return Err(ValueError(f"Invalid type for `{n}`: expected {k}, got {type(v)}"))
     filters = namespace.get("filters")
-    if _is_sequence_t(filters, Filter.__value__):
+    if _is_sequence_t(filters, Filter):
         kwargs["filters"] = filters
     return Ok(_CmdLineArguments(names, kwargs))
 
