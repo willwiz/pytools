@@ -1,0 +1,19 @@
+from collections.abc import Callable
+from typing import Any, Protocol, Self, TypedDict, Unpack
+
+class _SupportNext(Protocol):
+    def next(self) -> None: ...
+
+class ThreadMethods(TypedDict, total=False):
+    core: int
+    thread: int
+    interpreter: int
+
+class ThreadedRunner:
+    def __init__(
+        self, *, prog_bar: _SupportNext | None = None, **kwargs: Unpack[ThreadMethods]
+    ) -> None: ...
+    def __enter__(self) -> Self: ...
+    def __exit__(self, *_args: object) -> None: ...
+    def submit(self, func: Callable[..., Any], *args: object, **kwargs: object) -> None: ...
+    def wait_then_shutdown(self) -> None: ...

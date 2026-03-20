@@ -1,0 +1,171 @@
+from __future__ import annotations
+
+import abc
+import inspect
+import types
+from collections.abc import Mapping, Sequence
+from typing import Any, Generic, Never, TypeGuard, TypeVar, cast, overload
+
+__all__ = ["Err", "Ok", "all_ok", "filter_ok"]
+
+
+T_co = TypeVar("T_co", covariant=True)
+
+
+class _ResultType[T: Any](abc.ABC):
+    @abc.abstractmethod
+    def __str__(self) -> str: ...
+    @abc.abstractmethod
+    def unwrap(self) -> T: ...
+
+    @abc.abstractmethod
+    def unwrap_or[O: Any](self, default: O, /) -> T | O: ...
+
+    @abc.abstractmethod
+    def next(self) -> _ResultType[T]: ...
+
+    @abc.abstractmethod
+    def ok(self) -> bool: ...
+
+
+class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
+    __slots__ = ("val",)
+    __match_args__ = ("val",)
+    val: T_co
+
+    def __init__(self, value: T_co) -> None:
+        self.val = value
+
+    def __str__(self) -> str:
+        return f"{self.val!s}"
+
+    def unwrap(self) -> T_co:
+        return self.val
+
+    def unwrap_or[O: Any](self, _default: O, /) -> T_co | O:
+        return self.val
+
+    def next(self) -> Ok[T_co]:
+        return self
+
+    def ok(self) -> bool:
+        return True
+
+
+class Err(_ResultType[Never]):
+    __slots__ = ("val",)
+    __match_args__ = ("val",)
+    val: Exception
+
+    def __init__(self, value: Exception) -> None:
+        match inspect.currentframe():
+            case types.FrameType(f_back=frame):
+                if frame is None:
+                    msg = "Failed to get caller frame for Err."
+                    raise RuntimeError(msg)
+                tb = types.TracebackType(value.__traceback__, frame, frame.f_lasti, frame.f_lineno)
+            case None:
+                msg = "Failed to get current frame for Err. Should never reach here."
+                raise RuntimeError(msg)
+        self.val = value.with_traceback(tb)
+
+    def __str__(self) -> str:
+        return f"{self.val!s}"
+
+    def unwrap(self) -> Never:
+        raise self.val
+
+    def unwrap_or[O: Any](self, default: O, /) -> O:
+        return default
+
+    def next(self) -> Err:
+        return Err(self.val)
+
+    def ok(self) -> bool:
+        return False
+
+
+type Result[T] = Ok[T] | Err
+
+
+def _is_ok_sequence[T](results: Sequence[Ok[T] | Err]) -> TypeGuard[Sequence[Ok[T]]]:
+    return all(isinstance(res, Ok) for res in results)
+
+
+def _is_ok_mapping[K, V](results: Mapping[K, Ok[V] | Err]) -> TypeGuard[Mapping[K, Ok[V]]]:
+    return all(isinstance(res, Ok) for res in results.values())
+
+
+@overload
+def is_all_ok[T](results: Sequence[Ok[T] | Err]) -> TypeGuard[Sequence[Ok[T]]]: ...
+@overload
+def is_all_ok[K, V](results: Mapping[K, Ok[V] | Err]) -> TypeGuard[Mapping[K, Ok[V]]]: ...
+
+
+def is_all_ok[K, V](results: Sequence[Ok[V] | Err] | Mapping[K, Ok[V] | Err]):
+    match results:
+        case Mapping():
+            return _is_ok_mapping(results)
+        case Sequence():
+            return _is_ok_sequence(results)
+
+
+def _all_ok_dict[K, V](result: Mapping[K, Ok[V] | Err]) -> Ok[Mapping[K, V]] | Err:
+    for res in result.values():
+        if isinstance(res, Err):
+            return Err(res.val)
+    return Ok({key: res.val for key, res in cast("Mapping[K, Ok[V]]", result).items()})
+
+
+def _all_ok_sequence[V](result: Sequence[Ok[V] | Err]) -> Ok[Sequence[V]] | Err:
+    for res in result:
+        if isinstance(res, Err):
+            return Err(res.val)
+    return Ok([res.val for res in cast("Sequence[Ok[V]]", result)])
+
+
+@overload
+def all_ok[T](
+    result: Sequence[Ok[T] | Err],
+) -> Ok[Sequence[T]] | Err: ...
+
+
+@overload
+def all_ok[K, V](
+    result: Mapping[K, Ok[V] | Err],
+) -> Ok[Mapping[K, V]] | Err: ...
+
+
+def all_ok[K, V](result: Sequence[Ok[V] | Err] | Mapping[K, Ok[V] | Err]):
+    match result:
+        case Mapping():
+            return _all_ok_dict(result)
+        case Sequence():
+            return _all_ok_sequence(result)
+
+
+@overload
+def filter_ok[V](results: Sequence[Ok[V] | Err]) -> Sequence[V]: ...
+@overload
+def filter_ok[K, V](results: Mapping[K, Ok[V] | Err]) -> Mapping[K, V]: ...
+def filter_ok[K, V](
+    results: Sequence[Ok[V] | Err] | Mapping[K, Ok[V] | Err],
+) -> Sequence[V] | Mapping[K, V]:
+    """Filter out all Ok values from a sequence of Ok and Err results.
+
+    Parameters
+    ----------
+    results : Sequence[Ok[T] | Err]
+        A sequence of Ok or Err results.
+
+    Returns
+    -------
+    Sequence[V]
+        A sequence of V values from the Ok results.
+
+    """
+    match results:
+        case Mapping():
+            return {k: res.val for k, res in results.items() if isinstance(res, Ok)}
+        case Sequence():
+            return [res.val for res in results if isinstance(res, Ok)]

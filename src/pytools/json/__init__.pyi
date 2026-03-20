@@ -6,16 +6,7 @@ Type aliases for `json` standard library.
 This assumes that the default encoder and decoder are used.
 """
 
-
 __all__ = "AnyArray", "AnyObject", "AnyValue", "Array", "Object", "_Value"
-
-
-def __dir__() -> tuple[str, ...]:
-    return __all__
-
-
-###
-
 
 type _Primitive = bool | int | float | str | None
 type _Value = _Primitive | Mapping[str, _Value] | Sequence[_Value]
@@ -30,14 +21,12 @@ type _AnyValue = (
     | tuple[_AnyValue, ...]
 )
 
-
 # Return types of `json.load[s]`
 
 type Array[_VT: _Value = _Value] = Sequence[_VT]
 type Object[_VT: _Value = _Value] = Mapping[str, _VT]
 # ensure that `Value | Array | Object` is equivalent to `Value`
 type Value = _Value | Array | Object
-
 
 # Input types of `json.dumps`
 

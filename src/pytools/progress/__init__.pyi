@@ -1,0 +1,16 @@
+from typing import Literal, TypedDict, Unpack
+
+class PBarKwargs(TypedDict, total=False):
+    length: int
+    decimal: int
+    pixel: str
+    end: Literal["\n", "\r", ""]
+
+class ProgressBar:
+    def __init__(
+        self, n: int, prefix: str = "", suffix: str = "", **kwargs: Unpack[PBarKwargs]
+    ) -> None: ...
+    def reset(self) -> None: ...
+    def next(self) -> None: ...
+    def finish(self) -> None: ...
+    def _print_bar(self) -> None: ...

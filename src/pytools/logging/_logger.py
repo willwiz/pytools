@@ -6,7 +6,7 @@ import threading
 import traceback
 from inspect import getframeinfo, stack
 from pathlib import Path
-from typing import TYPE_CHECKING, Final, Literal, overload, override
+from typing import TYPE_CHECKING, Final, Literal, override
 
 from pytools.parsing import ppfmt
 
@@ -19,46 +19,7 @@ if TYPE_CHECKING:
 
 
 _LOGGERS_DICT: Final[dict[str, ILogger]] = {}
-_NOT_NULL = Literal[
-    "DEBUG",
-    "INFO",
-    "BRIEF",
-    "WARN",
-    "ERROR",
-    "FATAL",
-    LogEnum.DEBUG,
-    LogEnum.INFO,
-    LogEnum.BRIEF,
-    LogEnum.WARN,
-    LogEnum.ERROR,
-    LogEnum.FATAL,
-]
 
-
-@overload
-def get_logger(name: None) -> _NullLogger: ...
-@overload
-def get_logger(
-    *, console: bool = ..., file: Sequence[str | Path] | None = ..., verbose: bool = ...
-) -> ILogger: ...
-@overload
-def get_logger(
-    name: str = ...,
-    *,
-    level: Literal["NULL", LogEnum.NULL],
-    console: bool = ...,
-    file: Sequence[str | Path] | None = ...,
-    verbose: bool = ...,
-) -> _NullLogger: ...
-@overload
-def get_logger(
-    name: str = ...,
-    *,
-    level: _NOT_NULL | None,
-    console: bool = ...,
-    file: Sequence[str | Path] | None = ...,
-    verbose: bool = ...,
-) -> BLogger: ...
 def get_logger(
     name: str | None = "__main__",
     *,

@@ -1,3 +1,3 @@
-from ._parallel_exec import PExecArgList, PExecArgs, ThreadedRunner, ThreadMethods, parallel_exec
+from ._parallel_exec import ThreadedRunner, ThreadMethods
 
-__all__ = ["PExecArgList", "PExecArgs", "ThreadMethods", "ThreadedRunner", "parallel_exec"]
+__all__ = ["ThreadMethods", "ThreadedRunner"]
