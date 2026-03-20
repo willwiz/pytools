@@ -80,8 +80,6 @@ zip_parser.add_argument("--dir-only", action="store_true", help="Only compress d
 zip_parser.add_argument("names", type=str, nargs="+", help="The input directories to compress.")
 
 
-
-
 class APIKwargs(TypedDict, total=False):
     output_dir: Path
     filters: Sequence[Filter]
