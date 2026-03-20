@@ -14,7 +14,7 @@ def main_cli(args: list[str] | None = None) -> None:
     match main_args.command:
         case "zip":
             zip_cli(args)
-        case None:
+        case _:
             parser.print_help()
 
 

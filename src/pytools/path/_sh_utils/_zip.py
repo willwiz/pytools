@@ -1,6 +1,5 @@
 import argparse
 import tarfile
-from collections.abc import Sequence
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -8,24 +7,23 @@ from typing import (
     Final,
     Literal,
     NamedTuple,
+    TypeAliasType,
     TypedDict,
-    TypeIs,
     Unpack,
     get_args,
-    get_origin,
 )
 
 from pytools.logging import LogEnum, LogLevel, get_logger
 from pytools.parallel import ThreadedRunner
 from pytools.path import expand_as_path
 from pytools.result import Err, Ok, Result
+from pytools.typing import is_sequence_t, is_type
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-    from types import UnionType
+    from collections.abc import Mapping, Sequence
 
 
-Filter = Literal["MACOS", "GIT", "PYTHON", "HIDDEN", "LOG", "DATA", "DEFAULT"]
+type Filter = Literal["MACOS", "GIT", "PYTHON", "HIDDEN", "LOG", "DATA", "DEFAULT"]
 
 
 FILTERS: Mapping[Filter, Mapping[Literal["match", "prefix", "suffix"], Sequence[str]]] = {
@@ -38,7 +36,7 @@ FILTERS: Mapping[Filter, Mapping[Literal["match", "prefix", "suffix"], Sequence[
     "DEFAULT": {"prefix": ["."], "match": ["__MACOSX", "__pycache__"], "suffix": [".D", ".log"]},
 }
 
-API_KWARGS: Mapping[str, type | UnionType] = {
+API_KWARGS: Mapping[str, type[Any] | TypeAliasType] = {
     "output_dir": Path,
     "thread": int,
     "log_level": LogLevel,
@@ -82,16 +80,6 @@ zip_parser.add_argument("--dir-only", action="store_true", help="Only compress d
 zip_parser.add_argument("names", type=str, nargs="+", help="The input directories to compress.")
 
 
-def _is_type[T: Any](args: object, kind: type[T] | UnionType) -> TypeIs[T]:
-    if get_origin(kind) == Literal:
-        return args in get_args(kind)
-    return isinstance(args, kind)
-
-
-def _is_sequence_t[T: Any](args: object, kind: type[T] | UnionType) -> TypeIs[Sequence[T]]:
-    if not isinstance(args, Sequence):
-        return False
-    return all(_is_type(i, kind) for i in args)
 
 
 class APIKwargs(TypedDict, total=False):
@@ -154,8 +142,8 @@ def compose_program_args(
     archives: Mapping[Path, Path],
     **kwargs: Unpack[APIKwargs],
 ) -> list[object]:
-    files = {v for k, v in archives.items() if v.is_file()}
-    folders = {v for k, v in archives.items() if v.is_dir()}
+    files = {v for v in archives.values() if v.is_file()}
+    folders = {v for v in archives.values() if v.is_dir()}
     return [
         "  Archive Folders:",
         folders,
@@ -212,18 +200,18 @@ def archive_api(*names: str | Path, **kwargs: Unpack[APIKwargs]) -> Result[None]
 def get_command_line_arguments(args: Sequence[str] | None = None) -> Result[_CmdLineArguments]:
     namespace = vars(zip_parser.parse_args(args))
     names = namespace.get("names")
-    if not _is_sequence_t(names, str):
+    if not is_sequence_t(names, str):
         return Err(ValueError("Missing `names` value"))
     kwargs = APIKwargs()
     for n, k in API_KWARGS.items():
-        if _is_type(v := namespace.get(n), k):
+        if is_type(v := namespace.get(n), k):
             kwargs[n] = v
         elif v is None:
             continue
         else:
             return Err(ValueError(f"Invalid type for `{n}`: expected {k}, got {type(v)}"))
     filters = namespace.get("filters")
-    if _is_sequence_t(filters, Filter):
+    if is_sequence_t(filters, Filter):
         kwargs["filters"] = filters
     return Ok(_CmdLineArguments(names, kwargs))
 
