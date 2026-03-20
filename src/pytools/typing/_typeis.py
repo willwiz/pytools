@@ -1,11 +1,5 @@
 from collections.abc import Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    TypeAliasType,
-    TypeIs,
-    get_args,
-)
+from typing import TYPE_CHECKING, Any, TypeAliasType, TypeIs, get_args
 
 if TYPE_CHECKING:
     from types import UnionType
