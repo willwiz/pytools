@@ -26,5 +26,3 @@ pytools = { workspace = true }
 [tool.uv.build-backend]
 namespace = true
 
-[tool.pyright]
-typeCheckingMode = "basic"
