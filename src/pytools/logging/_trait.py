@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 __all__ = ["BColors", "ILogger", "LogEnum", "LogLevel"]
 
-LogLevel = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
+type LogLevel = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBUG"]
 
 
 class LogEnum(enum.IntEnum):

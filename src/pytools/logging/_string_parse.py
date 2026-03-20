@@ -100,7 +100,4 @@ def filter_ansi(text: object) -> str:
 def filter_ansi_char[T: (str, bytes)](text: T) -> Ok[T] | Err:
     if isinstance(text, str):
         return Ok(ANSI_ESCAPE_8BIT.sub("", text))
-    if isinstance(text, bytes):
-        return Ok(ANSI_ESCAPE_8BITB.sub(b"", text))
-    err_msg = f"text must be str or bytes, got {type(text).__name__}"
-    return Err(TypeError(err_msg))
+    return Ok(ANSI_ESCAPE_8BITB.sub(b"", text))
