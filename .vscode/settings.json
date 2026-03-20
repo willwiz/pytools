@@ -3,8 +3,8 @@
         "**/*.D": true,
         "**/*.vtu": true,
         "**/*.log": true,
-        ".mypy_cache/": true,
-        ".venv/": true,
+        "${workspaceFolder}/.mypy_cache/": true,
+        "${workspaceFolder}/.venv/": true,
     },
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff",
@@ -14,14 +14,11 @@
             "source.organizeImports.ruff": "explicit",
         }
     },
-    "python.analysis.importFormat": "relative",
-    "python.analysis.autoFormatStrings": true,
-    "python.analysis.autoImportCompletions": true,
-    "python.analysis.completeFunctionParens": true,
     "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.importFormat": "relative",
+    "python.analysis.completeFunctionParens": true,
     "python.analysis.enableColorPicker": false,
     "python.analysis.enablePytestSupport": false,
-    "python.analysis.includeAliasesFromUserFiles": true,
     "python.analysis.userFileIndexingLimit": 2000,
     "python.analysis.enableParallelIndexing": false,
 }
