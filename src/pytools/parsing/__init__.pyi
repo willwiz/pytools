@@ -1,0 +1,3 @@
+from ._enum import EnumGetter as EnumGetter
+
+def ppfmt(items: object, *, layer: int = 0) -> str: ...

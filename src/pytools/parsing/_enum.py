@@ -1,4 +1,4 @@
-from __future__ import annotations
+# ruff: noqa: UP046
 
 import enum
 from typing import Generic, TypeVar
