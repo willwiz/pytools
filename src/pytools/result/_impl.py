@@ -79,7 +79,7 @@ class Err(_ResultType[Never]):
         return default
 
     def next(self) -> Err:
-        return Err(self.val)
+        return self
 
     def ok(self) -> bool:
         return False
@@ -120,7 +120,7 @@ def _all_ok_dict[K, V](result: Mapping[K, Ok[V] | Err]) -> Ok[Mapping[K, V]] | E
 def _all_ok_sequence[V](result: Sequence[Ok[V] | Err]) -> Ok[Sequence[V]] | Err:
     for res in result:
         if isinstance(res, Err):
-            return Err(res.val)
+            return res
     return Ok([res.val for res in cast("Sequence[Ok[V]]", result)])
 
 
