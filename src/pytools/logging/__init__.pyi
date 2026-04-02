@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Literal, overload
 
@@ -49,3 +49,4 @@ def get_logger(
     file: Sequence[str | Path] | None = ...,
     verbose: bool = ...,
 ) -> ILogger: ...
+def timeit[**P, R](f: Callable[P, R]) -> Callable[P, R]: ...
