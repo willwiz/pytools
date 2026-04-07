@@ -45,39 +45,39 @@ API_KWARGS: Mapping[str, type[Any] | TypeAliasType] = {
 }
 
 
-zip_parser = argparse.ArgumentParser(
+gzip_parser = argparse.ArgumentParser(
     description="Compress a directory into a tar.gz archive.", add_help=False
 )
-zip_parser.add_argument(
+gzip_parser.add_argument(
     "--output-dir", "-o", type=Path, default=Path.cwd(), help="The output tar.gz file path."
 )
-zip_parser.add_argument(
+gzip_parser.add_argument(
     "--exclude",
     "-x",
     type=str.upper,
-    choices=get_args(Filter),
+    choices=get_args(Filter.__value__),
     action="append",
     help="Filters to apply when compressing.",
 )
-zip_parser.add_argument(
+gzip_parser.add_argument(
     "--log-level",
     type=str.upper,
-    choices=get_args(LogLevel),
+    choices=get_args(LogLevel.__value__),
     default="INFO",
     help="Set the logging level.",
 )
-zip_parser.add_argument(
+gzip_parser.add_argument(
     "--dry-run",
     action="store_true",
     help="Perform a dry run without creating the archive.",
 )
-zip_parser.add_argument(
+gzip_parser.add_argument(
     "--thread",
     type=int,
     help="Number of parallel compressions to run.",
 )
-zip_parser.add_argument("--dir-only", action="store_true", help="Only compress directories.")
-zip_parser.add_argument("names", type=str, nargs="+", help="The input directories to compress.")
+gzip_parser.add_argument("--dir-only", action="store_true", help="Only compress directories.")
+gzip_parser.add_argument("names", type=str, nargs="+", help="The input directories to compress.")
 
 
 class APIKwargs(TypedDict, total=False):
@@ -196,7 +196,7 @@ def archive_api(*names: str | Path, **kwargs: Unpack[APIKwargs]) -> Result[None]
 
 
 def get_command_line_arguments(args: Sequence[str] | None = None) -> Result[_CmdLineArguments]:
-    namespace = vars(zip_parser.parse_args(args))
+    namespace = vars(gzip_parser.parse_args(args))
     names = namespace.get("names")
     if not is_sequence_t(names, str):
         return Err(ValueError("Missing `names` value"))
@@ -214,6 +214,6 @@ def get_command_line_arguments(args: Sequence[str] | None = None) -> Result[_Cmd
     return Ok(_CmdLineArguments(names, kwargs))
 
 
-def zip_cli(args: list[str] | None = None) -> None:
+def gzip_cli(args: list[str] | None = None) -> None:
     names, kwargs = get_command_line_arguments(args).unwrap()
     archive_api(*names, **kwargs).unwrap()

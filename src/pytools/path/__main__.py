@@ -1,11 +1,11 @@
 import argparse
 
-from ._sh_utils import zip_cli, zip_parser
+from ._sh_utils import gzip_cli, gzip_parser
 
 parser = argparse.ArgumentParser(description="Compress a directory into a tar.gz archive.")
 subparsers = parser.add_subparsers(dest="command")
 subparsers.add_parser(
-    "gzip", help="Compress a directory into a tar.gz archive.", parents=[zip_parser]
+    "gzip", help="Compress a directory into a tar.gz archive.", parents=[gzip_parser]
 )
 
 
@@ -13,7 +13,7 @@ def main_cli(args: list[str] | None = None) -> None:
     main_args = parser.parse_args(args)
     match main_args.command:
         case "gzip":
-            zip_cli(args)
+            gzip_cli(args)
         case _:
             parser.print_help()
 
