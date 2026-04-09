@@ -64,9 +64,13 @@ class ThreadedRunner:
     def __exit__(self, *_args: object) -> None:
         self.wait_then_shutdown()
 
-    def submit(self, func: Callable[..., Any], *args: object, **kwargs: object) -> None:
+    def submit[**P, R](
+        self, func: Callable[P, R], *args: P.args, **kwargs: P.kwargs
+    ) -> futures.Future[R]:
         self._counter += 1
-        self._futures[self._exe.submit(func, *args, **kwargs)] = self._counter
+        future = self._exe.submit(func, *args, **kwargs)
+        self._futures[future] = self._counter
+        return future
 
     def wait_then_shutdown(self) -> None:
         logger = get_logger()
