@@ -1,4 +1,5 @@
 import argparse
+import shutil as sh
 import tarfile
 from pathlib import Path
 from typing import (
@@ -128,11 +129,14 @@ def compress(output_file: Path, *input_dir: Path, filt: ArchiveFilter) -> None:
             tar.add(folder, filter=filt)
 
 
-def archive_core(output_dir: Path, input_dir: Path, filt: ArchiveFilter) -> str:
-    archive_file = output_dir / input_dir.parent / input_dir.stem
+def archive_core(output_dir: Path, input_item: Path, filt: ArchiveFilter) -> str:
+    if input_item.is_file():
+        sh.copy2(input_item, output_dir / input_item.name)
+        return f"Input {input_item} is a file, copied ...\n"
+    archive_file = output_dir / input_item.parent / input_item.stem
     archive_file.parent.mkdir(parents=True, exist_ok=True)
-    compress(archive_file, input_dir, filt=filt)
-    return f"Archive for {input_dir} created successfully.\n"
+    compress(archive_file, input_item, filt=filt)
+    return f"Archive for {input_item} created successfully.\n"
 
 
 def compose_program_args(
@@ -181,13 +185,13 @@ def archive_api(*names: str | Path, **kwargs: Unpack[APIKwargs]) -> Result[None]
         return Ok(None)
     if threads := kwargs.get("thread"):
         with ThreadedRunner(thread=threads) as runner:
-            for input_dir in items:
-                runner.submit(archive_core, output_dir, input_dir, filt=item_filter)
-                log.info(f"Archive for {input_dir} submitted.\n")
+            for input_item in items:
+                runner.submit(archive_core, output_dir, input_item, filt=item_filter)
+                log.info(f"Archive for {input_item} submitted.\n")
     else:
-        for input_dir in items:
-            log.info(f"Compressing {(output_dir / input_dir.stem).with_suffix('.tar.gz')}\n")
-            log.info(archive_core(output_dir, input_dir, filt=item_filter))
+        for input_item in items:
+            log.info(f"Compressing {(output_dir / input_item.stem).with_suffix('.tar.gz')}\n")
+            log.info(archive_core(output_dir, input_item, filt=item_filter))
     log.info(
         "Completed Archives:",
         [k for k in archives if k.is_file()],
