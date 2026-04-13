@@ -27,6 +27,16 @@ def dict_format(dct: Mapping[str, object], *, layer: int = 0) -> str:
     tail = f"\n{TAB * layer}}}"
     return head + body + tail
 
+def set_format(st: set[object], *, layer: int = 0) -> str:
+    items = [ppfmt(item, layer=layer + 1) for item in st]
+    total_len = sum(len(item) for item in items) + 2 * (len(items) - 1) + 2 * (layer + 1)
+    indent = TAB * layer
+    head = "{\n"
+    if total_len <= SCREEN_WRAP_LIMIT:
+        return "{" + ", ".join(items) + "}"
+    body = ",\n".join(f"{TAB * (layer + 1)}{item}" for item in items)
+    tail = f"\n{indent}}}"
+    return head + body + tail
 
 def ppfmt(items: object, *, layer: int = 0) -> str:
     match items:
@@ -36,6 +46,8 @@ def ppfmt(items: object, *, layer: int = 0) -> str:
             return dict_format(cast("Mapping[str, object]", items), layer=layer)
         case Sequence():
             return list_format(cast("Sequence[object]", items), layer=layer)
+        case set():
+            return set_format(cast("set[object]", items), layer=layer)
         # case Iterable():
         #     return list_format(items, layer=layer)
         case _:
