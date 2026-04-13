@@ -133,8 +133,7 @@ def archive_core(output_dir: Path, input_item: Path, filt: ArchiveFilter) -> str
     if input_item.is_file():
         sh.copy2(input_item, output_dir / input_item.name)
         return f"Input {input_item} is a file, copied ...\n"
-    archive_file = output_dir / input_item.parent / input_item.stem
-    archive_file.parent.mkdir(parents=True, exist_ok=True)
+    archive_file = output_dir / input_item.stem
     compress(archive_file, input_item, filt=filt)
     return f"Archive for {input_item} created successfully.\n"
 
