@@ -1,4 +1,3 @@
-import dataclasses as dc
 import re
 import shutil
 from typing import TYPE_CHECKING, Unpack
@@ -10,13 +9,6 @@ if TYPE_CHECKING:
 
 LATEX_INPUT = re.compile(r"(?:\s*)\\input\{(.*?)\}")
 IMAGE_PATH = re.compile(r"(?:\s*)\\includegraphics\[width=(?:\d.*in|\\textwidth)\]{Images/(.*?)}")
-
-
-@dc.dataclass(slots=True)
-class ProgramArgs:
-    home: Path
-    out: Path
-    clear: bool
 
 
 def insert_section(file: Path) -> str:

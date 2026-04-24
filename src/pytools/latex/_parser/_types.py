@@ -7,3 +7,7 @@ if TYPE_CHECKING:
 class MergeKwargs(TypedDict, total=False):
     out: Required[Path]
     clear: bool
+
+
+class HighlightKwargs(TypedDict, total=False):
+    out: Required[Path]

@@ -1,4 +1,5 @@
 import argparse
+from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -7,9 +8,7 @@ from pydantic import BaseModel, ValidationError
 from pytools.result import Err, Ok, Result
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
-    from pytools.latex._parser._types import MergeKwargs
+    from ._types import MergeKwargs
 
 merge_parser = argparse.ArgumentParser(add_help=False)
 merge_parser.add_argument("proj", type=Path)
