@@ -2,10 +2,10 @@ import re
 import shutil
 from typing import TYPE_CHECKING, Unpack
 
-from ._parser import MergeKwargs, merge_parser, parse_merge_args
-
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from ._parser import MergeKwargs
 
 LATEX_INPUT = re.compile(r"(?:\s*)\\input\{(.*?)\}")
 IMAGE_PATH = re.compile(r"(?:\s*)\\includegraphics\[width=(?:\d.*in|\\textwidth)\]{Images/(.*?)}")
@@ -30,6 +30,14 @@ def fixed_image_path(line: str) -> str:
             return line
         case _:
             return line.replace(r"Images/", "")
+
+
+def clear_dir(**kwargs: Unpack[MergeKwargs]) -> None:
+    for s in LATEX_TEMPFILES:
+        print(s)
+        for f in kwargs["out"].glob(s):
+            print(f)
+            f.unlink()
 
 
 def main(home: Path, **kwargs: Unpack[MergeKwargs]) -> None:
@@ -86,17 +94,3 @@ LATEX_TEMPFILES = [
     "*.bbl.bak",
     "*.spl",
 ]
-
-
-def clear_dir(**kwargs: Unpack[MergeKwargs]) -> None:
-    for s in LATEX_TEMPFILES:
-        print(s)
-        for f in kwargs["out"].glob(s):
-            print(f)
-            f.unlink()
-
-
-def main_cli(args: list[str] | None = None) -> None:
-    _args = merge_parser.parse_args(args)
-    home, kwargs = parse_merge_args(**vars(_args)).unwrap()
-    main(home, **kwargs)

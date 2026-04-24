@@ -16,10 +16,10 @@ def main_cli(args: list[str] | None = None) -> None:
     main_args = parser.parse_args(args)
     match main_args.command:
         case "merge":
-            home, kwargs = parse_merge_args(**vars(main_args)).unwrap()
+            home, kwargs = parse_merge_args(vars(main_args)).unwrap()
             merge_main(home, **kwargs)
         case "remove_hl":
-            file, kwargs = parse_highlight_args(**vars(main_args)).unwrap()
+            file, kwargs = parse_highlight_args(vars(main_args)).unwrap()
             hl_main(file, **kwargs)
         case _:
             parser.print_help()

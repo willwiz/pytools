@@ -1,5 +1,4 @@
 import argparse
-from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -8,6 +7,8 @@ from pydantic import BaseModel, ValidationError
 from pytools.result import Err, Ok, Result
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from ._types import MergeKwargs
 
 merge_parser = argparse.ArgumentParser(add_help=False)
