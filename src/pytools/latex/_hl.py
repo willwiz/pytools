@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from ._parser import HighlightKwargs
 
 
-HIGHTLIGHTED = re.compile(r"\\hlc\[.+\]\{(?P<tex>.+)\}")
+HIGHTLIGHTED = re.compile(r"\\hlc\[.+?\]\{(?P<tex>.+?)\}")
 
 
 def remove_highlight(tex: str) -> str:
