@@ -14,17 +14,19 @@ from typing import (
     get_args,
 )
 
+from pydantic import BaseModel, ValidationError
+
 from pytools.logging import LogEnum, LogLevel, get_logger
 from pytools.parallel import ThreadedRunner
 from pytools.path import expand_as_path
 from pytools.result import Err, Ok, Result
-from pytools.typing import is_sequence_t, is_type
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
 
 type Filter = Literal["MACOS", "GIT", "PYTHON", "HIDDEN", "LOG", "DATA", "DEFAULT"]
+type CompressionMode = Literal["gz", "xz"]
 
 
 FILTERS: Mapping[Filter, Mapping[Literal["match", "prefix", "suffix"], Sequence[str]]] = {
@@ -46,9 +48,7 @@ API_KWARGS: Mapping[str, type[Any] | TypeAliasType] = {
 }
 
 
-gzip_parser = argparse.ArgumentParser(
-    description="Compress a directory into a tar.gz archive.", add_help=False
-)
+gzip_parser = argparse.ArgumentParser("tar", add_help=False)
 gzip_parser.add_argument(
     "--output-dir", "-o", type=Path, default=Path.cwd(), help="The output tar.gz file path."
 )
@@ -57,7 +57,7 @@ gzip_parser.add_argument(
     "-x",
     type=str.upper,
     choices=get_args(Filter.__value__),
-    action="append",
+    action="extend",
     help="Filters to apply when compressing.",
 )
 gzip_parser.add_argument(
@@ -73,6 +73,14 @@ gzip_parser.add_argument(
     help="Perform a dry run without creating the archive.",
 )
 gzip_parser.add_argument(
+    "--type",
+    "-t",
+    type=str.lower,
+    choices=get_args(CompressionMode.__value__),
+    default="gz",
+    help="The compression mode to use.",
+)
+gzip_parser.add_argument(
     "--thread",
     type=int,
     help="Number of parallel compressions to run.",
@@ -81,11 +89,25 @@ gzip_parser.add_argument("--dir-only", action="store_true", help="Only compress 
 gzip_parser.add_argument("names", type=str, nargs="+", help="The input directories to compress.")
 
 
+class KwargsModel(BaseModel):
+    names: list[str]
+    output_dir: Path
+    exclude: list[Filter] | None
+    type: CompressionMode
+    log_level: LogLevel
+    thread: int | None
+    dry_run: bool = False
+    dir_only: bool = False
+
+
+class APIArgs(NamedTuple):
+    names: Sequence[str]
 class APIKwargs(TypedDict, total=False):
     output_dir: Path
-    filters: Sequence[Filter]
+    exclude: Sequence[Filter] | None
+    type: CompressionMode
     log_level: LogLevel
-    thread: int
+    thread: int | None
     dry_run: bool
     dir_only: bool
 
@@ -123,18 +145,29 @@ class ArchiveFilter:
         return tarinfo
 
 
-def compress(output_file: Path, *input_dir: Path, filt: ArchiveFilter) -> None:
-    with tarfile.open(output_file.with_suffix(".tar.gz"), "w:gz") as tar:
+type _COMPRESSION_TYPES = Literal["w:gz", "w:xz"]
+_COMPRESSION_MODES: Mapping[CompressionMode, _COMPRESSION_TYPES] = {
+    "gz": "w:gz",
+    "xz": "w:xz",
+}
+
+
+def compress(
+    output_file: Path, *input_dir: Path, mode: CompressionMode, filt: ArchiveFilter
+) -> None:
+    with tarfile.open(output_file.with_suffix(f".tar.{mode}"), _COMPRESSION_MODES[mode]) as tar:
         for folder in input_dir:
             tar.add(folder, filter=filt)
 
 
-def archive_core(output_dir: Path, input_item: Path, filt: ArchiveFilter) -> str:
+def archive_core(
+    output_dir: Path, input_item: Path, filt: ArchiveFilter, mode: CompressionMode
+) -> str:
     if input_item.is_file():
         sh.copy2(input_item, output_dir / input_item.name)
         return f"Input {input_item} is a file, copied ...\n"
     archive_file = output_dir / input_item.stem
-    compress(archive_file, input_item, filt=filt)
+    compress(archive_file, input_item, filt=filt, mode=mode)
     return f"Archive for {input_item} created successfully.\n"
 
 
@@ -166,8 +199,7 @@ def archive_api(*names: str | Path, **kwargs: Unpack[APIKwargs]) -> Result[None]
     if not output_dir.is_dir():
         msg = f"Output directory: {output_dir} was not found!"
         return Err(ValueError(msg))
-    filters = kwargs.get("filters", [])
-    filter_list = {k: FILTERS[k] for k in (filters or ["DEFAULT"])}
+    filter_list = {k: FILTERS[k] for k in kwargs.get("exclude") or ["DEFAULT"]}
     item_filter = ArchiveFilter(filter_list)
     items = expand_as_path(names)
     items = [i for i in items if not i.name.endswith(".tar.gz")]
@@ -185,12 +217,22 @@ def archive_api(*names: str | Path, **kwargs: Unpack[APIKwargs]) -> Result[None]
     if threads := kwargs.get("thread"):
         with ThreadedRunner(thread=threads) as runner:
             for input_item in items:
-                runner.submit(archive_core, output_dir, input_item, filt=item_filter)
+                runner.submit(
+                    archive_core,
+                    output_dir,
+                    input_item,
+                    filt=item_filter,
+                    mode=kwargs.get("type", "gz"),
+                )
                 log.info(f"Archive for {input_item} submitted.\n")
     else:
         for input_item in items:
             log.info(f"Compressing {(output_dir / input_item.stem).with_suffix('.tar.gz')}\n")
-            log.info(archive_core(output_dir, input_item, filt=item_filter))
+            log.info(
+                archive_core(
+                    output_dir, input_item, filt=item_filter, mode=kwargs.get("type", "gz")
+                )
+            )
     log.info(
         "Completed Archives:",
         [k for k in archives if k.is_file()],
@@ -198,23 +240,33 @@ def archive_api(*names: str | Path, **kwargs: Unpack[APIKwargs]) -> Result[None]
     return Ok(None)
 
 
+def parse_command_line_arguments(nsp: Mapping[str, Any]) -> Result[tuple[APIArgs, APIKwargs]]:
+    print(nsp)
+    try:
+        model = KwargsModel(**nsp)
+    except ValidationError as e:
+        msg = f"Invalid arguments: {e}"
+        return Err(ValueError(msg))
+    args = APIArgs(names=model.names)
+    kwargs = APIKwargs(
+        output_dir=model.output_dir,
+        exclude=model.exclude,
+        type=model.type,
+        log_level=model.log_level,
+        thread=model.thread,
+        dry_run=model.dry_run,
+        dir_only=model.dir_only,
+    )
+    return Ok((args, kwargs))
+
+
 def get_command_line_arguments(args: Sequence[str] | None = None) -> Result[_CmdLineArguments]:
-    namespace = vars(gzip_parser.parse_args(args))
-    names = namespace.get("names")
-    if not is_sequence_t(names, str):
-        return Err(ValueError("Missing `names` value"))
-    kwargs = APIKwargs()
-    for n, k in API_KWARGS.items():
-        if is_type(v := namespace.get(n), k):
-            kwargs[n] = v
-        elif v is None:
-            continue
-        else:
-            return Err(ValueError(f"Invalid type for `{n}`: expected {k}, got {type(v)}"))
-    filters = namespace.get("filters")
-    if is_sequence_t(filters, Filter):
-        kwargs["filters"] = filters
-    return Ok(_CmdLineArguments(names, kwargs))
+    match parse_command_line_arguments(vars(gzip_parser.parse_args(args))):
+        case Ok((_args, _kwargs)):
+            return Ok(_CmdLineArguments(names=_args.names, kwargs=_kwargs))
+        case Err(e):
+            msg = f"Error parsing command line arguments: {e}"
+            return Err(ValueError(msg))
 
 
 def gzip_cli(args: list[str] | None = None) -> None:
