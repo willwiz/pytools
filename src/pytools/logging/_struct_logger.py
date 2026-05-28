@@ -106,15 +106,13 @@ class StructLogger(ILogger):
         if len(msg) < 1:
             return
         message = "\n".join([ppfmt(m) for m in msg])
-        if self._header:
-            header = f"[{now()}|{cstr(level)}]>>> "
-            message = header + message
-        if level > LogEnum.BRIEF:
+        header = f"[{now()}|{cstr(level)}]>>> " if self._header else ""
+        if level > LogEnum.BRIEF or kwargs:
             tb = getframeinfo(stack()[2][0])
-            kwargs = {**debug_info(tb), **kwargs}
+            kwargs = {**debug_info(tb), "msg": message, **kwargs}
             message = message + "\n" + ppfmt(kwargs)
         for h in self._handlers.values():
-            h.log(message + "\n")
+            h.log(header + message + "\n")
 
     def debug(self, *msg: object, **kwargs: object) -> None:
         if self._level <= LogEnum.DEBUG:
