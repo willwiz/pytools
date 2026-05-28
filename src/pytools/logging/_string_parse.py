@@ -39,13 +39,22 @@ def now() -> str:
     return time.strftime("%H:%M:%S", time.localtime())
 
 
-def debug_str(tb: Traceback) -> str:
-    file = Path(*Path(tb.filename).parts[-3:])
-    return f"({file}:{tb.lineno}|{tb.function})>>>"
-
-
 def cstr(level: LogEnum) -> str:
     return f"{LB[level]}{level}{RB[level]}"
+
+
+def debug_str(tb: Traceback) -> str:
+    file = Path(*Path(tb.filename).parts[-3:])
+    return f"({file}:{tb.lineno}|{tb.function})"
+
+
+def debug_info(tb: Traceback) -> dict[str, str]:
+    file = Path(*Path(tb.filename).parts[-3:])
+    return {
+        "file": str(file),
+        "function": tb.function,
+        "line": str(tb.lineno),
+    }
 
 
 # 7-bit and 8-bit C1 ANSI sequences

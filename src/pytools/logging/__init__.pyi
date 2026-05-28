@@ -29,7 +29,10 @@ type _NOT_NULL = Literal[
 def get_logger(name: None) -> ILogger: ...
 @overload
 def get_logger(
-    *, console: bool = ..., file: Sequence[str | Path] | None = ..., verbose: bool = ...
+    *,
+    console: bool = ...,
+    file: Sequence[str | Path] | None = ...,
+    logger: Literal["basic", "struct"] = ...,
 ) -> ILogger: ...
 @overload
 def get_logger(
@@ -38,7 +41,7 @@ def get_logger(
     level: Literal["NULL", LogEnum.NULL],
     console: bool = ...,
     file: Sequence[str | Path] | None = ...,
-    verbose: bool = ...,
+    logger: Literal["basic", "struct"] = ...,
 ) -> ILogger: ...
 @overload
 def get_logger(
@@ -47,6 +50,6 @@ def get_logger(
     level: _NOT_NULL | None,
     console: bool = ...,
     file: Sequence[str | Path] | None = ...,
-    verbose: bool = ...,
+    logger: Literal["basic"] = ...,
 ) -> ILogger: ...
 def timeit[**P, R](f: Callable[P, R]) -> Callable[P, R]: ...

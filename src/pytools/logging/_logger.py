@@ -3,22 +3,38 @@ from __future__ import annotations
 import multiprocessing
 import sys
 import threading
-import traceback
-from inspect import getframeinfo, stack
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, Literal, override
 
-from pytools.parsing import ppfmt
-
-from ._handlers import STDOUT_HANDLER, FileHandler
-from ._string_parse import cstr, debug_str, now
-from ._trait import BColors, IHandler, ILogger, LogEnum, LogLevel
+from ._basic_logger import BLogger
+from ._struct_logger import StructLogger
+from ._trait import IHandler, ILogger, LogEnum, LogLevel
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
 
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+    from pathlib import Path
+
+
 _LOGGERS_DICT: Final[dict[str, ILogger]] = {}
+
+
+def _create_logger(
+    level: LogLevel | LogEnum,
+    file: Sequence[str | Path] | None = None,
+    *,
+    console: bool = True,
+    logger: Literal["struct", "basic"] = "basic",
+) -> ILogger:
+    match logger:
+        case "struct":
+            return StructLogger(level=level, stdout=console, files=file)
+        case "basic":
+            return BLogger(level=level, stdout=console, files=file)
+
 
 def get_logger(
     name: str | None = "__main__",
@@ -26,167 +42,35 @@ def get_logger(
     level: LogLevel | LogEnum | None = None,
     console: bool = True,
     file: Sequence[str | Path] | None = None,
-    verbose: bool = True,
+    logger: Literal["struct", "basic"] = "basic",
 ) -> ILogger:
     if (
         multiprocessing.parent_process() is not None
         or threading.current_thread() is not threading.main_thread()
     ) or (name is None):
         return NLOGGER
-    logger = _LOGGERS_DICT.get(name)
-    if logger is None:
+    log = _LOGGERS_DICT.get(name)
+    if log is None:
         level = LogEnum.INFO if level is None else level
         level = level if isinstance(level, LogEnum) else LogEnum[level]
         _LOGGERS_DICT[name] = (
             NLOGGER
             if level is LogEnum.NULL
-            else BLogger(level=level, stdout=console, files=file, verbose=verbose)
+            else _create_logger(level=level, console=console, file=file, logger=logger)
         )
         return _LOGGERS_DICT[name]
-    if level is None or (logger.level == level):
-        return logger
-    if logger.level is LogEnum.NULL:
+    if level is None or (log.level == level):
+        return log
+    if log.level is LogEnum.NULL:
         # Allow NullLogger to be replaced, but not BLoggers
-        _LOGGERS_DICT[name] = BLogger(level=level, stdout=console, files=file, verbose=verbose)
+        _LOGGERS_DICT[name] = _create_logger(level=level, console=console, file=file, logger=logger)
         return _LOGGERS_DICT[name]
     msg = (
-        f"Logger '{name}' already exists with level {logger.level!s}. "
+        f"Logger '{name}' already exists with level {log.level!s}. "
         f"Requested level {level!s} is ignored."
     )
-    logger.debug(msg)
-    return logger
-
-
-class BLogger(ILogger):
-    __slots__ = ["_handlers", "_header", "_level"]
-    _level: LogEnum
-    _handlers: dict[str, IHandler]
-    _header: bool
-
-    def __init__(
-        self,
-        level: LogLevel | LogEnum,
-        *,
-        header: bool = True,
-        stdout: bool = True,
-        files: Sequence[str | Path] | None = None,
-        verbose: bool = True,
-    ) -> None:
-        self._level = level if isinstance(level, LogEnum) else LogEnum[level]
-        self._header = header
-        self._handlers = {"STDOUT": STDOUT_HANDLER} if stdout else {}
-        if files is not None:
-            self._handlers.update({str(f): FileHandler(f) for f in files})
-        if not verbose:
-            return
-        for h in self._handlers.values():
-            if self._level < LogEnum.BRIEF:
-                continue
-            h.log(
-                f"{BColors.UNDERLINE}Logger instance {self!r} created at {now()}{BColors.ENDC}\n"
-                f"{'\n'.join(f'  - {hand!r}' for hand in self._handlers.values())}\n"
-            )
-            h.flush()
-
-    def __del__(self) -> None:
-        self.close()
-
-    def __repr__(self) -> str:
-        return (
-            f"<BLogger level={self._level.name}"
-            f" header={self._header}"
-            f" handlers={len(self._handlers)}>"
-        )
-
-    @property
-    def header(self) -> bool:
-        return self._header
-
-    @property
-    def level(self) -> LogEnum:
-        return self._level
-
-    @level.setter
-    def level(self, level: LogLevel | LogEnum) -> None:
-        self._level = level if isinstance(level, LogEnum) else LogEnum[level]
-
-    @property
-    def console(self) -> bool:
-        return "STDOUT" in self._handlers
-
-    @console.setter
-    def console(self, console: bool) -> None:
-        if ("STDOUT" in self._handlers) == console:
-            return
-        if console:
-            self._handlers["STDOUT"] = STDOUT_HANDLER
-            return
-        del self._handlers["STDOUT"]
-
-    def add_handler(self, handler: IHandler | Path | str, *, name: str | None = None) -> None:
-        if isinstance(handler, (str, Path)):
-            handler = FileHandler(handler)
-        key = name or repr(handler)
-        self._handlers[key] = handler
-
-    def remove_handler(self, handler: IHandler | str) -> None:
-        key = handler if isinstance(handler, str) else repr(handler)
-        if key in self._handlers:
-            del self._handlers[key]
-
-    def flush(self) -> None:
-        for h in self._handlers.values():
-            h.flush()
-
-    def log(self, *msg: object, level: LogEnum = LogEnum.BRIEF) -> None:
-        if len(msg) < 1:
-            return
-        if self._header:
-            tb = getframeinfo(stack()[2][0])
-            header = f"\n[{now()}|{cstr(level)}]{debug_str(tb)}\n"
-            for h in self._handlers.values():
-                h.log(header)
-        self.disp(*msg)
-
-    def disp(
-        self, *msg: object, end: Literal["\n", "\r", ""] = "\n", filt: LogEnum | None = None
-    ) -> None:
-        if filt and self._level <= filt:
-            return
-        message = "\n".join([ppfmt(m) for m in msg])
-        for h in self._handlers.values():
-            h.log(message + end)
-
-    def debug(self, *msg: object) -> None:
-        if self._level >= LogEnum.DEBUG:
-            self.log(*msg, level=LogEnum.DEBUG)
-
-    def info(self, *msg: object) -> None:
-        if self._level >= LogEnum.INFO:
-            self.log(*msg, level=LogEnum.INFO)
-
-    def brief(self, *msg: object) -> None:
-        if self._level >= LogEnum.BRIEF:
-            self.log(*msg, level=LogEnum.BRIEF)
-
-    def warn(self, *msg: object) -> None:
-        if self._level >= LogEnum.WARN:
-            self.log(*msg, level=LogEnum.WARN)
-
-    def error(self, *msg: object) -> None:
-        if self._level >= LogEnum.ERROR:
-            self.log(*msg, level=LogEnum.ERROR)
-
-    def fatal(self, *msg: object) -> None:
-        if self._level >= LogEnum.FATAL:
-            self.log(*msg, level=LogEnum.FATAL)
-
-    def exception(self, e: Exception) -> Exception:
-        self.disp(traceback.format_exc())
-        return e
-
-    def close(self) -> None:
-        self._handlers.clear()
+    log.debug(msg)
+    return log
 
 
 class _NullLogger(ILogger):
@@ -221,25 +105,31 @@ class _NullLogger(ILogger):
 
     def flush(self) -> None: ...
 
-    def log(self, *msg: object, level: LogEnum = LogEnum.BRIEF) -> None: ...
+    @override
+    def log(self, *msg: object, level: LogEnum = LogEnum.BRIEF, **kwargs: object) -> None: ...
 
+    @override
     def disp(
         self, *msg: object, end: Literal["\n", "\r", ""] = "\n", filt: LogEnum | None = None
     ) -> None: ...
 
-    def debug(self, *msg: object) -> None: ...
+    @override
+    def debug(self, *msg: object, **kwargs: object) -> None: ...
 
-    def info(self, *msg: object) -> None: ...
-
-    def brief(self, *msg: object) -> None: ...
-
-    def warn(self, *msg: object) -> None:
+    @override
+    def info(self, *msg: object, **kwargs: object) -> None: ...
+    @override
+    def brief(self, *msg: object, **kwargs: object) -> None: ...
+    @override
+    def warn(self, *msg: object, **kwargs: object) -> None:
         sys.stderr.write("<<< Warning: " + "\n".join(str(m) for m in msg) + "\n")
 
-    def error(self, *msg: object) -> None:
+    @override
+    def error(self, *msg: object, **kwargs: object) -> None:
         sys.stderr.write("<<< Error: " + "\n".join(str(m) for m in msg) + "\n")
 
-    def fatal(self, *msg: object) -> None:
+    @override
+    def fatal(self, *msg: object, **kwargs: object) -> None:
         sys.stderr.write("<<< Fatal: " + "\n".join(str(m) for m in msg) + "\n")
 
     def exception(self, e: Exception) -> Exception:

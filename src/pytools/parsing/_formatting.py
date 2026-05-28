@@ -27,6 +27,7 @@ def dict_format(dct: Mapping[str, object], *, layer: int = 0) -> str:
     tail = f"\n{TAB * layer}}}"
     return head + body + tail
 
+
 def set_format(st: set[object], *, layer: int = 0) -> str:
     items = [ppfmt(item, layer=layer + 1) for item in st]
     total_len = sum(len(item) for item in items) + 2 * (len(items) - 1) + 2 * (layer + 1)
@@ -37,6 +38,7 @@ def set_format(st: set[object], *, layer: int = 0) -> str:
     body = ",\n".join(f"{TAB * (layer + 1)}{item}" for item in items)
     tail = f"\n{indent}}}"
     return head + body + tail
+
 
 def ppfmt(items: object, *, layer: int = 0) -> str:
     match items:
