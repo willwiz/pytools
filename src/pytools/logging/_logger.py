@@ -27,7 +27,7 @@ def _create_logger(
     file: Sequence[str | Path] | None = None,
     *,
     console: bool = True,
-    logger: Literal["struct", "basic"] = "basic",
+    logger: Literal["struct", "basic"] = "struct",
 ) -> ILogger:
     match logger:
         case "struct":
@@ -42,7 +42,7 @@ def get_logger(
     level: LogLevel | LogEnum | None = None,
     console: bool = True,
     file: Sequence[str | Path] | None = None,
-    logger: Literal["struct", "basic"] = "basic",
+    logger: Literal["struct", "basic"] = "struct",
 ) -> ILogger:
     if (
         multiprocessing.parent_process() is not None
