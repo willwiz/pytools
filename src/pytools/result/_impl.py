@@ -132,7 +132,7 @@ def all_ok[T](result: Sequence[Ok[T] | Err]) -> Ok[Sequence[T]] | Err: ...
 def all_ok[K, V](result: Mapping[K, Ok[V] | Err]) -> Ok[Mapping[K, V]] | Err: ...
 
 
-def all_ok[K, V](result: Sequence[Ok[V] | Err] | Mapping[K, Ok[V] | Err]):
+def all_ok[K, V](result: Sequence[Ok[V] | Err] | Generator[Ok[V] | Err] | Mapping[K, Ok[V] | Err]):
     match result:
         case Mapping():
             return _all_ok_dict(result)
@@ -147,7 +147,7 @@ def filter_ok[V](results: Sequence[Ok[V] | Err]) -> Sequence[V]: ...
 @overload
 def filter_ok[K, V](results: Mapping[K, Ok[V] | Err]) -> Mapping[K, V]: ...
 def filter_ok[K, V](
-    results: Sequence[Ok[V] | Err] | Mapping[K, Ok[V] | Err],
+    results: Sequence[Ok[V] | Err] | Generator[Ok[V] | Err] | Mapping[K, Ok[V] | Err],
 ) -> Sequence[V] | Mapping[K, V]:
     """Filter out all Ok values from a sequence of Ok and Err results.
 
@@ -166,4 +166,6 @@ def filter_ok[K, V](
         case Mapping():
             return {k: res.val for k, res in results.items() if isinstance(res, Ok)}
         case Sequence():
+            return [res.val for res in results if isinstance(res, Ok)]
+        case Generator():
             return [res.val for res in results if isinstance(res, Ok)]
