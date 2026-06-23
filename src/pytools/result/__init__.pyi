@@ -1,5 +1,5 @@
 # ruff: noqa: D418, PYI021
-from collections.abc import Mapping, Sequence
+from collections.abc import Generator, Mapping, Sequence
 from typing import Any, Generic, Never, TypeGuard, TypeVar, overload
 
 _T_co = TypeVar("_T_co", covariant=True)
@@ -29,24 +29,6 @@ class Ok(Generic[_T_co]):  # noqa: UP046
 type Result[T] = Ok[T] | Err
 
 @overload
-def all_ok[T](
-    result: Sequence[Ok[T] | Err],
-) -> Ok[Sequence[T]] | Err:
-    """Return Ok[Sequence[T]] if all results are Ok, otherwise return the first Err.
-
-    Parameters
-    ----------
-    result : Sequence[Ok[T] | Err]
-    A sequence of Ok or Err results.
-
-    Returns
-    -------
-    Ok[Sequence[T]] | Err
-    An Ok containing a sequence of T if all results are Ok, otherwise an Err.
-
-    """
-
-@overload
 def all_ok[K, V](
     result: Mapping[K, Ok[V] | Err],
 ) -> Ok[Mapping[K, V]] | Err:
@@ -63,11 +45,47 @@ def all_ok[K, V](
         An Ok containing a mapping of V if all results are Ok, otherwise an Err.
 
     """
+@overload
+def all_ok[T](
+    result: Sequence[Ok[T] | Err],
+) -> Ok[Sequence[T]] | Err:
+    """Return Ok[Sequence[T]] if all results are Ok, otherwise return the first Err.
 
+    Parameters
+    ----------
+    result : Sequence[Ok[T] | Err]
+    A sequence of Ok or Err results.
+
+    Returns
+    -------
+    Ok[Sequence[T]] | Err
+    An Ok containing a sequence of T if all results are Ok, otherwise an Err.
+
+    """
+@overload
+def all_ok[T](
+    result: Generator[Ok[T] | Err],
+) -> Ok[Sequence[T]] | Err:
+    """Return Ok[Sequence[T]] if all results are Ok, otherwise return the first Err.
+
+    Parameters
+    ----------
+    result : Generator[Ok[T] | Err]
+        A generator of Ok or Err results.
+
+    Returns
+    -------
+    Ok[Sequence[T]] | Err
+    An Ok containing a sequence of T if all results are Ok, otherwise an Err.
+
+    """
+
+@overload
+def filter_ok[K, V](results: Mapping[K, Ok[V] | Err]) -> Mapping[K, V]: ...
 @overload
 def filter_ok[V](results: Sequence[Ok[V] | Err]) -> Sequence[V]: ...
 @overload
-def filter_ok[K, V](results: Mapping[K, Ok[V] | Err]) -> Mapping[K, V]: ...
+def filter_ok[V](results: Generator[Ok[V] | Err]) -> Sequence[V]: ...
 @overload
 def is_all_ok[T](results: Sequence[Ok[T] | Err]) -> TypeGuard[Sequence[Ok[T]]]: ...
 @overload
