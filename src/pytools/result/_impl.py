@@ -167,7 +167,5 @@ def filter_ok[K, V](
     match results:
         case Mapping():
             return {k: res.val for k, res in results.items() if isinstance(res, Ok)}
-        case Sequence():
-            return [res.val for res in results if isinstance(res, Ok)]
-        case Generator():
+        case Sequence() | Generator():
             return [res.val for res in results if isinstance(res, Ok)]

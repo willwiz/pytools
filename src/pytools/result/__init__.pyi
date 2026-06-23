@@ -45,6 +45,7 @@ def all_ok[K, V](
         An Ok containing a mapping of V if all results are Ok, otherwise an Err.
 
     """
+
 @overload
 def all_ok[T](
     result: Sequence[Ok[T] | Err],
@@ -62,6 +63,7 @@ def all_ok[T](
     An Ok containing a sequence of T if all results are Ok, otherwise an Err.
 
     """
+
 @overload
 def all_ok[T](
     result: Generator[Ok[T] | Err],
