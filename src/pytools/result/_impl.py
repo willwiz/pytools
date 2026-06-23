@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 import inspect
 import types
-from collections.abc import Mapping, Sequence
+from collections.abc import Generator, Mapping, Sequence
 from typing import Any, Generic, Never, TypeGuard, TypeVar, cast, overload
 
 __all__ = ["Err", "Ok", "all_ok", "filter_ok"]
@@ -125,15 +125,11 @@ def _all_ok_sequence[V](result: Sequence[Ok[V] | Err]) -> Ok[Sequence[V]] | Err:
 
 
 @overload
-def all_ok[T](
-    result: Sequence[Ok[T] | Err],
-) -> Ok[Sequence[T]] | Err: ...
-
-
+def all_ok[T](result: Generator[Ok[T] | Err]) -> Ok[Sequence[T]] | Err: ...
 @overload
-def all_ok[K, V](
-    result: Mapping[K, Ok[V] | Err],
-) -> Ok[Mapping[K, V]] | Err: ...
+def all_ok[T](result: Sequence[Ok[T] | Err]) -> Ok[Sequence[T]] | Err: ...
+@overload
+def all_ok[K, V](result: Mapping[K, Ok[V] | Err]) -> Ok[Mapping[K, V]] | Err: ...
 
 
 def all_ok[K, V](result: Sequence[Ok[V] | Err] | Mapping[K, Ok[V] | Err]):
@@ -142,6 +138,8 @@ def all_ok[K, V](result: Sequence[Ok[V] | Err] | Mapping[K, Ok[V] | Err]):
             return _all_ok_dict(result)
         case Sequence():
             return _all_ok_sequence(result)
+        case Generator():
+            return _all_ok_sequence(list(result))
 
 
 @overload
