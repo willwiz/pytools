@@ -51,9 +51,7 @@ class BLogger(ILogger):
 
     def __repr__(self) -> str:
         return (
-            f"<BLogger level={self._level.name}"
-            f" header={self._header}"
-            f" handlers={len(self._handlers)}>"
+            f"<BLogger level={self._level!s} header={self._header} handlers={len(self._handlers)}>"
         )
 
     @property

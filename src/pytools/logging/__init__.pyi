@@ -38,7 +38,7 @@ def get_logger(
 def get_logger(
     name: str = ...,
     *,
-    level: Literal["NULL", LogEnum.NULL],
+    level: Literal["NULL", LogEnum.NULL] = ...,
     console: bool = ...,
     file: Sequence[str | Path] | None = ...,
     logger: Literal["basic", "struct"] = ...,
@@ -47,9 +47,9 @@ def get_logger(
 def get_logger(
     name: str = ...,
     *,
-    level: _NOT_NULL | None,
+    level: _NOT_NULL | None = ...,
     console: bool = ...,
     file: Sequence[str | Path] | None = ...,
-    logger: Literal["basic"] = ...,
+    logger: Literal["basic", "struct"] = ...,
 ) -> ILogger: ...
 def timeit[**P, R](f: Callable[P, R]) -> Callable[P, R]: ...

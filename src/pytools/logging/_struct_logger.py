@@ -48,7 +48,7 @@ class StructLogger(ILogger):
 
     def __repr__(self) -> str:
         return (
-            f"<StrucLogger level={self._level.name}"
+            f"<StrucLogger level={self._level!s}"
             f" header={self._header}"
             f" handlers={len(self._handlers)}>"
         )
@@ -98,27 +98,20 @@ class StructLogger(ILogger):
     ) -> None:
         if filt and self._level <= filt:
             return
-        message = "\n".join([ppfmt(m) for m in msg])
+        message = "\n".join([ppfmt(m) for m in msg]) + end
         for h in self._handlers.values():
-            h.log(message + end)
+            h.log(message)
 
     def log(self, *msg: object, level: LogEnum = LogEnum.BRIEF, **kwargs: object) -> None:
         if len(msg) < 1:
             return
-        message = "\n".join([ppfmt(m) for m in msg])
         header = f"[{now()}|{cstr(level)}]>>> " if self._header else ""
-        if level > LogEnum.BRIEF or kwargs:
+        if level > LogEnum.BRIEF or level == LogEnum.DEBUG:
             tb = getframeinfo(stack()[2][0])
-            kwargs = {
-                "time": now(),
-                "level": level.name,
-                **debug_info(tb),
-                "msg": message,
-                **kwargs,
-            }
-            message = message + "\n" + ppfmt(kwargs)
+            kwargs = {"level": level, "time": now(), **debug_info(tb), "msg": list(msg), **kwargs}
+        message = f"{header}{'\n'.join([ppfmt(m) for m in [*msg, kwargs] if m])}\n"
         for h in self._handlers.values():
-            h.log(header + message + "\n")
+            h.log(message)
 
     def debug(self, *msg: object, **kwargs: object) -> None:
         if self._level <= LogEnum.DEBUG:
