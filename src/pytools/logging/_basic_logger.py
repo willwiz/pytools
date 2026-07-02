@@ -42,7 +42,7 @@ class BLogger(ILogger):
                 continue
             h.log(
                 f"{BColors.UNDERLINE}Logger instance {self!r} created at {now()}{BColors.ENDC}\n"
-                f"{'\n'.join(f'  - {hand!r}' for hand in self._handlers.values())}\n"
+                f"{'\n'.join([f'  - {hand!r}' for hand in self._handlers.values()])}\n"
             )
             h.flush()
 

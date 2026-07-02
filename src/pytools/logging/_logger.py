@@ -122,15 +122,15 @@ class _NullLogger(ILogger):
     def brief(self, *msg: object, **kwargs: object) -> None: ...
     @override
     def warn(self, *msg: object, **kwargs: object) -> None:
-        sys.stderr.write("<<< Warning: " + "\n".join(str(m) for m in msg) + "\n")
+        sys.stderr.write("<<< Warning: " + "\n".join([str(m) for m in msg]) + "\n")
 
     @override
     def error(self, *msg: object, **kwargs: object) -> None:
-        sys.stderr.write("<<< Error: " + "\n".join(str(m) for m in msg) + "\n")
+        sys.stderr.write("<<< Error: " + "\n".join([str(m) for m in msg]) + "\n")
 
     @override
     def fatal(self, *msg: object, **kwargs: object) -> None:
-        sys.stderr.write("<<< Fatal: " + "\n".join(str(m) for m in msg) + "\n")
+        sys.stderr.write("<<< Fatal: " + "\n".join([str(m) for m in msg]) + "\n")
 
     def exception(self, e: Exception) -> Exception:
         return e

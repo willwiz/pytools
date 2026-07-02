@@ -12,7 +12,7 @@ def list_format(lst: Sequence[Any], *, layer: int = 0) -> str:
     head = "[\n"
     if total_len <= SCREEN_WRAP_LIMIT:
         return "[" + ", ".join(items) + "]"
-    body = ",\n".join(f"{TAB * (layer + 1)}{item}" for item in items)
+    body = ",\n".join([f"{TAB * (layer + 1)}{item}" for item in items])
     tail = f"\n{indent}]"
     return head + body + tail
 
@@ -23,7 +23,7 @@ def dict_format(dct: Mapping[str, object], *, layer: int = 0) -> str:
     if total_len <= SCREEN_WRAP_LIMIT:
         return "{" + ", ".join(items.values()) + "}"
     head = "{\n"
-    body = ",\n".join(f"{TAB * (layer + 1)}{v}" for v in items.values())
+    body = ",\n".join([f"{TAB * (layer + 1)}{v}" for v in items.values()])
     tail = f"\n{TAB * layer}}}"
     return head + body + tail
 
@@ -35,7 +35,7 @@ def set_format(st: set[object], *, layer: int = 0) -> str:
     head = "{\n"
     if total_len <= SCREEN_WRAP_LIMIT:
         return "{" + ", ".join(items) + "}"
-    body = ",\n".join(f"{TAB * (layer + 1)}{item}" for item in items)
+    body = ",\n".join([f"{TAB * (layer + 1)}{item}" for item in items])
     tail = f"\n{indent}}}"
     return head + body + tail
 

@@ -109,7 +109,13 @@ class StructLogger(ILogger):
         header = f"[{now()}|{cstr(level)}]>>> " if self._header else ""
         if level > LogEnum.BRIEF or kwargs:
             tb = getframeinfo(stack()[2][0])
-            kwargs = {**debug_info(tb), "msg": message, **kwargs}
+            kwargs = {
+                "time": now(),
+                "level": level.name,
+                **debug_info(tb),
+                "msg": message,
+                **kwargs,
+            }
             message = message + "\n" + ppfmt(kwargs)
         for h in self._handlers.values():
             h.log(header + message + "\n")

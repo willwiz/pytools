@@ -22,7 +22,8 @@ class _ResultType[T: Any](abc.ABC):
     def unwrap_or[O: Any](self, default: O, /) -> T | O: ...
 
     @abc.abstractmethod
-    def next(self) -> _ResultType[T]: ...
+    def next(self) -> _ResultType[T]:
+        """Return the result object but update traceback information if it is an Err."""
 
     @abc.abstractmethod
     def ok(self) -> bool: ...
@@ -46,6 +47,7 @@ class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
         return self.val
 
     def next(self) -> Ok[T_co]:
+        """Return Self."""
         return self
 
     def ok(self) -> bool:
@@ -79,6 +81,7 @@ class Err(_ResultType[Never]):
         return default
 
     def next(self) -> Err:
+        """Append the traceback of the caller to the exception and return Self."""
         return self
 
     def ok(self) -> bool:
