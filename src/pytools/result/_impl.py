@@ -4,7 +4,7 @@ import abc
 import inspect
 import types
 from collections.abc import Generator, Mapping, Sequence
-from typing import Any, Generic, Never, TypeGuard, TypeVar, cast, overload
+from typing import Any, Generic, Never, Self, TypeGuard, TypeVar, cast, overload
 
 __all__ = ["Err", "Ok", "all_ok", "filter_ok"]
 
@@ -22,7 +22,7 @@ class _ResultType[T: Any](abc.ABC):
     def unwrap_or[O: Any](self, default: O, /) -> T | O: ...
 
     @abc.abstractmethod
-    def next(self) -> _ResultType[T]:
+    def next(self) -> Self:
         """Return the result object but update traceback information if it is an Err."""
 
     @abc.abstractmethod
@@ -46,7 +46,7 @@ class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
     def unwrap_or[O: Any](self, _default: O, /) -> T_co | O:
         return self.val
 
-    def next(self) -> Ok[T_co]:
+    def next(self) -> Self:
         """Return Self."""
         return self
 
@@ -80,8 +80,20 @@ class Err(_ResultType[Never]):
     def unwrap_or[O: Any](self, default: O, /) -> O:
         return default
 
-    def next(self) -> Err:
+    def next(self) -> Self:
         """Append the traceback of the caller to the exception and return Self."""
+        match inspect.currentframe():
+            case types.FrameType(f_back=frame):
+                if frame is None:
+                    msg = "Failed to get called frame for Err.next()"
+                    raise RuntimeError(msg)
+                tb = types.TracebackType(
+                    self.val.__traceback__, frame, frame.f_lasti, frame.f_lineno
+                )
+            case None:
+                msg = "Failed to get current frame for Err.next(). Should never reach here."
+                raise RuntimeError(msg)
+        self.val = self.val.with_traceback(tb)
         return self
 
     def ok(self) -> bool:
