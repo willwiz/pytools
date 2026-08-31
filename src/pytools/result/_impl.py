@@ -116,7 +116,7 @@ def is_all_ok[K, V](results: Sequence[Ok[V] | Err] | Mapping[K, Ok[V] | Err]):
 def _all_ok_dict[K, V](result: Mapping[K, Ok[V] | Err]) -> Ok[Mapping[K, V]] | Err:
     for res in result.values():
         if isinstance(res, Err):
-            return Err(res.val)
+            return res
     return Ok({key: res.val for key, res in cast("Mapping[K, Ok[V]]", result).items()})
 
 
