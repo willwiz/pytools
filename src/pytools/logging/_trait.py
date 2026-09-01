@@ -13,13 +13,13 @@ type LogLevel = Literal["NULL", "FATAL", "ERROR", "WARN", "BRIEF", "INFO", "DEBU
 
 
 class LogEnum(enum.IntEnum):
-    NULL = 0
     DEBUG = 1
     INFO = 2
     BRIEF = 3
     WARN = 4
     ERROR = 5
     FATAL = 6
+    NULL = 10
 
     def __str__(self) -> str:
         return self.name
