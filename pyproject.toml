@@ -15,7 +15,12 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Development Status :: 1 - Beta",
 ]
-dependencies = ["matplotlib>=3.10.5", "numpy>=2.3.2", "pydantic"]
+dependencies = [
+    "matplotlib>=3.10.5",
+    "numpy>=2.3.2",
+    "pydantic",
+    "scipy-stubs[scipy]>=1.18.1.0",
+]
 
 [project.scripts]
 archive = "pytools.path.__main__:main_cli"
