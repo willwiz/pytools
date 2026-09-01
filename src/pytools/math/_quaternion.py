@@ -22,7 +22,7 @@ def _r_basis[F: np.floating](v: A1[F], *, flatten: bool) -> A1[F] | A2[F]:
     r = rot.as_matrix().astype(v.dtype).T
     if flatten:
         r = r.flatten()
-    return rot.as_matrix().astype(v.dtype).T
+    return r
 
 
 def r_basis[F: np.floating](
