@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 import inspect
 import types
-from collections.abc import Generator, Mapping, Sequence
+from collections.abc import Callable, Generator, Mapping, Sequence
 from typing import Any, Generic, Never, Self, TypeGuard, TypeVar, cast, overload
 
 __all__ = ["Err", "Ok", "all_ok", "filter_ok"]
@@ -27,6 +27,9 @@ class _ResultType[T: Any](abc.ABC):
 
     @abc.abstractmethod
     def ok(self) -> bool: ...
+
+    @abc.abstractmethod
+    def and_then[O: Any](self, func: Callable[[T], O], /) -> _ResultType[O]: ...
 
 
 class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
@@ -52,6 +55,10 @@ class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
 
     def ok(self) -> bool:
         return True
+
+    def and_then[O: Any](self, func: Callable[[T_co], O], /) -> Ok[O]:
+        """Apply a function to the value of the Ok result and return a new Ok result."""
+        return Ok(func(self.val))
 
 
 class Err(_ResultType[Never]):
@@ -98,6 +105,10 @@ class Err(_ResultType[Never]):
 
     def ok(self) -> bool:
         return False
+
+    def and_then[O: Any](self, _func: Callable[[Never], O], /) -> Err:
+        """Return Self without applying the function."""
+        return self
 
 
 type Result[T] = Ok[T] | Err
