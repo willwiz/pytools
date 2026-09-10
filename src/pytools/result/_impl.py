@@ -4,7 +4,7 @@ import abc
 import inspect
 import types
 from collections.abc import Callable, Generator, Mapping, Sequence
-from typing import Any, Generic, Never, Self, TypeGuard, TypeVar, cast, overload
+from typing import Any, Generic, Never, Self, TypeGuard, TypeVar, cast, overload, override
 
 __all__ = ["Err", "Ok", "all_ok", "filter_ok"]
 
@@ -40,22 +40,28 @@ class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
     def __init__(self, value: T_co) -> None:
         self.val = value
 
+    @override
     def __str__(self) -> str:
         return f"{self.val!s}"
 
+    @override
     def unwrap(self) -> T_co:
         return self.val
 
+    @override
     def unwrap_or[O: Any](self, _default: O, /) -> T_co | O:
         return self.val
 
+    @override
     def next(self) -> Self:
         """Return Self."""
         return self
 
+    @override
     def ok(self) -> bool:
         return True
 
+    @override
     def and_then[O: Any](self, func: Callable[[T_co], O], /) -> Ok[O]:
         """Apply a function to the value of the Ok result and return a new Ok result."""
         return Ok(func(self.val))
@@ -78,15 +84,19 @@ class Err(_ResultType[Never]):
                 raise RuntimeError(msg)
         self.val = value.with_traceback(tb)
 
+    @override
     def __str__(self) -> str:
         return f"{self.val!s}"
 
+    @override
     def unwrap(self) -> Never:
         raise self.val
 
+    @override
     def unwrap_or[O: Any](self, default: O, /) -> O:
         return default
 
+    @override
     def next(self) -> Self:
         """Append the traceback of the caller to the exception and return Self."""
         match inspect.currentframe():
@@ -103,10 +113,12 @@ class Err(_ResultType[Never]):
         self.val = self.val.with_traceback(tb)
         return self
 
+    @override
     def ok(self) -> bool:
         return False
 
-    def and_then[O: Any](self, _func: Callable[[Never], O], /) -> Err:
+    @override
+    def and_then[O: Any](self, func: Callable[[Never], O], /) -> Err:
         """Return Self without applying the function."""
         return self
 
