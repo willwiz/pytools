@@ -1,13 +1,13 @@
 # ruff: noqa: D418, PYI021
 from collections.abc import Callable, Generator, Mapping, Sequence
-from typing import Any, Never, TypeGuard, overload
+from typing import Any, Final, Never, TypeGuard, overload
 
 # _T_co = TypeVar("_T_co", covariant=True)
 
 class Err:
     __slots__ = ("val",)
     __match_args__ = ("val",)
-    val: Exception
+    val: Final[Exception]
 
     def __init__(self, value: Exception) -> None: ...
     def unwrap(self) -> Never: ...
@@ -19,7 +19,7 @@ class Err:
 class Ok[T]:
     __slots__ = ("val",)
     __match_args__ = ("val",)
-    val: T
+    val: Final[T]
 
     def __init__(self, value: T) -> None: ...
     def unwrap(self) -> T: ...
