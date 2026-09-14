@@ -4,7 +4,7 @@ import abc
 import inspect
 import types
 from collections.abc import Callable, Generator, Mapping, Sequence
-from typing import Any, Generic, Never, Self, TypeGuard, TypeVar, cast, overload, override
+from typing import Any, Never, Self, TypeGuard, TypeVar, cast, overload, override
 
 __all__ = ["Err", "Ok", "all_ok", "filter_ok"]
 
@@ -12,14 +12,14 @@ __all__ = ["Err", "Ok", "all_ok", "filter_ok"]
 T_co = TypeVar("T_co", covariant=True)
 
 
-class _ResultType[T: Any](abc.ABC):
+class _ResultType[T_co](abc.ABC):
     @abc.abstractmethod
     def __str__(self) -> str: ...
     @abc.abstractmethod
-    def unwrap(self) -> T: ...
+    def unwrap(self) -> T_co: ...
 
     @abc.abstractmethod
-    def unwrap_or[O: Any](self, default: O, /) -> T | O: ...
+    def unwrap_or[O: Any](self, default: O, /) -> T_co | O: ...
 
     @abc.abstractmethod
     def next(self) -> Self:
@@ -29,10 +29,10 @@ class _ResultType[T: Any](abc.ABC):
     def ok(self) -> bool: ...
 
     @abc.abstractmethod
-    def and_then[O: Any](self, func: Callable[[T], O], /) -> _ResultType[O]: ...
+    def and_then[O: Any](self, func: Callable[[T_co], Result[O]], /) -> Result[O]: ...
 
 
-class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
+class Ok[T_co](_ResultType[T_co]):
     __slots__ = ("val",)
     __match_args__ = ("val",)
     val: T_co
@@ -62,9 +62,9 @@ class Ok(_ResultType[T_co], Generic[T_co]):  # noqa: UP046
         return True
 
     @override
-    def and_then[O: Any](self, func: Callable[[T_co], O], /) -> Ok[O]:
+    def and_then[O: Any](self, func: Callable[[T_co], Result[O]], /) -> Result[O]:
         """Apply a function to the value of the Ok result and return a new Ok result."""
-        return Ok(func(self.val))
+        return func(self.val)
 
 
 class Err(_ResultType[Never]):
@@ -118,7 +118,7 @@ class Err(_ResultType[Never]):
         return False
 
     @override
-    def and_then[O: Any](self, func: Callable[[Never], O], /) -> Err:
+    def and_then[O: Any](self, func: Callable[[Never], Result[O]], /) -> Self:
         """Return Self without applying the function."""
         return self
 
