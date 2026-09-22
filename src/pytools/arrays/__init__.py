@@ -39,13 +39,13 @@ _DType_co = TypeVar(
 
 
 @runtime_checkable
-class _SupportsDType(Protocol[_DType_co]):
+class SupportsDType(Protocol[_DType_co]):
     @property
     def dtype(self) -> _DType_co: ...
 
 
 type DType[T: np.generic[Any] = np.generic[Any]] = (
-    type[T] | np.dtype[T] | _SupportsDType[np.dtype[T]]
+    type[T] | np.dtype[T] | SupportsDType[np.dtype[T]]
 )
 
 type ToIndex = int | np.integer[Any] | bool | np.bool_
