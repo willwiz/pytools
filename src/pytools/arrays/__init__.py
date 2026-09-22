@@ -33,9 +33,7 @@ type T1[T] = tuple[T]
 type T2[T] = tuple[T, T]
 type T3[T] = tuple[T, T, T]
 
-_DType_co = TypeVar(
-    "_DType_co", bound=np.dtype[Any], covariant=True, default=np.dtype[np.generic[Any]]
-)
+_DType_co = TypeVar("_DType_co", bound=np.dtype[Any], covariant=True, default=np.dtype[np.generic])
 
 
 @runtime_checkable
