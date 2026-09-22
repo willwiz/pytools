@@ -4,7 +4,7 @@ import abc
 import inspect
 import types
 from collections.abc import Callable, Generator, Mapping, Sequence
-from typing import Any, Never, Self, TypeGuard, TypeVar, cast, overload, override
+from typing import Any, Final, Never, Self, TypeGuard, TypeVar, cast, overload, override
 
 __all__ = ["Err", "Ok", "all_ok", "filter_ok"]
 
@@ -22,35 +22,32 @@ class _ResultType[T_co](abc.ABC):
     def unwrap_or[O: Any](self, default: O, /) -> T_co | O: ...
 
     @abc.abstractmethod
-    def next(self) -> Self:
+    def next(self) -> Self | Err:
         """Return the result object but update traceback information if it is an Err."""
-
-    @abc.abstractmethod
-    def ok(self) -> bool: ...
 
     @abc.abstractmethod
     def and_then[O: Any](self, func: Callable[[T_co], Result[O]], /) -> Result[O]: ...
 
 
 class Ok[T_co](_ResultType[T_co]):
-    __slots__ = ("val",)
-    __match_args__ = ("val",)
-    val: T_co
+    __slots__ = ("_val",)
+    __match_args__ = ("_val",)
+    _val: Final[T_co]
 
     def __init__(self, value: T_co) -> None:
-        self.val = value
+        self._val = value
 
     @override
     def __str__(self) -> str:
-        return f"{self.val!s}"
+        return f"{self._val!s}"
 
     @override
     def unwrap(self) -> T_co:
-        return self.val
+        return self._val
 
     @override
-    def unwrap_or[O: Any](self, _default: O, /) -> T_co | O:
-        return self.val
+    def unwrap_or[O: Any](self, default: Any, /) -> T_co:
+        return self._val
 
     @override
     def next(self) -> Self:
@@ -58,19 +55,15 @@ class Ok[T_co](_ResultType[T_co]):
         return self
 
     @override
-    def ok(self) -> bool:
-        return True
-
-    @override
     def and_then[O: Any](self, func: Callable[[T_co], Result[O]], /) -> Result[O]:
         """Apply a function to the value of the Ok result and return a new Ok result."""
-        return func(self.val)
+        return func(self._val)
 
 
 class Err(_ResultType[Never]):
-    __slots__ = ("val",)
-    __match_args__ = ("val",)
-    val: Exception
+    __slots__ = ("_val",)
+    __match_args__ = ("_val",)
+    _val: Final[Exception]
 
     def __init__(self, value: Exception) -> None:
         match inspect.currentframe():
@@ -82,22 +75,22 @@ class Err(_ResultType[Never]):
             case None:
                 msg = "Failed to get current frame for Err. Should never reach here."
                 raise RuntimeError(msg)
-        self.val = value.with_traceback(tb)
+        self._val = value.with_traceback(tb)
 
     @override
     def __str__(self) -> str:
-        return f"{self.val!s}"
+        return f"{self._val!s}"
 
     @override
     def unwrap(self) -> Never:
-        raise self.val
+        raise self._val
 
     @override
     def unwrap_or[O: Any](self, default: O, /) -> O:
         return default
 
     @override
-    def next(self) -> Self:
+    def next(self) -> Err:
         """Append the traceback of the caller to the exception and return Self."""
         match inspect.currentframe():
             case types.FrameType(f_back=frame):
@@ -105,17 +98,12 @@ class Err(_ResultType[Never]):
                     msg = "Failed to get called frame for Err.next()"
                     raise RuntimeError(msg)
                 tb = types.TracebackType(
-                    self.val.__traceback__, frame, frame.f_lasti, frame.f_lineno
+                    self._val.__traceback__, frame, frame.f_lasti, frame.f_lineno
                 )
             case None:
                 msg = "Failed to get current frame for Err.next(). Should never reach here."
                 raise RuntimeError(msg)
-        self.val = self.val.with_traceback(tb)
-        return self
-
-    @override
-    def ok(self) -> bool:
-        return False
+        return Err(self._val.with_traceback(tb))
 
     @override
     def and_then[O: Any](self, func: Callable[[Never], Result[O]], /) -> Self:
@@ -152,14 +140,14 @@ def _all_ok_dict[K, V](result: Mapping[K, Ok[V] | Err]) -> Ok[Mapping[K, V]] | E
     for res in result.values():
         if isinstance(res, Err):
             return res
-    return Ok({key: res.val for key, res in cast("Mapping[K, Ok[V]]", result).items()})
+    return Ok({key: res.unwrap() for key, res in cast("Mapping[K, Ok[V]]", result).items()})
 
 
 def _all_ok_sequence[V](result: Sequence[Ok[V] | Err]) -> Ok[Sequence[V]] | Err:
     for res in result:
         if isinstance(res, Err):
             return res
-    return Ok([res.val for res in cast("Sequence[Ok[V]]", result)])
+    return Ok([res.unwrap() for res in cast("Sequence[Ok[V]]", result)])
 
 
 @overload
@@ -204,6 +192,6 @@ def filter_ok[K, V](
     """
     match results:
         case Mapping():
-            return {k: res.val for k, res in results.items() if isinstance(res, Ok)}
+            return {k: res.unwrap() for k, res in results.items() if isinstance(res, Ok)}
         case Sequence() | Generator():
-            return [res.val for res in results if isinstance(res, Ok)]
+            return [res.unwrap() for res in results if isinstance(res, Ok)]
