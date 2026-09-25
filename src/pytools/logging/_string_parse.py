@@ -51,9 +51,9 @@ def debug_str(tb: Traceback) -> str:
 def debug_info(tb: Traceback) -> dict[str, str]:
     file = Path(*Path(tb.filename).parts[-3:])
     return {
-        "file": str(file),
-        "function": tb.function,
-        "line": str(tb.lineno),
+        "log.file": str(file),
+        "log.function": tb.function,
+        "log.line": str(tb.lineno),
     }
 
 

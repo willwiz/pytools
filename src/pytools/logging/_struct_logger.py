@@ -108,7 +108,13 @@ class StructLogger(ILogger):
         header = f"[{now()}|{cstr(level)}]>>> " if self._header else ""
         if level > LogEnum.BRIEF or level == LogEnum.DEBUG:
             tb = getframeinfo(stack()[2][0])
-            kwargs = {"level": level, "time": now(), **debug_info(tb), "msg": list(msg), **kwargs}
+            kwargs = {
+                "log.level": level,
+                "log.time": now(),
+                **debug_info(tb),
+                "log.msg": list(msg),
+                **kwargs,
+            }
         message = f"{header}{'\n'.join([ppfmt(m) for m in [*msg, kwargs] if m])}\n"
         for h in self._handlers.values():
             h.log(message)
