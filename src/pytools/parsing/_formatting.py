@@ -16,6 +16,8 @@ def list_format(lst: Sequence[Any], *, layer: int = 0, wrap_limit: int = SCREEN_
     head = "[\n"
     if total_len <= wrap_limit:
         return "[" + ", ".join(items) + "]"
+    if total_len <= wrap_limit - 2:
+        return "[\n" + ", ".join(items) + "\n]"
     body = ",\n".join([f"{TAB * (layer + 1)}{item}" for item in items])
     tail = f"\n{indent}]"
     return head + body + tail
@@ -28,6 +30,8 @@ def dict_format(
     total_len = sum(len(v) for v in items.values()) + 2 * (len(items) - 1) + 2 * (layer + 1)
     if total_len <= wrap_limit:
         return "{" + ", ".join(items.values()) + "}"
+    if total_len <= wrap_limit - 2:
+        return "{\n" + ", ".join(items.values()) + "\n}"
     head = "{\n"
     body = ",\n".join([f"{TAB * (layer + 1)}{v}" for v in items.values()])
     tail = f"\n{TAB * layer}}}"
@@ -41,6 +45,8 @@ def set_format(st: set[object], *, layer: int = 0, wrap_limit: int = SCREEN_WRAP
     head = "{\n"
     if total_len <= wrap_limit:
         return "{" + ", ".join(items) + "}"
+    if total_len <= wrap_limit - 2:
+        return "{\n" + ", ".join(items) + "\n}"
     body = ",\n".join([f"{TAB * (layer + 1)}{item}" for item in items])
     tail = f"\n{indent}}}"
     return head + body + tail
@@ -66,6 +72,8 @@ def dc_format(
     )
     if total_len <= wrap_limit:
         return f"{class_name}({', '.join(items.values())})"
+    if total_len <= wrap_limit - len(class_name) - 2:
+        return f"{class_name}(\n" + ", ".join(items.values()) + "\n)"
     head = f"{class_name}(\n"
     body = ",\n".join([f"{TAB * (layer + 1)}{v}" for v in items.values()])
     tail = f"\n{TAB * layer})"
