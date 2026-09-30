@@ -1,6 +1,6 @@
 import dataclasses as dc
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Any, TypeIs, cast
+from typing import TYPE_CHECKING, Any, Protocol, TypeIs, cast, runtime_checkable
 
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
@@ -9,44 +9,38 @@ SCREEN_WRAP_LIMIT = 100
 TAB = "  "
 
 
-def list_format(lst: Sequence[Any], *, layer: int = 0, wrap_limit: int = SCREEN_WRAP_LIMIT) -> str:
-    items = [ppfmt(item, layer=layer + 1) for item in lst]
-    total_len = sum(len(item) for item in items) + 2 * (len(items) - 1) + 2 * (layer + 1)
+def list_format(lst: Sequence[Any], *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIMIT) -> str:
+    items = [ppfmt(item, layer=layer + 1, w_limit=w_limit) for item in lst]
+    total_len = sum(len(item) for item in items) + 2 * (len(items) - 1) + len(TAB) * (layer + 1)
+    if total_len <= w_limit:
+        return "[" + ", ".join(items) + "]"
     indent = TAB * layer
     head = "[\n"
-    if total_len <= wrap_limit:
-        return "[" + ", ".join(items) + "]"
-    if total_len <= wrap_limit - 2:
-        return "[\n" + ", ".join(items) + "\n]"
     body = ",\n".join([f"{TAB * (layer + 1)}{item}" for item in items])
     tail = f"\n{indent}]"
     return head + body + tail
 
 
 def dict_format(
-    dct: Mapping[str, object], *, layer: int = 0, wrap_limit: int = SCREEN_WRAP_LIMIT
+    dct: Mapping[str, object], *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIMIT
 ) -> str:
-    items = {k: f"{k!s}: {ppfmt(v, layer=layer + 1)}" for k, v in dct.items()}
-    total_len = sum(len(v) for v in items.values()) + 2 * (len(items) - 1) + 2 * (layer + 1)
-    if total_len <= wrap_limit:
+    items = {k: f"{k!s}: {ppfmt(v, layer=layer + 1, w_limit=w_limit)}" for k, v in dct.items()}
+    total_len = sum(len(v) for v in items.values()) + 2 * (len(items) - 1) + len(TAB) * (layer + 1)
+    if total_len <= w_limit:
         return "{" + ", ".join(items.values()) + "}"
-    if total_len <= wrap_limit - 2:
-        return "{\n" + ", ".join(items.values()) + "\n}"
     head = "{\n"
     body = ",\n".join([f"{TAB * (layer + 1)}{v}" for v in items.values()])
     tail = f"\n{TAB * layer}}}"
     return head + body + tail
 
 
-def set_format(st: set[object], *, layer: int = 0, wrap_limit: int = SCREEN_WRAP_LIMIT) -> str:
-    items = [ppfmt(item, layer=layer + 1) for item in st]
-    total_len = sum(len(item) for item in items) + 2 * (len(items) - 1) + 2 * (layer + 1)
+def set_format(st: set[object], *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIMIT) -> str:
+    items = [ppfmt(item, layer=layer + 1, w_limit=w_limit) for item in st]
+    total_len = sum(len(item) for item in items) + 2 * (len(items) - 1) + len(TAB) * (layer + 1)
+    if total_len <= w_limit:
+        return "{" + ", ".join(items) + "}"
     indent = TAB * layer
     head = "{\n"
-    if total_len <= wrap_limit:
-        return "{" + ", ".join(items) + "}"
-    if total_len <= wrap_limit - 2:
-        return "{\n" + ", ".join(items) + "\n}"
     body = ",\n".join([f"{TAB * (layer + 1)}{item}" for item in items])
     tail = f"\n{indent}}}"
     return head + body + tail
@@ -56,45 +50,68 @@ def _is_dataclass_instance(obj: object) -> TypeIs[DataclassInstance]:
     return dc.is_dataclass(obj) and not isinstance(obj, type)
 
 
-def dc_format(
-    obj: DataclassInstance, *, layer: int = 0, wrap_limit: int = SCREEN_WRAP_LIMIT
-) -> str:
+def dc_format(obj: DataclassInstance, *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIMIT) -> str:
     class_name = obj.__class__.__name__
     items = {
-        f.name: f"{f.name}: {ppfmt(getattr(obj, f.name), layer=layer + 1)}" for f in dc.fields(obj)
+        f.name: f"{f.name}: {ppfmt(getattr(obj, f.name), layer=layer + 1, w_limit=w_limit)}"
+        for f in dc.fields(obj)
     }
     total_len = (
         len(class_name)
-        + 2
         + sum(len(v) for v in items.values())
         + 2 * (len(items) - 1)
-        + 2 * (layer + 1)
+        + len(TAB) * (layer + 1)
     )
-    if total_len <= wrap_limit:
+    indent = TAB * layer
+    if total_len <= w_limit:
         return f"{class_name}({', '.join(items.values())})"
-    if total_len <= wrap_limit - len(class_name) - 2:
-        return f"{class_name}(\n" + ", ".join(items.values()) + "\n)"
+    if total_len - len(class_name) <= w_limit:
+        return f"{class_name}(\n" + TAB * (layer + 1) + ", ".join(items.values()) + f"\n{indent})"
     head = f"{class_name}(\n"
     body = ",\n".join([f"{TAB * (layer + 1)}{v}" for v in items.values()])
-    tail = f"\n{TAB * layer})"
+    tail = f"\n{indent})"
     return head + body + tail
 
 
-def ppfmt(items: object, *, layer: int = 0, wrap_limit: int = SCREEN_WRAP_LIMIT) -> str:
+@runtime_checkable
+class HasDict(Protocol):
+    __dict__: dict[str, object]
+
+
+def class_format(obj: HasDict, *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIMIT) -> str:
+    class_name = obj.__class__.__name__
+    items = {k: f"{k}: {ppfmt(v, layer=layer + 1, w_limit=w_limit)}" for k, v in vars(obj).items()}
+    total_len = (
+        len(class_name)
+        + sum(len(v) for v in items.values())
+        + 2 * (len(items) - 1)
+        + len(TAB) * (layer + 1)
+    )
+    indent = TAB * layer
+    if total_len <= w_limit:
+        return f"{class_name}({', '.join(items.values())})"
+    if total_len - len(class_name) <= w_limit:
+        return f"{class_name}(\n" + TAB * (layer + 1) + ", ".join(items.values()) + f"\n{indent})"
+    head = f"{class_name}(\n"
+    body = ",\n".join([f"{TAB * (layer + 1)}{v}" for v in items.values()])
+    tail = f"\n{indent})"
+    return head + body + tail
+
+
+def ppfmt(items: object, *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIMIT) -> str:
     match items:
         case str() | float() | int():
-            return str(items)
+            v = str(items)
         case Mapping():
-            return dict_format(
-                cast("Mapping[str, object]", items), layer=layer, wrap_limit=wrap_limit
-            )
+            v = dict_format(cast("Mapping[str, object]", items), layer=layer, w_limit=w_limit)
         case Sequence():
-            return list_format(cast("Sequence[object]", items), layer=layer, wrap_limit=wrap_limit)
+            v = list_format(cast("Sequence[object]", items), layer=layer, w_limit=w_limit)
         case set():
-            return set_format(cast("set[object]", items), layer=layer, wrap_limit=wrap_limit)
+            v = set_format(cast("set[object]", items), layer=layer, w_limit=w_limit)
         case _ if _is_dataclass_instance(items):
-            return dc_format(items, layer=layer, wrap_limit=wrap_limit)
-        # case Iterable():
-        #     return list_format(items, layer=layer)
+            v = dc_format(items, layer=layer, w_limit=w_limit)
+        case _ if hasattr(items, "__dict__"):
+            v = class_format(items, layer=layer, w_limit=w_limit)
         case _:
             return str(items)
+    return v
