@@ -36,11 +36,11 @@ RB: Final = {
 
 
 def now() -> str:
-    return time.strftime("%H:%M:%S", time.localtime())
+    return time.strftime("%y-%m-%d %H:%M:%S", time.localtime())
 
 
 def cstr(level: LogEnum) -> str:
-    return f"{LB[level]}{level}{RB[level]}"
+    return f"{LB[level]}[{level}]{RB[level]}"
 
 
 def debug_str(tb: Traceback) -> str:

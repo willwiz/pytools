@@ -22,7 +22,7 @@ class LogEnum(enum.IntEnum):
     NULL = 10
 
     def __str__(self) -> str:
-        return self.name
+        return self.name[0]
 
 
 class BColors(enum.StrEnum):

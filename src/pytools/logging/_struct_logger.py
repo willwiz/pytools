@@ -105,7 +105,7 @@ class StructLogger(ILogger):
     def log(self, *msg: object, level: LogEnum = LogEnum.BRIEF, **kwargs: object) -> None:
         if len(msg) < 1:
             return
-        header = f"[{now()}|{cstr(level)}]>>> " if self._header else ""
+        header = f"{now()} {cstr(level)}>> " if self._header else ""
         if level > LogEnum.BRIEF or level == LogEnum.DEBUG:
             tb = getframeinfo(stack()[2][0])
             kwargs = {
