@@ -1,4 +1,5 @@
 import dataclasses as dc
+from argparse import Namespace
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Protocol, TypeIs, cast, runtime_checkable
 
@@ -75,12 +76,7 @@ def dc_format(obj: DataclassInstance, *, layer: int = 0, w_limit: int = SCREEN_W
     return head + body + tail
 
 
-@runtime_checkable
-class HasDict(Protocol):
-    __dict__: dict[str, object]
-
-
-def class_format(obj: HasDict, *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIMIT) -> str:
+def class_format(obj: object, *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIMIT) -> str:
     class_name = obj.__class__.__name__
     items = {k: f"{k}: {ppfmt(v, layer=layer + 1, w_limit=w_limit)}" for k, v in vars(obj).items()}
     total_len = (
@@ -117,6 +113,8 @@ def ppfmt(items: object, *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIMIT) ->
             v = set_format(cast("set[object]", items), layer=layer, w_limit=w_limit)
         case _ if _is_dataclass_instance(items):
             v = dc_format(items, layer=layer, w_limit=w_limit)
+        case Namespace():
+            v = class_format(items, layer=layer, w_limit=w_limit)
         case HasToStr():
             v = str(items).replace("\n", f"\n{TAB * (layer + 1)}")
     return v
