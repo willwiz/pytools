@@ -2,6 +2,8 @@ import dataclasses as dc
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Protocol, TypeIs, cast, runtime_checkable
 
+import numpy as np
+
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
 
@@ -98,20 +100,23 @@ def class_format(obj: HasDict, *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIM
     return head + body + tail
 
 
+@runtime_checkable
+class HasToStr(Protocol):
+    def __str__(self) -> str: ...
+
+
 def ppfmt(items: object, *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIMIT) -> str:
     match items:
         case str() | float() | int():
-            v = str(items)
+            v = str(items).replace("\n", f"\n{TAB * (layer + 1)}")
         case Mapping():
             v = dict_format(cast("Mapping[str, object]", items), layer=layer, w_limit=w_limit)
-        case Sequence():
+        case Sequence() | np.ndarray():
             v = list_format(cast("Sequence[object]", items), layer=layer, w_limit=w_limit)
         case set():
             v = set_format(cast("set[object]", items), layer=layer, w_limit=w_limit)
         case _ if _is_dataclass_instance(items):
             v = dc_format(items, layer=layer, w_limit=w_limit)
-        case _ if hasattr(items, "__dict__"):
-            v = class_format(items, layer=layer, w_limit=w_limit)
-        case _:
-            return str(items)
+        case HasToStr():
+            v = str(items).replace("\n", f"\n{TAB * (layer + 1)}")
     return v
