@@ -1,6 +1,7 @@
 import dataclasses as dc
 from argparse import Namespace
 from collections.abc import Mapping, Sequence
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, TypeIs, cast, runtime_checkable
 
 import numpy as np
@@ -103,8 +104,9 @@ class HasToStr(Protocol):
 
 def ppfmt(items: object, *, layer: int = 0, w_limit: int = SCREEN_WRAP_LIMIT) -> str:
     match items:
-        case str() | float() | int():
-            v = str(items).replace("\n", f"\n{TAB * (layer + 1)}")
+        case str() | float() | int() | Path():
+            v = repr(items) if isinstance(items, Path) else str(items)
+            v = v.replace("\n", f"\n{TAB * (layer + 1)}")
         case Mapping():
             v = dict_format(cast("Mapping[str, object]", items), layer=layer, w_limit=w_limit)
         case Sequence() | np.ndarray():
