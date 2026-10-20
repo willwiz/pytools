@@ -4,7 +4,7 @@ indent-width = 4
 include = ["chearttest"]
 exclude = [".venv", "**/build"]
 preview = false
-per-file-ignores = { "tests/**/*.py" = ["S101"] }
+per-file-ignores = { "tests/**/*.py" = ["S101"], "benchmark/**/*.py" = ["S101", "INP001"] }
 pydocstyle.convention = "numpy"
 [lint]
 preview = false
