@@ -12,8 +12,8 @@ requires-python = ">=3.14"
 license = "MIT"
 license-files = ["LICENSE"]
 classifiers = [
-  "Programming Language :: Python :: 3",
-  "Development Status :: 1 - Beta",
+    "Programming Language :: Python :: 3",
+    "Development Status :: 1 - Beta",
 ]
 dependencies = [
     "matplotlib>=3.10.5",

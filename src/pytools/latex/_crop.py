@@ -23,4 +23,3 @@ def crop(
         cropped.save(home / cropped_img)
         cropped.close()
         print(cropped.size)
-
