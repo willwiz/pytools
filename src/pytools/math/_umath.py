@@ -9,22 +9,24 @@ if TYPE_CHECKING:
 def optimized_add_at[F: np.floating](index: Arr[SAny, np.integer], weights: Arr[SAny, F]) -> A2[F]:
     """Optimized version of np.add.at for 1D arrays.
 
-    index [..., I]
-    weights [..., I, J]
-    result [N, J]
+    index [..., I] * weights [..., I, J] -> [..., I, J]
+
+    Type Parameters
+    ---------------
+    F : np.floating
 
     Parameters
     ----------
     index : Arr[SAny, np.integer]
         The row indices where the weights will be added. Contains integer in [0, N). Size of index
         is [..., I].
-    weights : Arr[SAny, T]
+    weights : Arr[SAny, F]
         The weights to be added. Size of weights is [..., I, J].
 
     Returns
     -------
-    A1[T]
-        The resulting array after adding the weights at the specified indices. Size [N, J]
+    A1[F]
+        The resulting array after adding the weights at the specified indices. Size [..., I, J]
 
     """
     size = int(index.max() + 1)

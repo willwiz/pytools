@@ -1,4 +1,4 @@
-# ruff: noqa: D418, PYI021
+# ruff: noqa: PYI021
 from collections.abc import Callable, Generator, Mapping, Sequence
 from typing import Any, Final, Never, TypeGuard, overload
 

@@ -30,3 +30,12 @@ pytools = { workspace = true }
 
 [tool.uv.build-backend]
 namespace = true
+
+[dependency-groups]
+dev = [
+    "mkdocs-gen-files>=0.6.1",
+    "mkdocs-literate-nav>=0.6.3",
+    "mkdocstrings>=1.0.8",
+    "mkdocstrings-python>=2.0.10",
+    "zensical>=0.0.73",
+]
