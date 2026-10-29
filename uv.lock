@@ -819,7 +819,7 @@ wheels = [
 
 [[package]]
 name = "pytools"
-version = "1.2.4a0"
+version = "1.2.5"
 source = { editable = "." }
 dependencies = [
     { name = "matplotlib" },

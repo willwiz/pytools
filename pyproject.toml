@@ -1,10 +1,10 @@
 [build-system]
-requires = ["uv_build>=0.10.9,<0.11"]
+requires = ["uv_build>=0.10.9,<=0.13.1"]
 build-backend = "uv_build"
 
 [project]
 name = "pytools"
-version = "1.2.4a"
+version = "1.2.5"
 authors = [{ name = "Will Zhang", email = "willwz@gmail.com" }]
 description = "Basic tools for Python development"
 readme = "README.md"
