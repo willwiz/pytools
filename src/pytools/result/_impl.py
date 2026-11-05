@@ -122,7 +122,7 @@ class Err(_ResultType[Never]):
 
     @override
     def and_then[O: Any, **P](
-        self, func: Callable[[Never], Result[O]], *args: P.args, **kwargs: P.kwargs
+        self, func: Callable[Concatenate[Never, P], Result[O]], *args: P.args, **kwargs: P.kwargs
     ) -> Self:
         """Return Self without applying the function."""
         return self
