@@ -4,7 +4,18 @@ import abc
 import inspect
 import types
 from collections.abc import Callable, Generator, Mapping, Sequence
-from typing import Any, Final, Never, Self, TypeGuard, TypeVar, cast, overload, override
+from typing import (
+    Any,
+    Concatenate,
+    Final,
+    Never,
+    Self,
+    TypeGuard,
+    TypeVar,
+    cast,
+    overload,
+    override,
+)
 
 __all__ = ["Err", "Ok", "all_ok", "filter_ok"]
 
@@ -26,7 +37,9 @@ class _ResultType[T_co](abc.ABC):
         """Return the result object but update traceback information if it is an Err."""
 
     @abc.abstractmethod
-    def and_then[O: Any](self, func: Callable[[T_co], Result[O]], /) -> Result[O]: ...
+    def and_then[O: Any, **P](
+        self, func: Callable[Concatenate[T_co, P], Result[O]], *args: P.args, **kwargs: P.kwargs
+    ) -> Result[O]: ...
 
 
 class Ok[T_co](_ResultType[T_co]):
@@ -55,9 +68,11 @@ class Ok[T_co](_ResultType[T_co]):
         return self
 
     @override
-    def and_then[O: Any](self, func: Callable[[T_co], Result[O]], /) -> Result[O]:
+    def and_then[O: Any, **P](
+        self, func: Callable[Concatenate[T_co, P], Result[O]], *args: P.args, **kwargs: P.kwargs
+    ) -> Result[O]:
         """Apply a function to the value of the Ok result and return a new Ok result."""
-        return func(self._val)
+        return func(self._val, *args, **kwargs)
 
 
 class Err(_ResultType[Never]):
@@ -106,7 +121,9 @@ class Err(_ResultType[Never]):
         return Err(self._val.with_traceback(tb))
 
     @override
-    def and_then[O: Any](self, func: Callable[[Never], Result[O]], /) -> Self:
+    def and_then[O: Any, **P](
+        self, func: Callable[[Never], Result[O]], *args: P.args, **kwargs: P.kwargs
+    ) -> Self:
         """Return Self without applying the function."""
         return self
 
